@@ -1,0 +1,74 @@
+{
+  "schema_version": 1,
+  "crew_id": "ops.system-issue-analysis",
+  "version": "1.0.0",
+  "name": "System Issue Analysis Crew",
+  "description": "Analyze an issue and return a normalized triage result.",
+  "owner": "jck",
+  "entrypoint": "system_analysis_crew.entrypoint:run",
+  "input_schema": {
+    "type": "object",
+    "required": [
+      "query",
+      "time_range",
+      "limit"
+    ],
+    "properties": {
+      "query": {
+        "type": "string"
+      },
+      "time_range": {
+        "type": "string"
+      },
+      "limit": {
+        "type": "int"
+      }
+    }
+  },
+  "output_schema": {
+    "type": "object",
+    "required": [
+      "service",
+      "resource",
+      "status",
+      "error_message",
+      "start_time",
+      "duration"
+    ],
+    "properties": {
+      "service": {
+        "type": "string"
+      },
+      "resource": {
+        "type": "string"
+      },
+      "status": {
+        "type": "string"
+      },
+      "error_message": {
+        "type": "string"
+      },
+      "start_time": {
+        "type": "string"
+      },
+      "duration": {
+        "type": "string"
+      },
+      "action_items": {
+        "type": "array",
+        "items": {
+          "type": "string"
+        }
+      }
+    }
+  },
+  "tags": [
+    "operations",
+    "incident",
+    "rca"
+  ],
+  "runtime": {
+    "crewai": ">=1.15.17,<1.16"
+  },
+  "process_definition": "src/system_analysis_crew/process.jsonc"
+}

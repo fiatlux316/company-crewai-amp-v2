@@ -1,0 +1,6 @@
+{
+  "triage": {
+    "description": " Datadog에서 query({query}) 와 time_range({time_range}) , limit({limit}) 를 기반으로 이슈를 분석한다.",
+    "expected_output": "{query}를 기반으로한 이슈를 json 형태로 반환한다."
+  }
+}

@@ -1,0 +1,40 @@
+[project]
+name = "company-flow-server"
+version = "0.2.0"
+description = "Administrator-owned Crew registry and Flow orchestration server"
+requires-python = ">=3.11,<3.14"
+dependencies = [
+  "crewai>=1.15.17,<1.16",
+  "mcp>=1.28,<2",
+  "pydantic>=2.8,<3",
+  "httpx>=0.27,<1",
+  "python-dotenv>=1.0,<2",
+  "fastapi>=0.115,<1",
+  "uvicorn>=0.34,<1",
+  "sqlalchemy>=2.0,<3",
+  "psycopg[binary]>=3.2,<4",
+  "celery[redis]>=5.4,<6",
+  "flower>=2.0,<3",
+  "redis>=5,<7",
+  "croniter>=3,<7",
+  "PyJWT[crypto]>=2.9,<3",
+  "crewai[bedrock,google-genai]>=1.15.17,<1.16"
+]
+
+[project.optional-dependencies]
+dev = ["pytest>=8,<9", "ruff>=0.9,<1"]
+
+[project.scripts]
+flow-admin = "company_flow_server.cli:main"
+company-mcp = "company_flow_server.mcp.server:main"
+
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[tool.hatch.build.targets.wheel]
+packages = ["src/company_flow_server"]
+
+[tool.pytest.ini_options]
+pythonpath = ["src"]
+testpaths = ["tests"]

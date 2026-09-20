@@ -1,0 +1,13 @@
+{
+  "process": "sequential",
+  "tasks": [
+    {
+      "id": "triage",
+      "agent": "system_issue_analyst",
+      "tools": [
+        "datadog.apm.search"
+      ],
+      "next": []
+    }
+  ]
+}

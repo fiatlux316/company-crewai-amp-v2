@@ -1,0 +1,6 @@
+.git
+__pycache__
+.pytest_cache
+*.pyc
+team_registry
+admin_state

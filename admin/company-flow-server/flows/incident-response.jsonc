@@ -1,0 +1,29 @@
+{
+  "flow_id": "incident-response",
+  "version": "1.0.0",
+  "name": "Incident response orchestration",
+  "description": "Team-admin-owned Flow. Personal Crews are referenced only by immutable id/version contracts.",
+  "steps": [
+    {
+      "step_id": "analyze",
+      "crew_id": "ops.incident-analysis",
+      "version": "1.0.0",
+      "inputs": {
+        "incident_id": "$flow.incident_id",
+        "symptom": "$flow.symptom"
+      }
+    },
+    {
+      "step_id": "report",
+      "crew_id": "ops.incident-report",
+      "version": "1.0.0",
+      "inputs": {
+        "incident_id": "$steps.analyze.outputs.incident_id",
+        "analysis": "$steps.analyze.outputs.analysis"
+      }
+    }
+  ],
+  "output": {
+    "report": "$steps.report.outputs.report"
+  }
+}
