@@ -4,6 +4,6 @@ __pycache__
 *.pyc
 .env
 .venv
-crew_specs
+#crew_specs
 crew_packages
 dist
