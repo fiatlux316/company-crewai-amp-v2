@@ -47,4 +47,25 @@ class RemoteLLMClient(BaseLLM):
         )
         response.raise_for_status()
         body = response.json()
-        return body["choices"][0]["message"].get("content") or ""
+
+
+        # 기존 로직:
+        # return body["choices"][0]["message"].get("content") or ""
+        
+        # 변경할 로직:
+        message = body["choices"][0]["message"]
+        content = message.get("content")
+        if content:
+            return content
+            
+        tool_calls = message.get("tool_calls")
+        if tool_calls:
+            import json
+            tc = tool_calls[0]
+            func = tc.get("function", {})
+            name = func.get("name", "")
+            args = func.get("arguments", "{}")
+            # CrewAI가 파싱할 수 있는 ReAct 텍스트 형태로 변환 반환
+            return f"Action: {name}\nAction Input: {args}"
+            
+        return ""

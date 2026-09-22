@@ -3,4 +3,7 @@ __pycache__
 .pytest_cache
 *.pyc
 .env
-crew_registry
+.venv
+crew_specs
+crew_packages
+dist
