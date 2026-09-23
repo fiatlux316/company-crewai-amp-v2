@@ -22,7 +22,7 @@ function App() {
       />
       <div className="main-content">
         {activeTab === 'persona' && <GeneratePersona onKickoff={() => setActiveTab('history')} />}
-        {activeTab === 'crew' && <CrewProcess />}
+        {activeTab === 'crew' && <CrewProcess onNavigateHistory={() => setActiveTab('history')} />}
         {activeTab === 'history' && <ExecutionHistory />}
         {activeTab === 'flow' && <NodeFlowDesigner />}
         {activeTab === 'mcp' && <McpCatalog />}

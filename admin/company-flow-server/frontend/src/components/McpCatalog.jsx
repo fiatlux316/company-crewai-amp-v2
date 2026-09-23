@@ -31,8 +31,16 @@ export default function McpCatalog() {
             <div>
               <h2>{selectedTool.name}</h2>
               <p>{selectedTool.description}</p>
-              <h3>Input Schema</h3>
-              <pre className="schema">{JSON.stringify(selectedTool.inputSchema, null, 2)}</pre>
+              <div className="adminGrid">
+                <div className="panel">
+                  <h3>Input Schema</h3>
+                  <pre className="schema">{JSON.stringify(selectedTool.input_schema || selectedTool.inputSchema || {}, null, 2)}</pre>
+                </div>
+                <div className="panel">
+                  <h3>Output Schema</h3>
+                  <pre className="schema">{JSON.stringify(selectedTool.output_schema || selectedTool.outputSchema || {}, null, 2)}</pre>
+                </div>
+              </div>
             </div>
           )}
         </main>
