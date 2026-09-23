@@ -1,6 +1,6 @@
-
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import Sidebar from './components/Sidebar';
+import Header from './components/Header';
 import GeneratePersona from './components/GeneratePersona';
 import CrewProcess from './components/CrewProcess';
 import ExecutionHistory from './components/ExecutionHistory';
@@ -20,19 +20,22 @@ function App() {
         collapsed={sidebarCollapsed} 
         onToggle={() => setSidebarCollapsed(!sidebarCollapsed)} 
       />
-      <div className="main-content">
-        {activeTab === 'persona' && <GeneratePersona onKickoff={() => setActiveTab('history')} />}
-        {activeTab === 'crew' && <CrewProcess onNavigateHistory={() => setActiveTab('history')} />}
-        {activeTab === 'history' && <ExecutionHistory />}
-        {activeTab === 'flow' && <NodeFlowDesigner />}
-        {activeTab === 'mcp' && <McpCatalog />}
-        {activeTab === 'swagger' && (
-          <iframe
-            src="/docs"
-            style={{ width: '100%', height: '100%', border: 'none' }}
-            title="Swagger API"
-          />
-        )}
+      <div className="main-wrapper">
+        <Header activeTab={activeTab} setActiveTab={setActiveTab} />
+        <div className="main-content">
+          {activeTab === 'persona' && <GeneratePersona onKickoff={() => setActiveTab('history')} />}
+          {activeTab === 'crew' && <CrewProcess onNavigateHistory={() => setActiveTab('history')} />}
+          {activeTab === 'history' && <ExecutionHistory />}
+          {activeTab === 'flow' && <NodeFlowDesigner />}
+          {activeTab === 'mcp' && <McpCatalog />}
+          {activeTab === 'swagger' && (
+            <iframe
+              src="/docs"
+              style={{ width: '100%', height: '100%', border: 'none' }}
+              title="Swagger API"
+            />
+          )}
+        </div>
       </div>
     </div>
   );

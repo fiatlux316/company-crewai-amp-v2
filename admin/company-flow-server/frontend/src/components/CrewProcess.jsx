@@ -419,9 +419,10 @@ export default function CrewProcess({ onNavigateHistory }) {
                 <button className="btn danger" onClick={deleteCrew}>Delete Crew</button>
               </div>
 
+              {/* 1. Schedule (Cron) & Metadata 2-Column Row */}
               <div className="adminGrid">
                 {/* Schedule (Cron) */}
-                <div className="panel">
+                <div className="panel" style={{ margin: 0 }}>
                   <h3>Schedule (Cron)</h3>
                   <label>
                     <input type="checkbox" style={{ width: 'auto' }} checked={schEnabled} onChange={e => setSchEnabled(e.target.checked)} /> Enabled
@@ -437,7 +438,7 @@ export default function CrewProcess({ onNavigateHistory }) {
                 </div>
 
                 {/* Metadata */}
-                <div className="panel">
+                <div className="panel" style={{ margin: 0 }}>
                   <h3>Metadata</h3>
                   <label>Owner</label>
                   <input value={metaOwner} onChange={e => setMetaOwner(e.target.value)} />
@@ -445,26 +446,26 @@ export default function CrewProcess({ onNavigateHistory }) {
                   <input value={metaDate} onChange={e => setMetaDate(e.target.value)} />
                   <button className="btn secondary" onClick={saveSettings}>Save Metadata</button>
                 </div>
+              </div>
 
-                {/* Initial Input Parameters */}
-                <div className="panel wide">
-                  <h3>Initial Input Parameters</h3>
-                  <textarea value={defaultInputs} onChange={e => setDefaultInputs(e.target.value)}></textarea>
-                  <button className="btn secondary" onClick={saveSettings}>Save Defaults</button>
-                </div>
+              {/* 2. Initial Input Parameters (Full-Width Single Row) */}
+              <div className="panel">
+                <h3>Initial Input Parameters</h3>
+                <textarea value={defaultInputs} onChange={e => setDefaultInputs(e.target.value)}></textarea>
+                <button className="btn secondary" onClick={saveSettings}>Save Defaults</button>
+              </div>
 
-                {/* Process Diagram */}
-                <div className="panel wide">
-                  <h3>Task · Agent · Tool Process</h3>
-                  {graph ? <CrewDiagram graph={graph} /> : <div className="hint">프로세스 그래프를 로딩 중...</div>}
-                </div>
+              {/* 3. Task · Agent · Tool Process (Full-Width Single Row) */}
+              <div className="panel">
+                <h3>Task · Agent · Tool Process</h3>
+                {graph ? <CrewDiagram graph={graph} /> : <div className="hint">프로세스 그래프를 로딩 중...</div>}
+              </div>
 
-                {/* Execution History link */}
-                <div className="panel wide">
-                  <h3>Execution History</h3>
-                  <div className="historyLink" onClick={() => onNavigateHistory && onNavigateHistory()}>
-                    📋 Execution History 탭에서 전체 이력 보기 →
-                  </div>
+              {/* 4. Execution History Link (Full-Width Single Row) */}
+              <div className="panel">
+                <h3>Execution History</h3>
+                <div className="historyLink" onClick={() => onNavigateHistory && onNavigateHistory()}>
+                  📋 Execution History 탭에서 전체 이력 보기 →
                 </div>
               </div>
             </div>
