@@ -146,9 +146,19 @@ def delete_run(run_id: str, confirm: bool=False, p: Principal = Depends(require(
     audit(p.subject,"run.delete",run_id)
     return {"status":"deleted","run_id":run_id}
 
+from .mcp.registry import get_mcp_catalog, invoke_mcp_tool
+
+class McpTestRequest(BaseModel):
+    tool_name: str
+    arguments: dict = Field(default_factory=dict)
+
 @app.get("/api/v1/mcp/tools")
 def mcp_tools(p: Principal = Depends(require("mcp:read"))) -> dict:
     return {"tools": get_mcp_catalog()}
+
+@app.post("/api/v1/mcp/test")
+def test_mcp_tool(request: McpTestRequest, p: Principal = Depends(require("mcp:read"))) -> dict:
+    return invoke_mcp_tool(request.tool_name, request.arguments)
 
 
 @app.get("/api/v1/crews/{crew_id}/{version}/graph")

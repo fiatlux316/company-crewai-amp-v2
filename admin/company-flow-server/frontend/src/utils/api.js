@@ -5,6 +5,9 @@ export const api = {
   fetchRuns: () => fetch('/api/v1/runs').then(r => r.json()),
   fetchRun: (id) => fetch('/api/v1/runs/'+id).then(r => r.json()),
   fetchMcpTools: () => fetch('/api/v1/mcp/tools').then(r => r.json()),
+  testMcpTool: (tool_name, args) => fetch('/api/v1/mcp/test', {
+    method: 'POST', headers: {'Content-Type': 'application/json'}, body: JSON.stringify({ tool_name, arguments: args || {} })
+  }).then(r => r.json()),
   kickoff: (crew_id, version, payload) => fetch(`/api/v1/crews/${encodeURIComponent(crew_id)}/${version}/kickoff`, {
     method: 'POST', headers: {'Content-Type': 'application/json'}, body: JSON.stringify(payload)
   }).then(r => r.json()),

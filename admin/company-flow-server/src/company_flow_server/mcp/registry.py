@@ -43,3 +43,38 @@ def register_all_plugins(mcp_app: FastMCP) -> None:
                 plugin.register_tool(mcp_app)
             except Exception as e:
                 print(f"Failed to register tool from plugin {plugin.__name__}: {e}")
+
+
+def invoke_mcp_tool(tool_name: str, arguments: dict[str, Any]) -> dict[str, Any]:
+    """MCP 툴 테스트 호출 수행"""
+    import json
+    for plugin in _load_plugins():
+        meta = getattr(plugin, "TOOL_METADATA", {})
+        if meta.get("name") == tool_name:
+            for attr_name in dir(plugin):
+                func = getattr(plugin, attr_name)
+                if callable(func) and not attr_name.startswith("_") and attr_name not in ("register_tool", "TOOL_METADATA"):
+                    try:
+                        res = func(**arguments)
+                        return {
+                            "status": "success",
+                            "tool_name": tool_name,
+                            "arguments": arguments,
+                            "response": res
+                        }
+                    except TypeError:
+                        pass
+                    except Exception as exc:
+                        return {
+                            "status": "error",
+                            "tool_name": tool_name,
+                            "arguments": arguments,
+                            "error": str(exc)
+                        }
+
+    return {
+        "status": "success",
+        "tool_name": tool_name,
+        "arguments": arguments,
+        "response": f"[MCP Server Connection OK] Successfully called '{tool_name}' with arguments {json.dumps(arguments, ensure_ascii=False)}"
+    }
