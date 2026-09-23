@@ -3,6 +3,7 @@ import React, { useState } from 'react';
 import { api } from '../utils/api';
 
 export default function GeneratePersona({ onKickoff }) {
+  const [personaName, setPersonaName] = useState('');
   const [goal, setGoal] = useState('');
   const [steps, setSteps] = useState({
     extract: { name: '추출', checked: true, tools: [] },
@@ -12,7 +13,7 @@ export default function GeneratePersona({ onKickoff }) {
   });
 
   const stepAvailableTools = {
-    extract: ['jira', 'confluence', 'database', 'datadog'],
+    extract: ['jira', 'confluence', 'database', 'datadog', 'repositories'],
     analysis: [],
     write: ['jira', 'confluence'],
     report: ['teams', 'outlook']
@@ -34,6 +35,7 @@ export default function GeneratePersona({ onKickoff }) {
   };
 
   const submitPersona = async () => {
+    if (!personaName.trim()) return alert("Persona 이름을 입력하세요.");
     if (!goal.trim()) return alert("업무 목적을 입력하세요.");
 
     let stepTools = [];
@@ -51,8 +53,8 @@ export default function GeneratePersona({ onKickoff }) {
 
       if (!targetCrew) return alert("ops.persona_generate 크루를 찾을 수 없습니다.");
 
-      const payload = { inputs: { business_goal: goal, step_tools: stepTools } };
-      if (!window.confirm(`업무목적:\n${goal}\n\n단계별 도구:\n${stepTools.join('\n')}\n\n진행하시겠습니까?`)) return;
+      const payload = { inputs: { persona_name: personaName, business_goal: goal, step_tools: stepTools } };
+      if (!window.confirm(`Persona 이름:\n${personaName}\n\n업무목적:\n${goal}\n\n단계별 도구:\n${stepTools.join('\n')}\n\n진행하시겠습니까?`)) return;
 
       const res = await api.kickoff(targetCrew.crew_id, targetCrew.version, payload);
       alert('Queued: ' + res.run_id);
@@ -68,7 +70,18 @@ export default function GeneratePersona({ onKickoff }) {
       <p className="hint" style={{ marginTop: 0, marginBottom: '24px' }}>업무 목적과 단계별 사용 도구를 매핑하여 Persona Crew를 생성합니다.</p>
 
       <div className="panel wide">
-        <h3>1. 업무목적 (Business Goal)</h3>
+        <h3>1. Persona 이름 (Persona Name)</h3>
+        <input
+          type="text"
+          value={personaName}
+          onChange={e => setPersonaName(e.target.value)}
+          placeholder="생성할 페르소나 이름을 입력하세요 (예: DevOps 엔지니어, QA 테스트 관리자)"
+          style={{ width: '100%', padding: '10px 12px', fontSize: '14px', borderRadius: '6px', border: '1px solid #cbd5e1', boxSizing: 'border-box' }}
+        />
+      </div>
+
+      <div className="panel wide">
+        <h3>2. 업무목적 (Business Goal)</h3>
         <textarea
           value={goal}
           onChange={e => setGoal(e.target.value)}
@@ -78,7 +91,7 @@ export default function GeneratePersona({ onKickoff }) {
 
       <div className="panel wide">
         <h3>
-          2. 단계별 도구 (Step Tools)
+          3. 단계별 도구 (Step Tools)
           <span style={{ display: 'block', fontSize: '50%', fontWeight: 'normal', color: '#64748b', marginTop: '4px' }}>
             * 불필요한 단계는 체크 해제해 주세요. 선택된 도구에 맞는 mcp tools 을 자동으로 추천해 줍니다.
           </span>
