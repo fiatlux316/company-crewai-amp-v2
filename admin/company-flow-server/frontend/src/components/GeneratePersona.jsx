@@ -73,26 +73,103 @@ export default function GeneratePersona({ onKickoff }) {
 
       <div className="panel wide">
         <h3>2. 단계별 도구 (Step Tools)</h3>
-        <div id="stepToolsContainer">
-          {Object.entries(steps).map(([id, config]) => (
-            <div key={id} className="step-group" style={{ marginBottom: id !== 'report' ? '15px' : '0', borderLeft: `3px solid ${colors[id]}`, paddingLeft: '10px', display: 'flex', alignItems: 'center', gap: '20px' }}>
-              <label style={{ fontWeight: 'bold', cursor: 'pointer', width: '140px', flexShrink: 0 }}>
-                <input type="checkbox" checked={config.checked} onChange={() => handleStepToggle(id)} /> {config.name} ({id})
-              </label>
-              <div style={{ display: 'flex', gap: '10px', flexWrap: 'wrap' }}>
-                {availableTools.map(tool => (
-                  <label key={tool}>
-                    <input 
-                      type="checkbox" 
-                      value={tool} 
-                      disabled={!config.checked}
-                      checked={config.tools.includes(tool)}
-                      onChange={() => handleToolToggle(id, tool)}
-                    /> {tool}
-                  </label>
-                ))}
+
+        {/* 프로세스 순차 진행 도식화 배너 */}
+        <div style={{
+          display: 'flex',
+          alignItems: 'center',
+          gap: '10px',
+          marginBottom: '20px',
+          padding: '12px 16px',
+          backgroundColor: '#f8fafc',
+          borderRadius: '10px',
+          border: '1px solid #e2e8f0',
+          overflowX: 'auto'
+        }}>
+          <span style={{ fontSize: '12px', fontWeight: '700', color: '#64748b', marginRight: '4px', flexShrink: 0 }}>
+            프로세스 순차 흐름:
+          </span>
+          {Object.entries(steps).map(([id, config], index, arr) => (
+            <React.Fragment key={id}>
+              <div style={{
+                display: 'flex',
+                alignItems: 'center',
+                gap: '6px',
+                padding: '6px 12px',
+                borderRadius: '20px',
+                backgroundColor: config.checked ? `${colors[id]}15` : '#f1f5f9',
+                border: `1.5px solid ${config.checked ? colors[id] : '#cbd5e1'}`,
+                color: config.checked ? colors[id] : '#94a3b8',
+                fontWeight: 'bold',
+                fontSize: '13px',
+                whiteSpace: 'nowrap'
+              }}>
+                <span style={{
+                  width: '20px',
+                  height: '20px',
+                  borderRadius: '50%',
+                  backgroundColor: config.checked ? colors[id] : '#cbd5e1',
+                  color: '#ffffff',
+                  display: 'inline-flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  fontSize: '11px',
+                  flexShrink: 0
+                }}>{index + 1}</span>
+                <span>{config.name} ({id})</span>
               </div>
-            </div>
+              {index < arr.length - 1 && (
+                <span style={{ color: '#6366f1', fontWeight: 'bold', fontSize: '16px', flexShrink: 0 }}>➔</span>
+              )}
+            </React.Fragment>
+          ))}
+        </div>
+
+        <div id="stepToolsContainer">
+          {Object.entries(steps).map(([id, config], index, arr) => (
+            <React.Fragment key={id}>
+              <div className="step-group" style={{
+                borderLeft: `4px solid ${config.checked ? colors[id] : '#cbd5e1'}`,
+                paddingLeft: '14px',
+                display: 'flex',
+                alignItems: 'center',
+                gap: '20px',
+                paddingTop: '8px',
+                paddingBottom: '8px',
+                backgroundColor: config.checked ? 'transparent' : '#f9fafb',
+                borderRadius: '0 8px 8px 0'
+              }}>
+                <label style={{ display: 'inline-flex', alignItems: 'center', gap: '8px', fontWeight: 'bold', cursor: 'pointer', width: '150px', flexShrink: 0 }}>
+                  <input 
+                    type="checkbox" 
+                    checked={config.checked} 
+                    onChange={() => handleStepToggle(id)} 
+                    style={{ margin: 0, width: '16px', height: '16px', cursor: 'pointer' }}
+                  />
+                  <span>{config.name} ({id})</span>
+                </label>
+                <div style={{ display: 'flex', gap: '12px', flexWrap: 'wrap', alignItems: 'center' }}>
+                  {availableTools.map(tool => (
+                    <label key={tool} style={{ display: 'inline-flex', alignItems: 'center', gap: '5px', cursor: config.checked ? 'pointer' : 'not-allowed', color: config.checked ? '#374151' : '#9ca3af' }}>
+                      <input 
+                        type="checkbox" 
+                        value={tool} 
+                        disabled={!config.checked}
+                        checked={config.tools.includes(tool)}
+                        onChange={() => handleToolToggle(id, tool)}
+                        style={{ margin: 0, cursor: config.checked ? 'pointer' : 'not-allowed' }}
+                      />
+                      <span>{tool}</span>
+                    </label>
+                  ))}
+                </div>
+              </div>
+              {index < arr.length - 1 && (
+                <div style={{ paddingLeft: '10px', height: '22px', display: 'flex', alignItems: 'center', color: '#6366f1', fontSize: '14px', fontWeight: 'bold' }}>
+                  <span style={{ marginLeft: '-4px' }}>↓</span>
+                </div>
+              )}
+            </React.Fragment>
           ))}
         </div>
       </div>
