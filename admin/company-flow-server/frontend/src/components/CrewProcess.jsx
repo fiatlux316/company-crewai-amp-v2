@@ -90,11 +90,8 @@ function CrewDiagram({ graph }) {
     const ns = graph.nodes || [];
     const es = graph.edges || [];
     const pos = {};
-    const ROW_GAP = 120;
-    const TOOL_OFFSET = 55;
-    const NODE_H = 74;
 
-    // Layout: task -> agent -> tool columns
+    // 1. Determine task order
     const taskIds = ns.filter(n => n.type === 'task').map(n => n.id);
     const taskOrder = [];
     const incoming = new Set(es.filter(e => e.label === 'next').map(e => e.target));
@@ -109,30 +106,62 @@ function CrewDiagram({ graph }) {
     taskIds.forEach(walk);
 
     const taskIndex = Object.fromEntries(taskOrder.map((id, i) => [id, i]));
+
+    // 2. Compute dynamic row heights based on item count in each row to prevent overlapping
+    const rowCounts = {};
+    taskOrder.forEach((taskId, rIdx) => {
+      const agents = es.filter(e => e.source === taskId && e.label === 'assigned').map(e => e.target);
+      let toolCount = 0;
+      agents.forEach(agentId => {
+        const tools = es.filter(e => e.source === agentId && e.label === 'uses').map(e => e.target);
+        toolCount = Math.max(toolCount, tools.length);
+      });
+      rowCounts[rIdx] = Math.max(1, agents.length, toolCount);
+    });
+
+    const rowYPositions = [];
+    let currentY = 40;
+    taskOrder.forEach((taskId, rIdx) => {
+      rowYPositions[rIdx] = currentY;
+      const count = rowCounts[rIdx] || 1;
+      currentY += Math.max(130, count * 85 + 30);
+    });
+
+    // Column X positions
+    const TASK_X = 60;
+    const AGENT_X = 350;
+    const TOOL_X = 640;
+
+    // Position Tasks
     ns.filter(n => n.type === 'task').forEach(n => {
       const row = taskIndex[n.id] ?? 0;
-      pos[n.id] = { x: 70, y: 40 + row * ROW_GAP };
+      pos[n.id] = { x: TASK_X, y: rowYPositions[row] || (40 + row * 130) };
     });
+
+    // Position Agents
     ns.filter(n => n.type === 'agent').forEach((n, j) => {
       const refs = es.filter(e => e.target === n.id && e.label === 'assigned');
       const row = refs.length ? (taskIndex[refs[0].source] ?? j) : j;
-      pos[n.id] = { x: 350, y: 40 + row * ROW_GAP };
+      pos[n.id] = { x: AGENT_X, y: rowYPositions[row] || (40 + row * 130) };
     });
-    const toolRows = {};
+
+    // Position Tools
+    const toolRowCounts = {};
     ns.filter(n => n.type === 'tool').forEach((n, j) => {
       const refs = es.filter(e => e.target === n.id && e.label === 'uses');
       const agent = refs[0]?.source;
       const assigned = es.find(e => e.target === agent && e.label === 'assigned');
       const row = assigned ? (taskIndex[assigned.source] ?? j) : j;
-      const offset = toolRows[row] || 0;
-      toolRows[row] = offset + 1;
-      pos[n.id] = { x: 650, y: 40 + row * ROW_GAP + offset * TOOL_OFFSET };
+      const offset = toolRowCounts[row] || 0;
+      toolRowCounts[row] = offset + 1;
+      const baseY = rowYPositions[row] || (40 + row * 130);
+      pos[n.id] = { x: TOOL_X, y: baseY + offset * 80 };
     });
 
-    const maxY = Math.max(400, ...Object.values(pos).map(p => p.y + 110));
+    const maxY = Math.max(400, currentY + 40);
     if (diagramRef.current) diagramRef.current.style.height = maxY + 'px';
 
-    // Render nodes
+    // 3. Render HTML DOM Nodes
     if (nodesRef.current) {
       nodesRef.current.innerHTML = ns.map(n => {
         const p = pos[n.id] || { x: 50, y: 50 };
@@ -143,7 +172,6 @@ function CrewDiagram({ graph }) {
         </div>`;
       }).join('');
 
-      // Add click handlers
       nodesRef.current.querySelectorAll('.crewNodeD').forEach(el => {
         el.addEventListener('click', () => {
           nodesRef.current.querySelectorAll('.crewNodeD').forEach(x => x.classList.remove('active'));
@@ -155,37 +183,66 @@ function CrewDiagram({ graph }) {
       });
     }
 
-    // Render edges
+    // 4. Measure actual DOM node dimensions for pixel-perfect arrow alignment
+    const bounds = {};
+    if (nodesRef.current) {
+      nodesRef.current.querySelectorAll('.crewNodeD').forEach(el => {
+        const nodeId = el.dataset.nodeId;
+        bounds[nodeId] = {
+          left: el.offsetLeft,
+          top: el.offsetTop,
+          width: el.offsetWidth,
+          height: el.offsetHeight,
+          centerX: el.offsetLeft + el.offsetWidth / 2,
+          centerY: el.offsetTop + el.offsetHeight / 2,
+          right: el.offsetLeft + el.offsetWidth,
+          bottom: el.offsetTop + el.offsetHeight
+        };
+      });
+    }
+
+    // 5. Render SVG Edges perfectly aligned to actual node borders & centers
     if (svgRef.current) {
       const w = diagramRef.current?.clientWidth || 1000;
       const h = maxY;
       svgRef.current.setAttribute('viewBox', `0 0 ${w} ${h}`);
 
-      // Arrow markers: default gray + purple for task next edges
       let svgContent = `<defs>
-        <marker id="arrow" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse"><path d="M 0 0 L 10 5 L 0 10 z" fill="#64748b"/></marker>
-        <marker id="arrowNext" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M 0 0 L 10 5 L 0 10 z" fill="#6366f1"/></marker>
+        <marker id="arrow" viewBox="0 0 10 10" refX="10" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse"><path d="M 0 0 L 10 5 L 0 10 z" fill="#64748b"/></marker>
+        <marker id="arrowNext" viewBox="0 0 10 10" refX="10" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M 0 0 L 10 5 L 0 10 z" fill="#6366f1"/></marker>
       </defs>`;
 
       svgContent += es.map(e => {
-          const a = pos[e.source], b = pos[e.target];
-          if (!a || !b) return '';
+        const a = bounds[e.source] || (pos[e.source] ? {
+          left: pos[e.source].x, top: pos[e.source].y, width: 210, height: 74,
+          centerX: pos[e.source].x + 105, centerY: pos[e.source].y + 37,
+          right: pos[e.source].x + 210, bottom: pos[e.source].y + 74
+        } : null);
 
-          if (e.label === 'next') {
-            // Task-to-task vertical arrow: bottom-center of source → top-center of target
-            const x1 = a.x + 105, y1 = a.y + NODE_H;
-            const x2 = b.x + 105, y2 = b.y;
-            const midY = (y1 + y2) / 2;
-            return `<path class="crewEdge next" marker-end="url(#arrowNext)" d="M${x1},${y1} C${x1},${midY} ${x2},${midY} ${x2},${y2}"/>
-                    <text class="crewEdgeLabel" x="${(x1 + x2) / 2 + 8}" y="${midY - 3}" style="fill:#6366f1;font-weight:700">next</text>`;
-          }
+        const b = bounds[e.target] || (pos[e.target] ? {
+          left: pos[e.target].x, top: pos[e.target].y, width: 210, height: 74,
+          centerX: pos[e.target].x + 105, centerY: pos[e.target].y + 37,
+          right: pos[e.target].x + 210, bottom: pos[e.target].y + 74
+        } : null);
 
-          // assigned / uses: right side of source → left side of target
-          const x1 = a.x + 210, y1 = a.y + 37, x2 = b.x, y2 = b.y + 37;
-          const mx = (x1 + x2) / 2, my = (y1 + y2) / 2;
-          return `<path class="crewEdge ${E(e.label)}" marker-end="url(#arrow)" d="M${x1},${y1} C${mx},${y1} ${mx},${y2} ${x2},${y2}"/>
-                  <text class="crewEdgeLabel" x="${mx + 4}" y="${my - 4}">${E(e.label)}</text>`;
-        }).join('');
+        if (!a || !b) return '';
+
+        if (e.label === 'next') {
+          // Task-to-task vertical arrow: bottom-center of source → top-center of target
+          const x1 = a.centerX, y1 = a.bottom;
+          const x2 = b.centerX, y2 = b.top;
+          const midY = (y1 + y2) / 2;
+          return `<path class="crewEdge next" marker-end="url(#arrowNext)" d="M${x1},${y1} C${x1},${midY} ${x2},${midY} ${x2},${y2}"/>
+                  <text class="crewEdgeLabel" x="${(x1 + x2) / 2 + 8}" y="${midY - 3}" style="fill:#6366f1;font-weight:700">next</text>`;
+        }
+
+        // assigned / uses horizontal arrow: right-center of source → left-center of target
+        const x1 = a.right, y1 = a.centerY;
+        const x2 = b.left, y2 = b.centerY;
+        const mx = (x1 + x2) / 2;
+        return `<path class="crewEdge ${E(e.label)}" marker-end="url(#arrow)" d="M${x1},${y1} C${mx},${y1} ${mx},${y2} ${x2},${y2}"/>
+                <text class="crewEdgeLabel" x="${mx + 4}" y="${(y1 + y2) / 2 - 4}">${E(e.label)}</text>`;
+      }).join('');
 
       svgRef.current.innerHTML = svgContent;
     }
