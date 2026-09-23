@@ -17,7 +17,7 @@ TOOL_METADATA = {
                 'description': 'select only'
             }
         },
-        'required': ['db_identifier','query']
+        'required': ['query']
     },
     'output_schema': {
         'type': 'string',
