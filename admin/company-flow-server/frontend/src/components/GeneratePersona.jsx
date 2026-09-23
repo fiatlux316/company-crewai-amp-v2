@@ -11,7 +11,12 @@ export default function GeneratePersona({ onKickoff }) {
     report: { name: '보고', checked: true, tools: [] }
   });
 
-  const availableTools = ['jira', 'confluence', 'database', 'datadog', 'outlook', 'teams'];
+  const stepAvailableTools = {
+    extract: ['jira', 'confluence', 'database', 'datadog'],
+    analysis: [],
+    write: ['jira', 'confluence'],
+    report: ['teams', 'outlook']
+  };
   const colors = { extract: '#6366f1', analysis: '#059669', write: '#d97706', report: '#db2777' };
 
   const handleStepToggle = (stepId) => {
@@ -21,7 +26,7 @@ export default function GeneratePersona({ onKickoff }) {
   const handleToolToggle = (stepId, tool) => {
     setSteps(prev => {
       const currentTools = prev[stepId].tools;
-      const newTools = currentTools.includes(tool) 
+      const newTools = currentTools.includes(tool)
         ? currentTools.filter(t => t !== tool)
         : [...currentTools, tool];
       return { ...prev, [stepId]: { ...prev[stepId], tools: newTools } };
@@ -30,7 +35,7 @@ export default function GeneratePersona({ onKickoff }) {
 
   const submitPersona = async () => {
     if (!goal.trim()) return alert("업무 목적을 입력하세요.");
-    
+
     let stepTools = [];
     Object.entries(steps).forEach(([id, config]) => {
       if (config.checked) {
@@ -43,11 +48,11 @@ export default function GeneratePersona({ onKickoff }) {
     try {
       const { crews } = await api.fetchCrews();
       const targetCrew = crews.find(c => c.crew_id === 'ops.persona_generate');
-      
+
       if (!targetCrew) return alert("ops.persona_generate 크루를 찾을 수 없습니다.");
 
       const payload = { inputs: { business_goal: goal, step_tools: stepTools } };
-      if(!window.confirm(`업무목적:\n${goal}\n\n단계별 도구:\n${stepTools.join('\n')}\n\n진행하시겠습니까?`)) return;
+      if (!window.confirm(`업무목적:\n${goal}\n\n단계별 도구:\n${stepTools.join('\n')}\n\n진행하시겠습니까?`)) return;
 
       const res = await api.kickoff(targetCrew.crew_id, targetCrew.version, payload);
       alert('Queued: ' + res.run_id);
@@ -64,15 +69,15 @@ export default function GeneratePersona({ onKickoff }) {
 
       <div className="panel wide">
         <h3>1. 업무목적 (Business Goal)</h3>
-        <textarea 
-          value={goal} 
-          onChange={e => setGoal(e.target.value)} 
+        <textarea
+          value={goal}
+          onChange={e => setGoal(e.target.value)}
           placeholder="이 페르소나가 수행해야 할 업무 목적을 상세히 입력하세요."
         ></textarea>
       </div>
 
       <div className="panel wide">
-        <h3>2. 단계별 도구 (Step Tools)</h3>
+        <h3>2. 단계별 도구 (Step Tools) \n * 선택된 도구에 맞는 mcp tools 을 자동으로 추천해 줍니다. </h3>
 
         {/* 프로세스 순차 진행 도식화 배너 */}
         <div style={{
@@ -140,28 +145,32 @@ export default function GeneratePersona({ onKickoff }) {
                 borderRadius: '0 8px 8px 0'
               }}>
                 <label style={{ display: 'inline-flex', alignItems: 'center', gap: '8px', fontWeight: 'bold', cursor: 'pointer', width: '150px', flexShrink: 0 }}>
-                  <input 
-                    type="checkbox" 
-                    checked={config.checked} 
-                    onChange={() => handleStepToggle(id)} 
+                  <input
+                    type="checkbox"
+                    checked={config.checked}
+                    onChange={() => handleStepToggle(id)}
                     style={{ margin: 0, width: '16px', height: '16px', cursor: 'pointer' }}
                   />
                   <span>{config.name} ({id})</span>
                 </label>
                 <div style={{ display: 'flex', gap: '12px', flexWrap: 'wrap', alignItems: 'center' }}>
-                  {availableTools.map(tool => (
-                    <label key={tool} style={{ display: 'inline-flex', alignItems: 'center', gap: '5px', cursor: config.checked ? 'pointer' : 'not-allowed', color: config.checked ? '#374151' : '#9ca3af' }}>
-                      <input 
-                        type="checkbox" 
-                        value={tool} 
-                        disabled={!config.checked}
-                        checked={config.tools.includes(tool)}
-                        onChange={() => handleToolToggle(id, tool)}
-                        style={{ margin: 0, cursor: config.checked ? 'pointer' : 'not-allowed' }}
-                      />
-                      <span>{tool}</span>
-                    </label>
-                  ))}
+                  {(stepAvailableTools[id] || []).length === 0 ? (
+                    <span style={{ fontSize: '13px', color: '#94a3b8', fontStyle: 'italic' }}>해당 없음</span>
+                  ) : (
+                    stepAvailableTools[id].map(tool => (
+                      <label key={tool} style={{ display: 'inline-flex', alignItems: 'center', gap: '5px', cursor: config.checked ? 'pointer' : 'not-allowed', color: config.checked ? '#374151' : '#9ca3af' }}>
+                        <input
+                          type="checkbox"
+                          value={tool}
+                          disabled={!config.checked}
+                          checked={config.tools.includes(tool)}
+                          onChange={() => handleToolToggle(id, tool)}
+                          style={{ margin: 0, cursor: config.checked ? 'pointer' : 'not-allowed' }}
+                        />
+                        <span>{tool}</span>
+                      </label>
+                    ))
+                  )}
                 </div>
               </div>
               {index < arr.length - 1 && (
