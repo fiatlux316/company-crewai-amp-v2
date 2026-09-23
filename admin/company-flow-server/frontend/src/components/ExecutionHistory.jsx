@@ -12,9 +12,9 @@ const KST = s => {
   } catch(e) { return s; }
 };
 
-export default function ExecutionHistory() {
+export default function ExecutionHistory({ initialRunId }) {
   const [runs, setRuns] = useState([]);
-  const [selectedRunId, setSelectedRunId] = useState(null);
+  const [selectedRunId, setSelectedRunId] = useState(initialRunId || null);
   const [currentRun, setCurrentRun] = useState(null);
   const [loading, setLoading] = useState(false);
 
@@ -27,6 +27,13 @@ export default function ExecutionHistory() {
       console.error(e);
     }
   };
+
+  useEffect(() => {
+    if (initialRunId) {
+      setSelectedRunId(initialRunId);
+      fetchRunDetail(initialRunId);
+    }
+  }, [initialRunId]);
 
   const loadHistory = async () => {
     setLoading(true);

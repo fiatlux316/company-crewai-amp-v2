@@ -41,7 +41,13 @@ export default function GeneratePersona({ onKickoff }) {
     let stepTools = [];
     Object.entries(steps).forEach(([id, config]) => {
       if (config.checked) {
-        stepTools.push(`${id}:${config.tools.join(',')}`);
+        if (config.tools.length > 1) {
+          stepTools.push(`${id}:[${config.tools.join(',')}]`);
+        } else if (config.tools.length === 1) {
+          stepTools.push(`${id}:${config.tools[0]}`);
+        } else {
+          stepTools.push(`${id}`);
+        }
       }
     });
 
@@ -57,8 +63,7 @@ export default function GeneratePersona({ onKickoff }) {
       if (!window.confirm(`Persona 이름:\n${personaName}\n\n업무목적:\n${goal}\n\n단계별 도구:\n${stepTools.join('\n')}\n\n진행하시겠습니까?`)) return;
 
       const res = await api.kickoff(targetCrew.crew_id, targetCrew.version, payload);
-      alert('Queued: ' + res.run_id);
-      onKickoff();
+      onKickoff(res.run_id);
     } catch (e) {
       alert("Error: " + e.message);
     }

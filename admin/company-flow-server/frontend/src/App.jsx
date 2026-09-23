@@ -10,7 +10,15 @@ import './index.css';
 
 function App() {
   const [activeTab, setActiveTab] = useState('persona');
+  const [initialRunId, setInitialRunId] = useState(null);
   const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
+
+  const handleNavigateHistory = (runId) => {
+    if (runId) {
+      setInitialRunId(runId);
+    }
+    setActiveTab('history');
+  };
 
   return (
     <div className="app-layout">
@@ -23,9 +31,9 @@ function App() {
       <div className="main-wrapper">
         <Header activeTab={activeTab} setActiveTab={setActiveTab} />
         <div className="main-content">
-          {activeTab === 'persona' && <GeneratePersona onKickoff={() => setActiveTab('history')} />}
-          {activeTab === 'crew' && <CrewProcess onNavigateHistory={() => setActiveTab('history')} />}
-          {activeTab === 'history' && <ExecutionHistory />}
+          {activeTab === 'persona' && <GeneratePersona onKickoff={handleNavigateHistory} />}
+          {activeTab === 'crew' && <CrewProcess onNavigateHistory={handleNavigateHistory} />}
+          {activeTab === 'history' && <ExecutionHistory initialRunId={initialRunId} />}
           {activeTab === 'flow' && <NodeFlowDesigner />}
           {activeTab === 'mcp' && <McpCatalog />}
           {activeTab === 'swagger' && (
