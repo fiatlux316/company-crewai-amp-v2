@@ -8,13 +8,13 @@ TOOL_METADATA = {
     'input_schema': {
         'type': 'object',
         'properties': {
-            'db_identifier': {
-                'type': 'string',
-                'description': 'postgresql connection url'
-            },
             'query': {
                 'type': 'string',
                 'description': 'select only'
+            },
+            'db_identifier': {
+                'type': 'string',
+                'description': 'postgresql connection url (미입력시 환경변수 참조)'
             }
         },
         'required': ['query']
