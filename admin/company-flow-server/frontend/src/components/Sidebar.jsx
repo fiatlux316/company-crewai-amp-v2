@@ -13,7 +13,7 @@ export default function Sidebar({ activeTab, setActiveTab, collapsed, onToggle }
           👤 <span className="tab-text">Generate Persona</span>
         </button>
         <button className={activeTab === 'crew' ? 'active' : ''} onClick={() => setActiveTab('crew')}>
-          ⚙️ <span className="tab-text">Crew Process</span>
+          ⚙️ <span className="tab-text">Crew Management</span>
         </button>
         <button className={activeTab === 'history' ? 'active' : ''} onClick={() => setActiveTab('history')}>
           📋 <span className="tab-text">Execution History</span>
@@ -22,7 +22,7 @@ export default function Sidebar({ activeTab, setActiveTab, collapsed, onToggle }
           🔀 <span className="tab-text">Flow Designer</span>
         </button>
         <button className={activeTab === 'mcp' ? 'active' : ''} onClick={() => setActiveTab('mcp')}>
-          🛠 <span className="tab-text">MCP Catalog</span>
+          🛠 <span className="tab-text">MCP Tools</span>
         </button>
         <button className={activeTab === 'swagger' ? 'active' : ''} onClick={() => setActiveTab('swagger')}>
           📖 <span className="tab-text">Swagger API</span>

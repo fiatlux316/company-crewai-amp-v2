@@ -45,18 +45,18 @@ const describeCron = (expr) => {
 
     // Specific time, every day
     if (isNum(min) && isNum(hour) && isAny(dom) && isAny(mon) && isAny(dow)) {
-      return `매일 ${hour.padStart(2,'0')}:${min.padStart(2,'0')}에 실행`;
+      return `매일 ${hour.padStart(2, '0')}:${min.padStart(2, '0')}에 실행`;
     }
 
     // Specific time, specific day of week
     if (isNum(min) && isNum(hour) && isAny(dom) && isAny(mon) && !isAny(dow)) {
       const days = dow.split(',').map(d => DOW_KR[parseInt(d)] || d).join(', ');
-      return `매주 ${days}요일 ${hour.padStart(2,'0')}:${min.padStart(2,'0')}에 실행`;
+      return `매주 ${days}요일 ${hour.padStart(2, '0')}:${min.padStart(2, '0')}에 실행`;
     }
 
     // Specific time, specific day of month
     if (isNum(min) && isNum(hour) && isNum(dom) && isAny(mon) && isAny(dow)) {
-      return `매월 ${dom}일 ${hour.padStart(2,'0')}:${min.padStart(2,'0')}에 실행`;
+      return `매월 ${dom}일 ${hour.padStart(2, '0')}:${min.padStart(2, '0')}에 실행`;
     }
 
     // Every minute
@@ -96,7 +96,7 @@ function CrewDiagram({ graph }) {
     const taskOrder = [];
     const incoming = new Set(es.filter(e => e.label === 'next').map(e => e.target));
     const roots = taskIds.filter(id => !incoming.has(id));
-    
+
     function walk(id) {
       if (taskOrder.includes(id)) return;
       taskOrder.push(id);
@@ -202,67 +202,90 @@ function CrewDiagram({ graph }) {
     }
 
     // 5. Render SVG Edges perfectly aligned to actual node borders & centers
-    if (svgRef.current) {
-      const w = diagramRef.current?.clientWidth || 1000;
-      const h = maxY;
-      svgRef.current.setAttribute('viewBox', `0 0 ${w} ${h}`);
+    const drawEdges = () => {
+      const bounds = {};
+      if (nodesRef.current) {
+        nodesRef.current.querySelectorAll('.crewNodeD').forEach(el => {
+          const nodeId = el.dataset.nodeId;
+          bounds[nodeId] = {
+            left: el.offsetLeft,
+            top: el.offsetTop,
+            width: el.offsetWidth,
+            height: el.offsetHeight,
+            centerX: el.offsetLeft + el.offsetWidth / 2,
+            centerY: el.offsetTop + el.offsetHeight / 2,
+            right: el.offsetLeft + el.offsetWidth,
+            bottom: el.offsetTop + el.offsetHeight
+          };
+        });
+      }
 
-      let svgContent = `<defs>
-        <marker id="arrow" viewBox="0 0 10 10" refX="10" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse"><path d="M 0 0 L 10 5 L 0 10 z" fill="#64748b"/></marker>
-        <marker id="arrowNext" viewBox="0 0 10 10" refX="10" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M 0 0 L 10 5 L 0 10 z" fill="#6366f1"/></marker>
-      </defs>`;
+      if (svgRef.current) {
+        const w = Math.max(diagramRef.current?.clientWidth || 880, 880);
+        const h = maxY;
+        svgRef.current.setAttribute('viewBox', `0 0 ${w} ${h}`);
+        svgRef.current.setAttribute('width', `${w}`);
+        svgRef.current.setAttribute('height', `${h}`);
+        svgRef.current.setAttribute('preserveAspectRatio', 'none');
 
-      svgContent += es.map(e => {
-        const a = bounds[e.source] || (pos[e.source] ? {
-          left: pos[e.source].x, top: pos[e.source].y, width: 210, height: 74,
-          centerX: pos[e.source].x + 105, centerY: pos[e.source].y + 37,
-          right: pos[e.source].x + 210, bottom: pos[e.source].y + 74
-        } : null);
+        let svgContent = `<defs>
+          <marker id="arrow" viewBox="0 0 10 10" refX="10" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse"><path d="M 0 0 L 10 5 L 0 10 z" fill="#64748b"/></marker>
+          <marker id="arrowNext" viewBox="0 0 10 10" refX="10" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M 0 0 L 10 5 L 0 10 z" fill="#6366f1"/></marker>
+        </defs>`;
 
-        const b = bounds[e.target] || (pos[e.target] ? {
-          left: pos[e.target].x, top: pos[e.target].y, width: 210, height: 74,
-          centerX: pos[e.target].x + 105, centerY: pos[e.target].y + 37,
-          right: pos[e.target].x + 210, bottom: pos[e.target].y + 74
-        } : null);
+        svgContent += es.map(e => {
+          const a = bounds[e.source] || (pos[e.source] ? {
+            left: pos[e.source].x, top: pos[e.source].y, width: 210, height: 74,
+            centerX: pos[e.source].x + 105, centerY: pos[e.source].y + 37,
+            right: pos[e.source].x + 210, bottom: pos[e.source].y + 74
+          } : null);
 
-        if (!a || !b) return '';
+          const b = bounds[e.target] || (pos[e.target] ? {
+            left: pos[e.target].x, top: pos[e.target].y, width: 210, height: 74,
+            centerX: pos[e.target].x + 105, centerY: pos[e.target].y + 37,
+            right: pos[e.target].x + 210, bottom: pos[e.target].y + 74
+          } : null);
 
-        if (e.label === 'next') {
-          // Task-to-task vertical arrow: bottom-center of source → top-center of target
-          const x1 = a.centerX, y1 = a.bottom;
-          const x2 = b.centerX, y2 = b.top;
-          const midY = (y1 + y2) / 2;
-          return `<path class="crewEdge next" marker-end="url(#arrowNext)" d="M${x1},${y1} C${x1},${midY} ${x2},${midY} ${x2},${y2}"/>
-                  <text class="crewEdgeLabel" x="${(x1 + x2) / 2 + 8}" y="${midY - 3}" style="fill:#6366f1;font-weight:700">next</text>`;
-        }
+          if (!a || !b) return '';
 
-        // assigned / uses horizontal arrow: right side of source → left side of target
-        const x1 = a.right;
-        let y1 = a.centerY;
-        const x2 = b.left;
-        let y2 = b.centerY;
+          if (e.label === 'next') {
+            // Task-to-task vertical arrow: bottom-center of source → top-center of target
+            const x1 = a.centerX, y1 = a.bottom;
+            const x2 = b.centerX, y2 = b.top;
+            const midY = (y1 + y2) / 2;
+            return `<path class="crewEdge next" marker-end="url(#arrowNext)" d="M${x1},${y1} C${x1},${midY} ${x2},${midY} ${x2},${y2}"/>
+                    <text class="crewEdgeLabel" x="${(x1 + x2) / 2 + 8}" y="${midY - 3}" style="fill:#6366f1;font-weight:700">next</text>`;
+          }
 
-        // If target node covers source centerY (same row), keep arrow perfectly horizontal
-        if (b.top <= a.centerY && a.centerY <= b.bottom) {
-          y2 = a.centerY;
-        } else if (a.top <= b.centerY && b.centerY <= a.bottom) {
-          y1 = b.centerY;
-        }
+          // assigned / uses horizontal arrow: right side of source → left side of target
+          const x1 = a.right;
+          const x2 = b.left;
 
-        const mx = (x1 + x2) / 2;
-        const my = (y1 + y2) / 2;
+          // Always align horizontal arrows straight at source node's centerY if within target's height bounds
+          let y1 = a.centerY;
+          let y2 = a.centerY;
+          if (a.centerY < b.top || a.centerY > b.bottom) {
+            y2 = b.centerY;
+          }
 
-        if (Math.abs(y1 - y2) < 2) {
-          return `<path class="crewEdge ${E(e.label)}" marker-end="url(#arrow)" d="M${x1},${y1} L${x2},${y2}"/>
-                  <text class="crewEdgeLabel" x="${mx}" y="${y1 - 5}">${E(e.label)}</text>`;
-        }
+          const mx = (x1 + x2) / 2;
+          const my = (y1 + y2) / 2;
 
-        return `<path class="crewEdge ${E(e.label)}" marker-end="url(#arrow)" d="M${x1},${y1} C${mx},${y1} ${mx},${y2} ${x2},${y2}"/>
-                <text class="crewEdgeLabel" x="${mx + 4}" y="${my - 4}">${E(e.label)}</text>`;
-      }).join('');
+          if (Math.abs(y1 - y2) < 2) {
+            return `<path class="crewEdge ${E(e.label)}" marker-end="url(#arrow)" d="M${x1},${y1} L${x2},${y1}"/>
+                    <text class="crewEdgeLabel" x="${mx}" y="${y1 - 5}">${E(e.label)}</text>`;
+          }
 
-      svgRef.current.innerHTML = svgContent;
-    }
+          return `<path class="crewEdge ${E(e.label)}" marker-end="url(#arrow)" d="M${x1},${y1} C${mx},${y1} ${mx},${y2} ${x2},${y2}"/>
+                  <text class="crewEdgeLabel" x="${mx + 4}" y="${my - 4}">${E(e.label)}</text>`;
+        }).join('');
+
+        svgRef.current.innerHTML = svgContent;
+      }
+    };
+
+    drawEdges();
+    requestAnimationFrame(drawEdges);
   };
 
   return (
@@ -307,7 +330,7 @@ export default function CrewProcess({ onNavigateHistory }) {
     try {
       const data = await api.fetchCrews();
       setCrews(data.crews || []);
-    } catch (e) {}
+    } catch (e) { }
   };
 
   useEffect(() => {
@@ -390,7 +413,7 @@ export default function CrewProcess({ onNavigateHistory }) {
             <div id="crewDetail">
               <h2>{selectedCrew.name}</h2>
               <div className="meta">{selectedCrew.crew_id} @ {selectedCrew.version} · deployed {KST(selectedCrew.deployed_at)}</div>
-              
+
               <div className="actions" style={{ marginTop: '10px' }}>
                 <button className="btn primary" onClick={kickoff}>▶ Kickoff</button>
                 <button className="btn danger" onClick={deleteCrew}>Delete Crew</button>
@@ -418,7 +441,7 @@ export default function CrewProcess({ onNavigateHistory }) {
                   <h3>Metadata</h3>
                   <label>Owner</label>
                   <input value={metaOwner} onChange={e => setMetaOwner(e.target.value)} />
-                  <label>Deployment date override</label>
+                  <label>Deployment Date</label>
                   <input value={metaDate} onChange={e => setMetaDate(e.target.value)} />
                   <button className="btn secondary" onClick={saveSettings}>Save Metadata</button>
                 </div>

@@ -125,7 +125,7 @@ def main():
       "version": "1.0.0",
       "name": f"{excel_name} Crew",
       "description": f"Generated crew from {excel_name}.xlsx",
-      "owner": "generated",
+      "owner": "SW Engineer",
       "entrypoint": f"{crew_dir_name}.entrypoint:run",
       "input_schema": {
         "type": "object",
