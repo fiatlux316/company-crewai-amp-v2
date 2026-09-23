@@ -47,10 +47,10 @@ function SchemaTable({ schema }) {
       <table className="schema-table">
         <thead>
           <tr>
-            <th>Property</th>
-            <th>Type</th>
-            <th>Required / Optional</th>
-            <th>Description</th>
+            <th style={{ width: '22%' }}>Property</th>
+            <th style={{ width: '15%' }}>Type</th>
+            <th style={{ width: '13%' }}>Required</th>
+            <th style={{ width: '50%' }}>Description</th>
           </tr>
         </thead>
         <tbody>

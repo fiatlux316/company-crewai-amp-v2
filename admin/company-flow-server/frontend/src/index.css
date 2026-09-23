@@ -273,6 +273,7 @@ input:focus, textarea:focus, select:focus { outline: none; border-color: #6366f1
 .prop-desc {
   color: #475569;
   line-height: 1.4;
+  word-break: break-word;
 }
 .schema-badge {
   display: inline-block;

@@ -8,8 +8,14 @@ TOOL_METADATA = {
     'input_schema': {
         'type': 'object',
         'properties': {
-            'db_identifier': {'type': 'string'},
-            'query': {'type': 'string'}
+            'db_identifier': {
+                'type': 'string',
+                'description': 'postgresql connection url'
+            },
+            'query': {
+                'type': 'string',
+                'description': 'select only'
+            }
         },
         'required': ['db_identifier','query']
     },
