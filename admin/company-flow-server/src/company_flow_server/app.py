@@ -7,6 +7,7 @@ from contextlib import asynccontextmanager
 
 from fastapi import FastAPI, Header, HTTPException, Request, Depends
 from fastapi.responses import FileResponse
+from fastapi.staticfiles import StaticFiles
 from pydantic import BaseModel, Field
 
 from .server.executor import CrewExecutor
@@ -68,9 +69,7 @@ def _check_deploy_token(authorization: str | None) -> None:
 
 
 
-@app.get("/")
-def process_console():
-    return FileResponse(Path(__file__).parent / "ui" / "index.html")
+
 
 
 @app.get("/api/v1/crew")
@@ -288,3 +287,12 @@ def run_flow(flow_id: str, request: FlowRunRequest) -> dict:
         "outputs": result.outputs,
         "steps": result.steps,
     }
+
+
+# Mount React SPA
+import os
+frontend_dist = Path(os.getenv("FRONTEND_DIST_DIR", "/app/frontend_dist"))
+if not frontend_dist.exists():
+    frontend_dist = Path(__file__).parent.parent.parent / "frontend" / "dist"
+
+app.mount("/", StaticFiles(directory=frontend_dist, html=True), name="spa")

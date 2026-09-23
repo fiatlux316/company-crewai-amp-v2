@@ -46,13 +46,13 @@ def main():
     for idx, row in df.iterrows():
         task_name = str(row.get("task_name", "")).strip()
         task_context = str(row.get("task_context", "")).strip()
-        task_desc = str(row.get("task_description", "")).strip()
-        task_expected = str(row.get("task_expected_output", "")).strip()
+        task_desc = str(row.get("task_description", "")).strip().replace("\\n", "\n")
+        task_expected = str(row.get("task_expected_output", "")).strip().replace("\\n", "\n")
         
         agent_id = str(row.get("task_agent", "")).strip()
-        agent_role = str(row.get("agent_role", "")).strip()
-        agent_goal = str(row.get("agent_goal", "")).strip()
-        agent_backstory = str(row.get("agent_backstory", "")).strip()
+        agent_role = str(row.get("agent_role", "")).strip().replace("\\n", "\n")
+        agent_goal = str(row.get("agent_goal", "")).strip().replace("\\n", "\n")
+        agent_backstory = str(row.get("agent_backstory", "")).strip().replace("\\n", "\n")
         agent_llm_ref = str(row.get("agent_llm_ref", "")).strip()
         if not agent_llm_ref:
             agent_llm_ref = "company/devx-llm"

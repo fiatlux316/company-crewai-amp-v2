@@ -1,6 +1,6 @@
 <!doctype html><html lang="ko"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Company Agent Platform</title>
 <style>
-:root{font-family:Inter,system-ui,sans-serif;color:#172033;background:#f4f6fa}*{box-sizing:border-box}body{margin:0}.top{height:62px;background:#111827;color:white;display:flex;align-items:center;padding:0 22px;gap:30px}.brand{font-weight:800}.tabs button{height:62px;border:0;background:none;color:#9ca3af;font-weight:700;cursor:pointer}.tabs .active{color:white;border-bottom:3px solid white}.view{display:none}.view.active{display:block}
+:root{font-family:Inter,system-ui,sans-serif;color:#172033;background:#f4f6fa}*{box-sizing:border-box}body{margin:0}.brand{font-weight:800}.view{display:none}.view.active{display:block}
 .designer{display:grid;grid-template-columns:270px 1fr 330px;height:calc(100vh - 62px)}aside{background:white;padding:15px;overflow:auto}.palette{border-right:1px solid #ddd}.props{border-left:1px solid #ddd}.workspace{overflow:auto;padding:14px}.toolbar{display:flex;gap:7px;align-items:center;margin-bottom:10px}.btn{border:0;border-radius:7px;padding:8px 11px;font-weight:700;cursor:pointer}.primary{background:#111827;color:#fff}.secondary{background:#e5e7eb}.danger{background:#fee2e2;color:#991b1b}.status{font-size:12px;color:#6b7280}
 .card{padding:11px;border:1px solid #ddd;border-radius:9px;margin:8px 0;background:#fff;cursor:grab}.card:hover{border-color:#2563eb}.name{font-weight:700}.meta,.hint{font-size:11px;color:#6b7280}.canvas{position:relative;min-width:900px;min-height:650px;border:1px solid #d1d5db;border-radius:12px;background-color:#fff;background-image:radial-gradient(#d1d5db 1px,transparent 1px);background-size:20px 20px;overflow:hidden}
 .node{position:absolute;width:230px;background:#fff;border:2px solid #2563eb;border-radius:12px;padding:11px;box-shadow:0 4px 14px #0002;cursor:move;z-index:2}.node.selected{outline:3px solid #93c5fd}.portrow{display:flex;justify-content:space-between;margin-top:9px;font-size:10px}.ports{max-height:90px;overflow:auto}.port{padding:2px 5px;margin:2px 0;border-radius:5px;background:#f3f4f6}.out{color:#047857}.in{color:#7c3aed}.edges{position:absolute;inset:0;width:100%;height:100%;pointer-events:none;z-index:1}.edge{stroke:#64748b;stroke-width:2;fill:none}.edge.good{stroke:#059669}.edge.bad{stroke:#dc2626;stroke-dasharray:5}.edgeLabel{font-size:10px;fill:#475569}
@@ -16,9 +16,106 @@ input,textarea,select{width:100%;padding:8px;border:1px solid #d1d5db;border-rad
 .liveTag{display:inline-flex;align-items:center;gap:5px;font-size:11px;font-weight:700;color:#059669;margin-left:10px}.liveTag::before{content:'';width:8px;height:8px;border-radius:50%;background:#059669;animation:pulse 1s ease-in-out infinite}
 .runMeta{display:flex;gap:14px;flex-wrap:wrap;margin:8px 0;font-size:12px;color:#6b7280}.runMeta span{display:flex;align-items:center;gap:4px}
 .verboseLive{background:#111827;color:#e5e7eb;padding:14px;border-radius:10px;white-space:pre-wrap;max-height:480px;overflow:auto;font:11px/1.6 ui-monospace,monospace;scroll-behavior:smooth}
-.historyLink{display:inline-flex;align-items:center;gap:5px;color:#2563eb;cursor:pointer;font-weight:600;font-size:13px;margin-top:6px}.historyLink:hover{text-decoration:underline}</style></head><body>
-<header class="top"><div class="brand">Company Agent Platform</div><div class="tabs"><button id="tCrew" class="active" onclick="tab('crew')">Crew Process</button><button id="tHistory" onclick="tab('history')">Execution History</button><button id="tFlow" onclick="tab('flow')">Node Flow Designer</button><button id="tMcp" onclick="tab('mcp')">MCP Catalog</button><button onclick="window.open('/docs','_blank')">Swagger API</button></div></header>
-<section id="crew" class="view active"><div class="simple"><aside><h2>Crew Management</h2><div id="crewList"></div></aside><main><div id="crewDetail" class="empty">Crew를 선택하세요.</div></main></div></section>
+.historyLink{display:inline-flex;align-items:center;gap:5px;color:#2563eb;cursor:pointer;font-weight:600;font-size:13px;margin-top:6px}.historyLink:hover{text-decoration:underline}
+.app-layout { display: flex; height: 100vh; overflow: hidden; }
+.sidebar { width: 230px; background: #111827; color: white; display: flex; flex-direction: column; transition: width 0.3s; flex-shrink: 0; z-index: 100; }
+.sidebar.collapsed { width: 60px; }
+.sidebar-header { display: flex; align-items: center; padding: 15px; gap: 10px; height: 62px; border-bottom: 1px solid #1f2937; overflow: hidden; }
+.toggle-btn { background: none; border: 0; color: white; font-size: 20px; cursor: pointer; padding: 0; width: 30px; text-align: center; flex-shrink: 0; }
+.sidebar .brand { font-weight: 800; white-space: nowrap; }
+.sidebar.collapsed .brand { opacity: 0; pointer-events: none; }
+.sidebar .tabs { display: flex; flex-direction: column; width: 100%; padding-top: 10px; }
+.sidebar .tabs button { height: 45px; border: 0; background: none; color: #9ca3af; font-weight: 700; cursor: pointer; text-align: left; padding: 0 15px; transition: 0.2s; white-space: nowrap; display: flex; align-items: center; gap: 12px; overflow: hidden; }
+.sidebar .tabs button:hover { background: #1f2937; color: white; }
+.sidebar.collapsed .tabs button { padding: 0; justify-content: center; }
+.sidebar.collapsed .tab-text { display: none; }
+.sidebar .tabs .active { color: white; border-bottom: none; border-left: 3px solid white; background: #1f2937; }
+.sidebar.collapsed .tabs .active { border-left: 3px solid white; }
+.main-content { flex: 1; height: 100vh; overflow: auto; background: #f4f6fa; }
+</style></head><body class="app-layout">
+<aside class="sidebar" id="appSidebar">
+  <div class="sidebar-header">
+    <button class="toggle-btn" onclick="toggleSidebar()">☰</button>
+    <div class="brand">Agent Platform</div>
+  </div>
+  <div class="tabs">
+    <button id="tPersona" class="active" onclick="tab('persona')">👤 <span class="tab-text">Generate Persona</span></button>
+    <button id="tCrew" onclick="tab('crew')">⚙️ <span class="tab-text">Crew Process</span></button>
+    <button id="tHistory" onclick="tab('history')">📋 <span class="tab-text">Execution History</span></button>
+    <button id="tFlow" onclick="tab('flow')">🔀 <span class="tab-text">Node Flow Designer</span></button>
+    <button id="tMcp" onclick="tab('mcp')">🛠 <span class="tab-text">MCP Catalog</span></button>
+    <button onclick="window.open('/docs','_blank')">📖 <span class="tab-text">Swagger API</span></button>
+  </div>
+</aside>
+<div class="main-content">
+
+<section id="persona" class="view active">
+  <div class="simple">
+    <aside>
+      <h2>Generate Persona</h2>
+      <p class="hint">업무 목적과 단계별 사용 도구를 매핑하여 Persona Crew를 생성합니다.</p>
+    </aside>
+    <main>
+      <div class="panel wide">
+        <h3>1. 업무목적 (Business Goal)</h3>
+        <textarea id="businessGoal" placeholder="이 페르소나가 수행해야 할 업무 목적을 상세히 입력하세요."></textarea>
+      </div>
+      <div class="panel wide">
+        <h3>2. 단계별 도구 (Step Tools)</h3>
+        <div id="stepToolsContainer">
+          <div class="step-group" style="margin-bottom:15px; border-left: 3px solid #6366f1; padding-left: 10px; display: flex; align-items: center; gap: 20px;">
+            <label style="font-weight:bold; cursor:pointer; width: 140px; flex-shrink: 0;"><input type="checkbox" id="step_extract" checked onchange="toggleStep('extract')"> 추출 (extract)</label>
+            <div id="tools_extract" style="display:flex; gap:10px; flex-wrap:wrap;">
+               <label><input type="checkbox" value="jira"> jira</label>
+               <label><input type="checkbox" value="confluence"> confluence</label>
+               <label><input type="checkbox" value="rds"> rds</label>
+               <label><input type="checkbox" value="datadog"> datadog</label>
+               <label><input type="checkbox" value="outlook"> outlook</label>
+               <label><input type="checkbox" value="teams"> teams</label>
+            </div>
+          </div>
+          <div class="step-group" style="margin-bottom:15px; border-left: 3px solid #059669; padding-left: 10px; display: flex; align-items: center; gap: 20px;">
+            <label style="font-weight:bold; cursor:pointer; width: 140px; flex-shrink: 0;"><input type="checkbox" id="step_analysis" checked onchange="toggleStep('analysis')"> 분석 (analysis)</label>
+            <div id="tools_analysis" style="display:flex; gap:10px; flex-wrap:wrap;">
+               <label><input type="checkbox" value="jira"> jira</label>
+               <label><input type="checkbox" value="confluence"> confluence</label>
+               <label><input type="checkbox" value="rds"> rds</label>
+               <label><input type="checkbox" value="datadog"> datadog</label>
+               <label><input type="checkbox" value="outlook"> outlook</label>
+               <label><input type="checkbox" value="teams"> teams</label>
+            </div>
+          </div>
+          <div class="step-group" style="margin-bottom:15px; border-left: 3px solid #d97706; padding-left: 10px; display: flex; align-items: center; gap: 20px;">
+            <label style="font-weight:bold; cursor:pointer; width: 140px; flex-shrink: 0;"><input type="checkbox" id="step_write" checked onchange="toggleStep('write')"> 작성 (write)</label>
+            <div id="tools_write" style="display:flex; gap:10px; flex-wrap:wrap;">
+               <label><input type="checkbox" value="jira"> jira</label>
+               <label><input type="checkbox" value="confluence"> confluence</label>
+               <label><input type="checkbox" value="rds"> rds</label>
+               <label><input type="checkbox" value="datadog"> datadog</label>
+               <label><input type="checkbox" value="outlook"> outlook</label>
+               <label><input type="checkbox" value="teams"> teams</label>
+            </div>
+          </div>
+          <div class="step-group" style="border-left: 3px solid #db2777; padding-left: 10px; display: flex; align-items: center; gap: 20px;">
+            <label style="font-weight:bold; cursor:pointer; width: 140px; flex-shrink: 0;"><input type="checkbox" id="step_report" checked onchange="toggleStep('report')"> 보고 (report)</label>
+            <div id="tools_report" style="display:flex; gap:10px; flex-wrap:wrap;">
+               <label><input type="checkbox" value="jira"> jira</label>
+               <label><input type="checkbox" value="confluence"> confluence</label>
+               <label><input type="checkbox" value="rds"> rds</label>
+               <label><input type="checkbox" value="datadog"> datadog</label>
+               <label><input type="checkbox" value="outlook"> outlook</label>
+               <label><input type="checkbox" value="teams"> teams</label>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="actions" style="margin-top:20px;">
+        <button class="btn primary" onclick="submitPersona()">▶ Generate Persona Crew</button>
+      </div>
+    </main>
+  </div>
+</section>
+<section id="crew" class="view"><div class="simple"><aside><h2>Crew Management</h2><div id="crewList"></div></aside><main><div id="crewDetail" class="empty">Crew를 선택하세요.</div></main></div></section>
 <section id="flow" class="view"><div class="designer">
 <aside class="palette"><h2>Crew Catalog</h2><p class="hint">Canvas로 Drag & Drop 하세요.</p><div id="palette"></div></aside>
 <div class="workspace"><div class="toolbar"><button class="btn primary" onclick="newFlow()">New</button><button class="btn secondary" onclick="autoLayout()">Auto Layout</button><button class="btn secondary" onclick="validateFlow()">Validate</button><button class="btn primary" onclick="saveFlow()">Save</button><select id="saved" style="width:190px;margin:0" onchange="loadFlow(this.value)"><option value="">Saved flows…</option></select><span id="status" class="status"></span></div><div id="canvas" class="canvas" ondragover="event.preventDefault()" ondrop="dropCrew(event)"><svg id="edges" class="edges"></svg><div id="nodes"></div></div></div>
@@ -26,11 +123,77 @@ input,textarea,select{width:100%;padding:8px;border:1px solid #d1d5db;border-rad
 </div></section>
 <section id="mcp" class="view"><div class="simple"><aside><h2>MCP Tools</h2><div id="mcpList"></div></aside><main><div id="mcpDetail" class="empty">MCP Tool을 선택하면 Input / Output Schema를 표시합니다.</div></main></div></section>
 <section id="history" class="view"><div class="simple historyList"><aside><h2>Execution History</h2><div style="padding:0 4px 8px"><button class="btn secondary" onclick="loadHistory()" style="width:100%">↻ Refresh</button></div><div id="historyRunList"></div></aside><main><div id="historyDetail" class="empty">실행 이력을 선택하세요.</div></main></div></section>
+</div>
 <script>
+
+function toggleSidebar() {
+  document.getElementById('appSidebar').classList.toggle('collapsed');
+}
+
 let crews=[],steps=[],selected=-1,dragIndex=null,historyPollTimer=null,currentRunId=null;
 const E=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 const KST=s=>{if(!s)return'-';try{let d=new Date(s);if(isNaN(d))return s;return d.toLocaleString('ko-KR',{timeZone:'Asia/Seoul',year:'numeric',month:'2-digit',day:'2-digit',hour:'2-digit',minute:'2-digit',second:'2-digit',hour12:false})}catch(e){return s}};
-const TAB_MAP={crew:'tCrew',history:'tHistory',flow:'tFlow',mcp:'tMcp'};
+const TAB_MAP={persona:'tPersona',crew:'tCrew',history:'tHistory',flow:'tFlow',mcp:'tMcp'};
+
+function toggleStep(step) {
+  const container = document.getElementById('tools_' + step);
+  const cb = document.getElementById('step_' + step);
+  if(!container || !cb) return;
+  const checkboxes = container.querySelectorAll('input[type="checkbox"]');
+  checkboxes.forEach(c => c.disabled = !cb.checked);
+}
+['extract','analysis','write','report'].forEach(toggleStep);
+
+async function submitPersona() {
+  const goal = document.getElementById('businessGoal').value.trim();
+  if(!goal) { alert("업무 목적을 입력하세요."); return; }
+  
+  const steps = [
+    { id: 'extract', name: '추출' },
+    { id: 'analysis', name: '분석' },
+    { id: 'write', name: '작성' },
+    { id: 'report', name: '보고' }
+  ];
+  
+  let stepTools = [];
+  for(let s of steps) {
+    let cb = document.getElementById('step_' + s.id);
+    if(cb && cb.checked) {
+      let tools = Array.from(document.getElementById('tools_' + s.id).querySelectorAll('input[type="checkbox"]:checked')).map(c => c.value);
+      stepTools.push(`${s.id}:${tools.join(',')}`);
+    }
+  }
+  
+  if(stepTools.length === 0) {
+    alert("최소 하나 이상의 단계를 선택하세요.");
+    return;
+  }
+  
+  let targetCrew = crews.find(c => c.crew_id === 'ops.persona_generate');
+  if(!targetCrew) {
+    alert("ops.persona_generate 크루를 찾을 수 없습니다. 배포되어 있는지 확인하세요.");
+    return;
+  }
+  
+  let payload = { inputs: { business_goal: goal, step_tools: stepTools } };
+  
+  if(!confirm(`업무목적:\n${goal}\n\n단계별 도구:\n${stepTools.join('\n')}\n\n이 설정으로 페르소나 생성을 킥오프하시겠습니까?`)) return;
+  
+  let r = await fetch(`/api/v1/crews/${encodeURIComponent(targetCrew.crew_id)}/${targetCrew.version}/kickoff`, {
+    method:'POST',
+    headers:{'Content-Type':'application/json'},
+    body:JSON.stringify(payload)
+  });
+  
+  let d = await r.json();
+  if(r.ok) {
+    alert('Persona Generate Queued: ' + d.run_id);
+    tab('history');
+  } else {
+    alert(JSON.stringify(d));
+  }
+}
+
 let crewPollTimer=null;function startCrewPoll(){if(!crewPollTimer){crewPollTimer=setInterval(async()=>{try{let r=await fetch('/api/v1/crews');if(r.ok){crews=(await r.json()).crews;renderCatalog();renderCrewList()}}catch(e){}},3000)}}function stopCrewPoll(){if(crewPollTimer){clearInterval(crewPollTimer);crewPollTimer=null}}
 function tab(x){stopHistoryPoll();stopCrewPoll();document.querySelectorAll('.view').forEach(v=>v.classList.remove('active'));document.querySelectorAll('.tabs button').forEach(v=>v.classList.remove('active'));document.getElementById(x).classList.add('active');let btn=TAB_MAP[x];if(btn)document.getElementById(btn).classList.add('active');if(x==='history')loadHistory();if(x==='crew')startCrewPoll()}
 async function init(){crews=(await (await fetch('/api/v1/crews')).json()).crews;renderCatalog();renderCrewList();renderMcp();refreshFlows();render();startCrewPoll()}
