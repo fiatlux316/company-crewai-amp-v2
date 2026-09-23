@@ -14,8 +14,19 @@ const KST = s => {
 
 export default function ExecutionHistory() {
   const [runs, setRuns] = useState([]);
+  const [selectedRunId, setSelectedRunId] = useState(null);
   const [currentRun, setCurrentRun] = useState(null);
   const [loading, setLoading] = useState(false);
+
+  const fetchRunDetail = async (id) => {
+    if (!id) return;
+    try {
+      const data = await api.fetchRun(id);
+      setCurrentRun(data);
+    } catch(e) {
+      console.error(e);
+    }
+  };
 
   const loadHistory = async () => {
     setLoading(true);
@@ -29,17 +40,37 @@ export default function ExecutionHistory() {
   };
 
   useEffect(() => {
-    loadHistory();
-    const timer = setInterval(loadHistory, 3000);
+    const refreshAll = async () => {
+      try {
+        const data = await api.fetchRuns();
+        setRuns(data.runs || []);
+      } catch(e) {
+        console.error(e);
+      }
+      if (selectedRunId) {
+        try {
+          const runData = await api.fetchRun(selectedRunId);
+          setCurrentRun(runData);
+        } catch(e) {
+          console.error(e);
+        }
+      }
+    };
+
+    refreshAll();
+    const timer = setInterval(refreshAll, 2000);
     return () => clearInterval(timer);
-  }, []);
+  }, [selectedRunId]);
 
   const selectRun = async (id) => {
-    try {
-      const data = await api.fetchRun(id);
-      setCurrentRun(data);
-    } catch(e) {
-      console.error(e);
+    setSelectedRunId(id);
+    await fetchRunDetail(id);
+  };
+
+  const handleManualRefresh = async () => {
+    await loadHistory();
+    if (selectedRunId) {
+      await fetchRunDetail(selectedRunId);
     }
   };
 
@@ -47,6 +78,7 @@ export default function ExecutionHistory() {
     if(!window.confirm('경고: 이 실행 이력을 영구 삭제합니다. 계속합니까?')) return;
     try {
       await api.deleteRun(id);
+      setSelectedRunId(null);
       setCurrentRun(null);
       loadHistory();
     } catch(e) {
@@ -60,7 +92,7 @@ export default function ExecutionHistory() {
         <aside>
           <h2>Execution History</h2>
           <div style={{padding: '0 4px 8px'}}>
-            <button className="btn secondary" onClick={loadHistory} style={{width: '100%'}}>↻ Refresh</button>
+            <button className="btn secondary" onClick={handleManualRefresh} style={{width: '100%'}}>↻ Refresh</button>
           </div>
           <div id="historyRunList">
             {runs.length === 0 && <div className="empty" style={{padding: '40px'}}>실행 이력이 없습니다.</div>}
