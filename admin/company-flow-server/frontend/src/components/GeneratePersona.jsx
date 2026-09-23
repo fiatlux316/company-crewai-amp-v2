@@ -77,7 +77,12 @@ export default function GeneratePersona({ onKickoff }) {
       </div>
 
       <div className="panel wide">
-        <h3>2. 단계별 도구 (Step Tools) \n * 선택된 도구에 맞는 mcp tools 을 자동으로 추천해 줍니다. </h3>
+        <h3>
+          2. 단계별 도구 (Step Tools)
+          <span style={{ display: 'block', fontSize: '50%', fontWeight: 'normal', color: '#64748b', marginTop: '4px' }}>
+            * 불필요한 단계는 체크 해제해 주세요. 선택된 도구에 맞는 mcp tools 을 자동으로 추천해 줍니다.
+          </span>
+        </h3>
 
         {/* 프로세스 순차 진행 도식화 배너 */}
         <div style={{
