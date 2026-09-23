@@ -94,15 +94,13 @@ export default function ExecutionHistory() {
                 {currentRun.ended_at && <span>⏹ {KST(currentRun.ended_at)}</span>}
               </div>
               <div className="meta" style={{marginBottom: '12px', fontSize: '10px', color: '#9ca3af'}}>{currentRun.run_id}</div>
-              <div className="adminGrid">
-                <div className="panel">
-                  <h3>Inputs</h3>
-                  <pre className="schema">{JSON.stringify(currentRun.inputs, null, 2)}</pre>
-                </div>
-                <div className="panel">
-                  <h3>Outputs</h3>
-                  <pre className="schema">{JSON.stringify(currentRun.outputs, null, 2)}</pre>
-                </div>
+              <div className="panel">
+                <h3>Inputs</h3>
+                <pre className="schema">{JSON.stringify(currentRun.inputs, null, 2)}</pre>
+              </div>
+              <div className="panel">
+                <h3>Outputs</h3>
+                <pre className="schema" style={{ maxHeight: '400px', overflowY: 'auto' }}>{JSON.stringify(currentRun.outputs, null, 2)}</pre>
               </div>
               {currentRun.error && (
                 <div className="panel">
