@@ -236,12 +236,29 @@ function CrewDiagram({ graph }) {
                   <text class="crewEdgeLabel" x="${(x1 + x2) / 2 + 8}" y="${midY - 3}" style="fill:#6366f1;font-weight:700">next</text>`;
         }
 
-        // assigned / uses horizontal arrow: right-center of source → left-center of target
-        const x1 = a.right, y1 = a.centerY;
-        const x2 = b.left, y2 = b.centerY;
+        // assigned / uses horizontal arrow: right side of source → left side of target
+        const x1 = a.right;
+        let y1 = a.centerY;
+        const x2 = b.left;
+        let y2 = b.centerY;
+
+        // If target node covers source centerY (same row), keep arrow perfectly horizontal
+        if (b.top <= a.centerY && a.centerY <= b.bottom) {
+          y2 = a.centerY;
+        } else if (a.top <= b.centerY && b.centerY <= a.bottom) {
+          y1 = b.centerY;
+        }
+
         const mx = (x1 + x2) / 2;
+        const my = (y1 + y2) / 2;
+
+        if (Math.abs(y1 - y2) < 2) {
+          return `<path class="crewEdge ${E(e.label)}" marker-end="url(#arrow)" d="M${x1},${y1} L${x2},${y2}"/>
+                  <text class="crewEdgeLabel" x="${mx}" y="${y1 - 5}">${E(e.label)}</text>`;
+        }
+
         return `<path class="crewEdge ${E(e.label)}" marker-end="url(#arrow)" d="M${x1},${y1} C${mx},${y1} ${mx},${y2} ${x2},${y2}"/>
-                <text class="crewEdgeLabel" x="${mx + 4}" y="${(y1 + y2) / 2 - 4}">${E(e.label)}</text>`;
+                <text class="crewEdgeLabel" x="${mx + 4}" y="${my - 4}">${E(e.label)}</text>`;
       }).join('');
 
       svgRef.current.innerHTML = svgContent;
