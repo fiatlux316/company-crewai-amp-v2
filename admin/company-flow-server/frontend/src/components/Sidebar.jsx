@@ -19,7 +19,7 @@ export default function Sidebar({ activeTab, setActiveTab, collapsed, onToggle }
           📋 <span className="tab-text">Execution History</span>
         </button>
         <button className={activeTab === 'flow' ? 'active' : ''} onClick={() => setActiveTab('flow')}>
-          🔀 <span className="tab-text">Node Flow Designer</span>
+          🔀 <span className="tab-text">Flow Designer</span>
         </button>
         <button className={activeTab === 'mcp' ? 'active' : ''} onClick={() => setActiveTab('mcp')}>
           🛠 <span className="tab-text">MCP Catalog</span>

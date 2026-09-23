@@ -17,11 +17,11 @@ input,textarea,select{width:100%;padding:8px;border:1px solid #d1d5db;border-rad
 .verboseLive{background:#111827;color:#e5e7eb;padding:14px;border-radius:10px;white-space:pre-wrap;max-height:480px;overflow:auto;font:11px/1.6 ui-monospace,monospace;scroll-behavior:smooth}
 .historyLink{display:inline-flex;align-items:center;gap:5px;color:#2563eb;cursor:pointer;font-weight:600;font-size:13px;margin-top:6px}.historyLink:hover{text-decoration:underline}
 .app-layout { display: flex; height: 100vh; overflow: hidden; }
-.sidebar { width: 230px; background: #111827; color: white; display: flex; flex-direction: column; transition: width 0.3s; flex-shrink: 0; z-index: 100; }
+.sidebar { width: 230px; background: #111827; color: white; display: flex; flex-direction: column; transition: width 0.3s; flex-shrink: 0; z-index: 100; overflow-x: auto; overflow-y: auto; }
 .sidebar.collapsed { width: 60px; }
-.sidebar-header { display: flex; align-items: center; padding: 15px; gap: 10px; height: 62px; border-bottom: 1px solid #1f2937; overflow: hidden; }
+.sidebar-header { display: flex; align-items: center; padding: 15px; gap: 10px; height: 62px; border-bottom: 1px solid #1f2937; flex-shrink: 0; }
 .toggle-btn { background: none; border: 0; color: white; font-size: 20px; cursor: pointer; padding: 0; width: 30px; text-align: center; flex-shrink: 0; }
-.sidebar .brand { font-weight: 800; white-space: nowrap; }
+.sidebar .brand { font-weight: 800; font-size: 1.1rem; white-space: nowrap; }
 .sidebar.collapsed .brand { opacity: 0; pointer-events: none; }
 .sidebar .tabs { display: flex; flex-direction: column; width: 100%; padding-top: 10px; }
 .sidebar .tabs button { height: 45px; border: 0; background: none; color: #9ca3af; font-weight: 700; font-size: 1.1rem; cursor: pointer; text-align: left; padding: 0 15px; transition: 0.2s; white-space: nowrap; display: flex; align-items: center; gap: 12px; overflow: hidden; }
