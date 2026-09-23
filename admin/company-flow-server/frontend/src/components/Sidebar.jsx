@@ -24,7 +24,7 @@ export default function Sidebar({ activeTab, setActiveTab, collapsed, onToggle }
         <button className={activeTab === 'mcp' ? 'active' : ''} onClick={() => setActiveTab('mcp')}>
           🛠 <span className="tab-text">MCP Catalog</span>
         </button>
-        <button onClick={() => window.open('/docs', '_blank')}>
+        <button className={activeTab === 'swagger' ? 'active' : ''} onClick={() => setActiveTab('swagger')}>
           📖 <span className="tab-text">Swagger API</span>
         </button>
       </div>

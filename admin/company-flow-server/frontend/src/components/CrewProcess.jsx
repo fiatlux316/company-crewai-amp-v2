@@ -15,6 +15,66 @@ const KST = s => {
   } catch (e) { return s; }
 };
 
+const DOW_KR = ['일', '월', '화', '수', '목', '금', '토'];
+const describeCron = (expr) => {
+  if (!expr || !expr.trim()) return '';
+  const parts = expr.trim().split(/\s+/);
+  if (parts.length !== 5) return '유효하지 않은 cron 형식';
+  const [min, hour, dom, mon, dow] = parts;
+
+  try {
+    // Helper: parse */N pattern
+    const interval = (f) => { const m = f.match(/^\*\/(\d+)$/); return m ? parseInt(m[1]) : null; };
+    const isAny = (f) => f === '*';
+    const isNum = (f) => /^\d+$/.test(f);
+
+    const minInt = interval(min);
+    const hourInt = interval(hour);
+
+    // Every N minutes
+    if (minInt && isAny(hour) && isAny(dom) && isAny(mon) && isAny(dow)) {
+      return `매 ${minInt}분마다 실행`;
+    }
+    // Every N hours
+    if (isNum(min) && hourInt && isAny(dom) && isAny(mon) && isAny(dow)) {
+      return `매 ${hourInt}시간마다 실행 (${min}분)`;
+    }
+    if (min === '0' && hourInt && isAny(dom) && isAny(mon) && isAny(dow)) {
+      return `매 ${hourInt}시간마다 실행 (정각)`;
+    }
+
+    // Specific time, every day
+    if (isNum(min) && isNum(hour) && isAny(dom) && isAny(mon) && isAny(dow)) {
+      return `매일 ${hour.padStart(2,'0')}:${min.padStart(2,'0')}에 실행`;
+    }
+
+    // Specific time, specific day of week
+    if (isNum(min) && isNum(hour) && isAny(dom) && isAny(mon) && !isAny(dow)) {
+      const days = dow.split(',').map(d => DOW_KR[parseInt(d)] || d).join(', ');
+      return `매주 ${days}요일 ${hour.padStart(2,'0')}:${min.padStart(2,'0')}에 실행`;
+    }
+
+    // Specific time, specific day of month
+    if (isNum(min) && isNum(hour) && isNum(dom) && isAny(mon) && isAny(dow)) {
+      return `매월 ${dom}일 ${hour.padStart(2,'0')}:${min.padStart(2,'0')}에 실행`;
+    }
+
+    // Every minute
+    if (isAny(min) && isAny(hour) && isAny(dom) && isAny(mon) && isAny(dow)) {
+      return '매 1분마다 실행';
+    }
+
+    // Specific minute every hour
+    if (isNum(min) && isAny(hour) && isAny(dom) && isAny(mon) && isAny(dow)) {
+      return `매시 ${min}분에 실행`;
+    }
+
+    return `${expr}`;
+  } catch (e) {
+    return expr;
+  }
+};
+
 function CrewDiagram({ graph }) {
   const diagramRef = useRef(null);
   const svgRef = useRef(null);
@@ -30,6 +90,9 @@ function CrewDiagram({ graph }) {
     const ns = graph.nodes || [];
     const es = graph.edges || [];
     const pos = {};
+    const ROW_GAP = 120;
+    const TOOL_OFFSET = 55;
+    const NODE_H = 74;
 
     // Layout: task -> agent -> tool columns
     const taskIds = ns.filter(n => n.type === 'task').map(n => n.id);
@@ -48,12 +111,12 @@ function CrewDiagram({ graph }) {
     const taskIndex = Object.fromEntries(taskOrder.map((id, i) => [id, i]));
     ns.filter(n => n.type === 'task').forEach(n => {
       const row = taskIndex[n.id] ?? 0;
-      pos[n.id] = { x: 70, y: 55 + row * 180 };
+      pos[n.id] = { x: 70, y: 40 + row * ROW_GAP };
     });
     ns.filter(n => n.type === 'agent').forEach((n, j) => {
       const refs = es.filter(e => e.target === n.id && e.label === 'assigned');
       const row = refs.length ? (taskIndex[refs[0].source] ?? j) : j;
-      pos[n.id] = { x: 350, y: 55 + row * 180 };
+      pos[n.id] = { x: 350, y: 40 + row * ROW_GAP };
     });
     const toolRows = {};
     ns.filter(n => n.type === 'tool').forEach((n, j) => {
@@ -63,10 +126,10 @@ function CrewDiagram({ graph }) {
       const row = assigned ? (taskIndex[assigned.source] ?? j) : j;
       const offset = toolRows[row] || 0;
       toolRows[row] = offset + 1;
-      pos[n.id] = { x: 650, y: 55 + row * 180 + offset * 90 };
+      pos[n.id] = { x: 650, y: 40 + row * ROW_GAP + offset * TOOL_OFFSET };
     });
 
-    const maxY = Math.max(580, ...Object.values(pos).map(p => p.y + 130));
+    const maxY = Math.max(400, ...Object.values(pos).map(p => p.y + 110));
     if (diagramRef.current) diagramRef.current.style.height = maxY + 'px';
 
     // Render nodes
@@ -97,16 +160,34 @@ function CrewDiagram({ graph }) {
       const w = diagramRef.current?.clientWidth || 1000;
       const h = maxY;
       svgRef.current.setAttribute('viewBox', `0 0 ${w} ${h}`);
-      svgRef.current.innerHTML = `<defs><marker id="arrow" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse"><path d="M 0 0 L 10 5 L 0 10 z" fill="#64748b"/></marker></defs>` +
-        es.map(e => {
+
+      // Arrow markers: default gray + purple for task next edges
+      let svgContent = `<defs>
+        <marker id="arrow" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse"><path d="M 0 0 L 10 5 L 0 10 z" fill="#64748b"/></marker>
+        <marker id="arrowNext" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M 0 0 L 10 5 L 0 10 z" fill="#6366f1"/></marker>
+      </defs>`;
+
+      svgContent += es.map(e => {
           const a = pos[e.source], b = pos[e.target];
           if (!a || !b) return '';
-          let x1 = a.x + 210, y1 = a.y + 37, x2 = b.x, y2 = b.y + 37;
-          if (e.label === 'next') { x1 = a.x + 105; y1 = a.y + 74; x2 = b.x + 105; y2 = b.y; }
+
+          if (e.label === 'next') {
+            // Task-to-task vertical arrow: bottom-center of source → top-center of target
+            const x1 = a.x + 105, y1 = a.y + NODE_H;
+            const x2 = b.x + 105, y2 = b.y;
+            const midY = (y1 + y2) / 2;
+            return `<path class="crewEdge next" marker-end="url(#arrowNext)" d="M${x1},${y1} C${x1},${midY} ${x2},${midY} ${x2},${y2}"/>
+                    <text class="crewEdgeLabel" x="${(x1 + x2) / 2 + 8}" y="${midY - 3}" style="fill:#6366f1;font-weight:700">next</text>`;
+          }
+
+          // assigned / uses: right side of source → left side of target
+          const x1 = a.x + 210, y1 = a.y + 37, x2 = b.x, y2 = b.y + 37;
           const mx = (x1 + x2) / 2, my = (y1 + y2) / 2;
           return `<path class="crewEdge ${E(e.label)}" marker-end="url(#arrow)" d="M${x1},${y1} C${mx},${y1} ${mx},${y2} ${x2},${y2}"/>
                   <text class="crewEdgeLabel" x="${mx + 4}" y="${my - 4}">${E(e.label)}</text>`;
         }).join('');
+
+      svgRef.current.innerHTML = svgContent;
     }
   };
 
@@ -249,6 +330,11 @@ export default function CrewProcess({ onNavigateHistory }) {
                     <input type="checkbox" style={{ width: 'auto' }} checked={schEnabled} onChange={e => setSchEnabled(e.target.checked)} /> Enabled
                   </label>
                   <input value={schCron} onChange={e => setSchCron(e.target.value)} placeholder="*/5 * * * *" />
+                  {schCron.trim() && (
+                    <p style={{ margin: '0 0 8px', fontSize: '12px', fontWeight: 600, color: '#2563eb' }}>
+                      📅 {describeCron(schCron)}
+                    </p>
+                  )}
                   <button className="btn secondary" onClick={saveSettings}>Save Schedule</button>
                   <p className="hint">관리자 상태로 별도 저장되므로 Crew 재배포 시 보존됩니다.</p>
                 </div>

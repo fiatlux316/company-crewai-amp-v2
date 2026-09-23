@@ -47,14 +47,14 @@ class _MockFastMCP:
 
 def build_tool_registry(settings: Settings) -> ToolRegistry:
     registry = ToolRegistry()
-    registry.register(
-        "company:internal_search", 
-        lambda **kwargs: InternalSearchTool(base_url=settings.internal_search_base_url, **kwargs)
-    )
-    registry.register(
-        "company.internal_search", 
-        lambda **kwargs: InternalSearchTool(base_url=settings.internal_search_base_url, **kwargs)
-    )
+    # registry.register(
+    #     "company:internal_search", 
+    #     lambda **kwargs: InternalSearchTool(base_url=settings.internal_search_base_url, **kwargs)
+    # )
+    # registry.register(
+    #     "company.internal_search", 
+    #     lambda **kwargs: InternalSearchTool(base_url=settings.internal_search_base_url, **kwargs)
+    # )
 
     try:
         from crewai.tools import tool

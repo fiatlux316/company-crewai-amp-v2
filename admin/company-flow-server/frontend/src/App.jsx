@@ -26,6 +26,13 @@ function App() {
         {activeTab === 'history' && <ExecutionHistory />}
         {activeTab === 'flow' && <NodeFlowDesigner />}
         {activeTab === 'mcp' && <McpCatalog />}
+        {activeTab === 'swagger' && (
+          <iframe
+            src="/docs"
+            style={{ width: '100%', height: '100%', border: 'none' }}
+            title="Swagger API"
+          />
+        )}
       </div>
     </div>
   );
