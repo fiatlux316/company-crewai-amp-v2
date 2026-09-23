@@ -158,7 +158,7 @@ function CrewDiagram({ graph }) {
       pos[n.id] = { x: TOOL_X, y: baseY + offset * 80 };
     });
 
-    const maxY = Math.max(400, currentY + 40);
+    const maxY = Math.max(315, currentY + 30);
     if (diagramRef.current) diagramRef.current.style.height = maxY + 'px';
 
     // 3. Render HTML DOM Nodes
@@ -451,7 +451,7 @@ export default function CrewProcess({ onNavigateHistory }) {
               {/* 2. Initial Input Parameters (Full-Width Single Row) */}
               <div className="panel">
                 <h3>Initial Input Parameters</h3>
-                <textarea value={defaultInputs} onChange={e => setDefaultInputs(e.target.value)}></textarea>
+                <textarea value={defaultInputs} onChange={e => setDefaultInputs(e.target.value)} style={{ minHeight: '160px', fontFamily: 'ui-monospace, monospace' }}></textarea>
                 <button className="btn secondary" onClick={saveSettings}>Save Defaults</button>
               </div>
 

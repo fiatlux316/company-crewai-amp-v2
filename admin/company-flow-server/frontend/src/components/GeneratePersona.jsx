@@ -11,7 +11,7 @@ export default function GeneratePersona({ onKickoff }) {
     report: { name: '보고', checked: true, tools: [] }
   });
 
-  const availableTools = ['jira', 'confluence', 'rds', 'datadog', 'outlook', 'teams'];
+  const availableTools = ['jira', 'confluence', 'database', 'datadog', 'outlook', 'teams'];
   const colors = { extract: '#6366f1', analysis: '#059669', write: '#d97706', report: '#db2777' };
 
   const handleStepToggle = (stepId) => {

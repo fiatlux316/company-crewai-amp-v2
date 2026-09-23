@@ -114,7 +114,7 @@ input, textarea, select { width: 100%; padding: 9px; border: 1px solid #d1d5db; 
 input:focus, textarea:focus, select:focus { outline: none; border-color: #6366f1; box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.15); }
 
 /* Diagram Canvas in Crew Management */
-.crewDiagram { position: relative; width: 100%; max-width: 100%; box-sizing: border-box; min-height: 350px; border: 1px solid #d1d5db; border-radius: 14px; background-color: #fff; background-image: radial-gradient(#d1d5db 1px, transparent 1px); background-size: 20px 20px; overflow: auto; margin-top: 14px; }
+.crewDiagram { position: relative; width: 100%; max-width: 100%; box-sizing: border-box; min-height: 315px; border: 1px solid #d1d5db; border-radius: 14px; background-color: #fff; background-image: radial-gradient(#d1d5db 1px, transparent 1px); background-size: 20px 20px; overflow: auto; margin-top: 14px; }
 .crewSvg { position: absolute; inset: 0; width: 100%; height: 100%; z-index: 1; pointer-events: none; }
 .crewNodes { position: absolute; inset: 0; z-index: 2; }
 .crewNodeD { position: absolute; width: 210px; min-height: 74px; background: #fff; border: 2px solid #d1d5db; border-radius: 12px; padding: 11px; box-shadow: 0 4px 12px #0001; cursor: pointer; transition: border-color 0.2s, box-shadow 0.2s; }
@@ -193,3 +193,63 @@ input:focus, textarea:focus, select:focus { outline: none; border-color: #6366f1
 .verboseLive { background: #111827; color: #e5e7eb; padding: 16px; border-radius: 10px; white-space: pre-wrap; max-height: 540px; overflow: auto; font: 12px/1.6 ui-monospace, monospace; scroll-behavior: smooth; }
 .schema { font: 11px ui-monospace, monospace; background: #f8fafc; border: 1px solid #e2e8f0; padding: 10px; border-radius: 8px; white-space: pre-wrap; }
 .empty { text-align: center; color: #6b7280; padding: 90px; }
+
+/* Schema Table Styling in MCP Tools */
+.schema-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 12px;
+  margin-top: 6px;
+}
+.schema-table th {
+  background: #f8fafc;
+  color: #475569;
+  font-weight: 700;
+  text-align: left;
+  padding: 8px 10px;
+  border-bottom: 2px solid #e2e8f0;
+}
+.schema-table td {
+  padding: 8px 10px;
+  border-bottom: 1px solid #f1f5f9;
+  vertical-align: top;
+}
+.schema-table tr:hover {
+  background: #f8fafc;
+}
+.prop-name {
+  font-family: ui-monospace, monospace;
+  font-weight: 700;
+  color: #1e293b;
+  background: #f1f5f9;
+  padding: 2px 6px;
+  border-radius: 4px;
+  font-size: 11px;
+}
+.prop-type {
+  font-family: ui-monospace, monospace;
+  color: #6366f1;
+  font-weight: 600;
+  font-size: 11px;
+}
+.prop-desc {
+  color: #475569;
+  line-height: 1.4;
+}
+.schema-badge {
+  display: inline-block;
+  padding: 2px 7px;
+  border-radius: 10px;
+  font-size: 10px;
+  font-weight: 700;
+}
+.schema-badge.required {
+  background: #fee2e2;
+  color: #991b1b;
+  border: 1px solid #fca5a5;
+}
+.schema-badge.optional {
+  background: #f1f5f9;
+  color: #64748b;
+  border: 1px solid #cbd5e1;
+}
