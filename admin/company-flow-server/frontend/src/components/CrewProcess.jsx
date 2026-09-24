@@ -376,8 +376,7 @@ export default function CrewProcess({ onNavigateHistory }) {
     if (!confirm(`${selectedCrew.crew_id}@${selectedCrew.version} 을(를) 실행합니다. 저장된 Default Input으로 Kickoff합니다.`)) return;
     try {
       const d = await api.kickoff(selectedCrew.crew_id, selectedCrew.version, { inputs: {} });
-      alert('Queued: ' + d.run_id);
-      if (onNavigateHistory) onNavigateHistory();
+      if (onNavigateHistory) onNavigateHistory(d.run_id);
     } catch (e) { alert('Error: ' + e.message); }
   };
 
