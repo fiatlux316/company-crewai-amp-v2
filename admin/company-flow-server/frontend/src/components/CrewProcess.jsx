@@ -422,7 +422,7 @@ export default function CrewProcess({ onNavigateHistory }) {
               <h2>{selectedCrew.name}</h2>
               <div className="meta">{selectedCrew.crew_id} @ {selectedCrew.version} · deployed {KST(selectedCrew.deployed_at)}</div>
 
-              <div className="actions" style={{ marginTop: '10px' }}>
+              <div className="actions" style={{ marginTop: '10px', display: 'flex', gap: '12px', alignItems: 'center' }}>
                 <button className="btn primary" onClick={kickoff}>▶ Kickoff</button>
                 <button className="btn danger" onClick={deleteCrew}>Delete Crew</button>
               </div>

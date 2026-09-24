@@ -7,7 +7,10 @@ from company_flow_server.distributed.tasks import execute_crew
 from .crew_admin import validate_cron
 
 def iso(v): return v.isoformat() if v else None
-def run_dict(r): return {"run_id":r.run_id,"crew_id":r.crew_id,"version":r.version,"trigger":r.trigger,"status":r.status,"inputs":r.inputs or {},"outputs":r.outputs,"error":r.error,"verbose":r.verbose or [],"created_at":iso(r.created_at),"started_at":iso(r.started_at),"ended_at":iso(r.ended_at)}
+def run_dict(r):
+    meta = getattr(r, "metadata_json", {}) or {}
+    artifacts = meta.get("artifacts", []) if isinstance(meta, dict) else []
+    return {"run_id":r.run_id,"crew_id":r.crew_id,"version":r.version,"trigger":r.trigger,"status":r.status,"inputs":r.inputs or {},"outputs":r.outputs,"error":r.error,"verbose":r.verbose or [],"artifacts":artifacts,"created_at":iso(r.created_at),"started_at":iso(r.started_at),"ended_at":iso(r.ended_at)}
 class CrewAdminServicePG:
  def __init__(self,registry,*args,**kwargs):self.registry=registry
  def start_scheduler(self):pass

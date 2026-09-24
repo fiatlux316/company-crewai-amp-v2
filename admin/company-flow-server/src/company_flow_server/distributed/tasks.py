@@ -20,6 +20,7 @@ def execute_crew(self,run_id:str,crew_id:str,version:str,inputs:dict):
         with SessionLocal() as db:
             rec=db.get(RunHistory,run_id);rec.status="succeeded";rec.ended_at=now();rec.outputs=result.outputs
             rec.verbose=list(rec.verbose or [])+list(result.metadata.get("verbose",[]) if isinstance(result.metadata,dict) else [])
+            rec.metadata_json=result.metadata
             db.commit()
     except Exception as exc:
         with SessionLocal() as db:

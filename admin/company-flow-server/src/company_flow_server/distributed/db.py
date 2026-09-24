@@ -28,6 +28,7 @@ class RunHistory(Base):
     outputs:Mapped[dict|None]=mapped_column(JSON,nullable=True)
     error:Mapped[str|None]=mapped_column(Text,nullable=True)
     verbose:Mapped[list]=mapped_column(JSON,default=list)
+    metadata_json:Mapped[dict|None]=mapped_column(JSON,nullable=True,default=dict)
     created_at:Mapped[datetime]=mapped_column(DateTime(timezone=True),default=lambda:datetime.now(timezone.utc))
     started_at:Mapped[datetime|None]=mapped_column(DateTime(timezone=True),nullable=True)
     ended_at:Mapped[datetime|None]=mapped_column(DateTime(timezone=True),nullable=True)
@@ -38,7 +39,19 @@ class ScheduleClaim(Base):
     minute_key:Mapped[str]=mapped_column(String(32))
     __table_args__=(UniqueConstraint("crew_id","minute_key",name="uq_schedule_claim"),)
 
-def init_db(): Base.metadata.create_all(engine)
+def init_db():
+    Base.metadata.create_all(engine)
+    try:
+        from sqlalchemy import text
+        with engine.connect() as conn:
+            if "postgresql" in engine.url.drivername:
+                conn.execute(text("ALTER TABLE run_history ADD COLUMN IF NOT EXISTS metadata_json JSONB DEFAULT '{}';"))
+            elif "sqlite" in engine.url.drivername:
+                conn.execute(text("ALTER TABLE run_history ADD COLUMN metadata_json JSON;"))
+            conn.commit()
+    except Exception:
+        pass
+
 
 class AuditLog(Base):
     __tablename__="audit_logs"

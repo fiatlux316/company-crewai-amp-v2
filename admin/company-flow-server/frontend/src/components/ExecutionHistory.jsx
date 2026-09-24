@@ -147,6 +147,24 @@ export default function ExecutionHistory({ initialRunId }) {
                   <pre className="verbose">{currentRun.error}</pre>
                 </div>
               )}
+              {currentRun.artifacts && currentRun.artifacts.length > 0 && (
+                <div className="panel">
+                  <h3>Generated Artifacts (산출물 파일)</h3>
+                  <div style={{ display: 'flex', gap: '8px', flexWrap: 'wrap', marginTop: '8px' }}>
+                    {currentRun.artifacts.map((art) => (
+                      <a
+                        key={art.filename}
+                        href={`/api/v1/runs/${currentRun.run_id}/artifacts/${art.filename}`}
+                        download
+                        className="btn secondary"
+                        style={{ display: 'inline-flex', alignItems: 'center', gap: '6px', textDecoration: 'none' }}
+                      >
+                        📥 {art.filename} <span style={{ fontSize: '11px', color: '#6b7280' }}>({(art.size / 1024).toFixed(1)} KB)</span>
+                      </a>
+                    ))}
+                  </div>
+                </div>
+              )}
               <div className="panel">
                 <h3>Verbose Log</h3>
                 <pre className="verboseLive">{(currentRun.verbose || []).join('\n')}</pre>

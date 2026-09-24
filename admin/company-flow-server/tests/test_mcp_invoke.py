@@ -21,5 +21,10 @@ class TestMcpInvoke(unittest.TestCase):
         self.assertEqual(res["status"], "success")
         self.assertTrue("ERROR" in res["response"] or "Logs" in res["response"])
 
+    def test_invoke_mcp_tool_all_list(self):
+        res = invoke_mcp_tool("all.mcp.list", {"filter": "jira"})
+        self.assertEqual(res["status"], "success")
+        self.assertIn("jira.get_issue", res["response"])
+
 if __name__ == "__main__":
     unittest.main()

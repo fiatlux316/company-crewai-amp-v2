@@ -146,6 +146,23 @@ def delete_run(run_id: str, confirm: bool=False, p: Principal = Depends(require(
     audit(p.subject,"run.delete",run_id)
     return {"status":"deleted","run_id":run_id}
 
+@app.get("/api/v1/runs/{run_id}/artifacts/{filename:path}")
+def download_run_artifact(run_id: str, filename: str, p: Principal = Depends(require("run:read"))):
+    artifacts_root = Path(os.getenv("ARTIFACTS_ROOT", "artifacts")).resolve()
+    target_dir = (artifacts_root / run_id).resolve()
+    file_path = (target_dir / filename).resolve()
+    try:
+        if not target_dir.exists() or not file_path.is_file() or not file_path.is_relative_to(target_dir):
+            raise HTTPException(status_code=404, detail="Artifact not found")
+    except ValueError:
+        raise HTTPException(status_code=404, detail="Artifact not found")
+
+    return FileResponse(
+        path=file_path,
+        filename=file_path.name,
+        media_type="application/octet-stream",
+    )
+
 from .mcp.registry import get_mcp_catalog, invoke_mcp_tool
 
 class McpTestRequest(BaseModel):
