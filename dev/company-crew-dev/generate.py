@@ -48,6 +48,7 @@ def main():
         task_context = str(row.get("task_context", "")).strip()
         task_desc = str(row.get("task_description", "")).strip().replace("\\n", "\n")
         task_expected = str(row.get("task_expected_output", "")).strip().replace("\\n", "\n")
+        task_output_file = str(row.get("task_output_file", "")).strip()
         
         agent_id = str(row.get("task_agent", "")).strip()
         agent_role = str(row.get("agent_role", "")).strip().replace("\\n", "\n")
@@ -85,11 +86,15 @@ def main():
         # Parse context dependencies
         context_list = [c.strip() for c in task_context.split(",") if c.strip()] if task_context else []
         
-        tasks[task_name] = {
+        task_entry = {
             "description": task_desc,
             "expected_output": task_expected,
             "context": context_list
         }
+        if task_output_file:
+            task_entry["output_file"] = task_output_file
+
+        tasks[task_name] = task_entry
         
         process_tasks.append({
             "id": task_name,
@@ -205,11 +210,15 @@ def run(inputs: dict[str, Any], runtime: Any) -> dict[str, Any]:
             except KeyError:
                 pass
                 
-            task_obj = Task(
-                description=desc,
-                expected_output=t_cfg["expected_output"],
-                agent=t_agent,
-            )
+            task_kwargs = {{
+                "description": desc,
+                "expected_output": t_cfg["expected_output"],
+                "agent": t_agent,
+            }}
+            if "output_file" in t_cfg and t_cfg["output_file"]:
+                task_kwargs["output_file"] = t_cfg["output_file"]
+
+            task_obj = Task(**task_kwargs)
             tasks[t_id] = task_obj
             ordered_tasks.append(task_obj)
             
