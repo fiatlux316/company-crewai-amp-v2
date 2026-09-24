@@ -3,10 +3,27 @@ from __future__ import annotations
 import argparse
 import importlib
 import json
+import os
 from pathlib import Path
 import sys
 import traceback
 import uuid
+
+# Safe storage path patch to prevent appdirs / crewai PermissionError in server/container
+try:
+    import appdirs
+    def _safe_user_data_dir(appname=None, appauthor=None, version=None, roaming=False):
+        base = Path(os.getenv("CREWAI_STORAGE_DIR") or Path.cwd() / ".crewai_storage")
+        if appname:
+            base = base / appname
+        try:
+            base.mkdir(parents=True, exist_ok=True)
+        except Exception:
+            pass
+        return str(base)
+    appdirs.user_data_dir = _safe_user_data_dir
+except Exception:
+    pass
 
 from company_flow_server.bootstrap import build_llm_registry, build_policy_engine, build_tool_registry
 from company_flow_server.config.settings import Settings

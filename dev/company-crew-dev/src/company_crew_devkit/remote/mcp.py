@@ -16,13 +16,25 @@ class RemoteMCPToolProvider:
       * Server: security context derived from bearer token (role/env/permissions)
     """
 
-    def __init__(self, *, mcp_url: str, token: str, business_context: dict[str, Any] | None = None) -> None:
+    def __init__(
+        self,
+        *,
+        mcp_url: str,
+        token: str,
+        business_context: dict[str, Any] | None = None,
+        required_names: Iterable[str] | None = None,
+    ) -> None:
         self.mcp_url = mcp_url
         self.token = token
         self.business_context = business_context or {}
+        self.required_names = list(required_names) if required_names is not None else None
         self._adapter: Any | None = None
 
     def __enter__(self) -> "RemoteMCPToolProvider":
+        if self.required_names == []:
+            self._adapter = None
+            return self
+
         headers = {"Authorization": f"Bearer {self.token}"}
         # Explicit allow-list: these are scope inputs, not authorization claims.
         header_map = {
@@ -45,6 +57,9 @@ class RemoteMCPToolProvider:
         return self
 
     def tools(self, required_names: Iterable[str]) -> list[Any]:
+        req_list = list(required_names)
+        if not req_list:
+            return []
         if self._adapter is None:
             raise RuntimeError("RemoteMCPToolProvider must be used as a context manager")
 

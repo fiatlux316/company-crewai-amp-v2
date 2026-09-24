@@ -32,4 +32,5 @@ class RemoteCrewRuntime:
             mcp_url=self.mcp_url,
             token=self.token,
             business_context=self.business_context,
+            required_names=required_names,
         )

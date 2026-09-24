@@ -2,9 +2,26 @@ from __future__ import annotations
 
 import importlib
 import json
+import os
 from pathlib import Path
 import sys
 from typing import Any
+
+# Ensure storage path uses a local writable directory inside workspace to prevent PermissionError
+try:
+    import appdirs
+    def _safe_user_data_dir(appname=None, appauthor=None, version=None, roaming=False):
+        base = Path(os.getenv("CREWAI_STORAGE_DIR") or Path.cwd() / ".crewai_storage")
+        if appname:
+            base = base / appname
+        try:
+            base.mkdir(parents=True, exist_ok=True)
+        except Exception:
+            pass
+        return str(base)
+    appdirs.user_data_dir = _safe_user_data_dir
+except Exception:
+    pass
 
 from company_crew_sdk.contracts import validate_contract
 from company_crew_sdk.manifest import CrewManifest

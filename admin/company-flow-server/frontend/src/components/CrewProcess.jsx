@@ -373,9 +373,18 @@ export default function CrewProcess({ onNavigateHistory }) {
 
   const kickoff = async () => {
     if (!selectedCrew) return;
-    if (!confirm(`${selectedCrew.crew_id}@${selectedCrew.version} 을(를) 실행합니다. 저장된 Default Input으로 Kickoff합니다.`)) return;
+    let inputs = {};
+    if (defaultInputs && defaultInputs.trim()) {
+      try {
+        inputs = JSON.parse(defaultInputs);
+      } catch (e) {
+        alert('Initial Input Parameters JSON 형식이 올바르지 않습니다: ' + e.message);
+        return;
+      }
+    }
+    if (!confirm(`${selectedCrew.crew_id}@${selectedCrew.version} 을(를) 실행합니다.`)) return;
     try {
-      const d = await api.kickoff(selectedCrew.crew_id, selectedCrew.version, { inputs: {} });
+      const d = await api.kickoff(selectedCrew.crew_id, selectedCrew.version, { inputs });
       if (onNavigateHistory) onNavigateHistory(d.run_id);
     } catch (e) { alert('Error: ' + e.message); }
   };

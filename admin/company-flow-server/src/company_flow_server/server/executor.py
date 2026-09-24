@@ -63,14 +63,23 @@ class CrewExecutor:
             env=env,
             check=False,
         )
-        stdout = proc.stdout.strip().splitlines()
-        if not stdout:
-            raise RuntimeError(f"crew worker produced no output; stderr={proc.stderr.strip()}")
-        payload = json.loads(stdout[-1])
-        if proc.returncode != 0 or not payload.get("ok"):
-            raise RuntimeError(
-                f"crew {crew_id}@{version} failed: {payload.get('error', proc.stderr.strip())}"
-            )
+        stdout = [line for line in proc.stdout.strip().splitlines() if line.strip()]
+        if not stdout and proc.stderr.strip():
+            raise RuntimeError(f"crew {crew_id}@{version} failed: {proc.stderr.strip()}")
+
+        payload = None
+        for line in reversed(stdout):
+            stripped = line.strip()
+            if stripped.startswith("{") and stripped.endswith("}"):
+                try:
+                    payload = json.loads(stripped)
+                    break
+                except Exception:
+                    pass
+
+        if payload is None or proc.returncode != 0 or not payload.get("ok"):
+            err_msg = payload.get("error") if (payload and isinstance(payload, dict)) else (proc.stderr.strip() or proc.stdout.strip() or "unknown worker error")
+            raise RuntimeError(f"crew {crew_id}@{version} failed: {err_msg}")
         outputs = payload["outputs"]
         validate_contract(outputs, manifest.output_schema, label="outputs")
         metadata = dict(payload.get("metadata", {}))
