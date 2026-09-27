@@ -6,11 +6,22 @@ from company_flow_server.distributed.db import SessionLocal,CrewSetting,RunHisto
 from company_flow_server.distributed.tasks import execute_crew
 from .crew_admin import validate_cron
 
+from pathlib import Path
+
 def iso(v): return v.isoformat() if v else None
 def run_dict(r):
     meta = getattr(r, "metadata_json", {}) or {}
-    artifacts = meta.get("artifacts", []) if isinstance(meta, dict) else []
-    return {"run_id":r.run_id,"crew_id":r.crew_id,"version":r.version,"trigger":r.trigger,"status":r.status,"inputs":r.inputs or {},"outputs":r.outputs,"error":r.error,"verbose":r.verbose or [],"artifacts":artifacts,"created_at":iso(r.created_at),"started_at":iso(r.started_at),"ended_at":iso(r.ended_at)}
+    raw_artifacts = meta.get("artifacts", []) if isinstance(meta, dict) else []
+    sanitized_artifacts = []
+    for art in raw_artifacts:
+        if isinstance(art, dict):
+            fn = art.get("filename", "")
+            clean_name = Path(fn).name if fn else "artifact"
+            sanitized_artifacts.append({
+                "filename": clean_name,
+                "size": art.get("size", 0)
+            })
+    return {"run_id":r.run_id,"crew_id":r.crew_id,"version":r.version,"trigger":r.trigger,"status":r.status,"inputs":r.inputs or {},"outputs":r.outputs,"error":r.error,"verbose":r.verbose or [],"artifacts":sanitized_artifacts,"created_at":iso(r.created_at),"started_at":iso(r.started_at),"ended_at":iso(r.ended_at)}
 class CrewAdminServicePG:
  def __init__(self,registry,*args,**kwargs):self.registry=registry
  def start_scheduler(self):pass

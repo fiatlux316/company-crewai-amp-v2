@@ -40,6 +40,9 @@ def main() -> None:
     parser.add_argument("--deployed-dir", required=True)
     args = parser.parse_args()
     deployed = Path(args.deployed_dir).resolve()
+
+    # Resolve artifacts_root in server working directory BEFORE chdir
+    artifacts_root = Path(os.getenv("ARTIFACTS_ROOT", "artifacts")).resolve()
     os.chdir(deployed)
 
     try:
@@ -79,8 +82,7 @@ def main() -> None:
             raise TypeError("crew result must be {'outputs': dict, 'metadata': dict} or a plain output dict")
         validate_contract(outputs, manifest.output_schema, label="outputs")
 
-        # Collect generated artifact files
-        artifacts_root = Path(os.getenv("ARTIFACTS_ROOT", "artifacts")).resolve()
+        # Collect generated artifact files to server artifacts_root / run_id
         artifacts_dir = artifacts_root / run_id
         artifacts_dir.mkdir(parents=True, exist_ok=True)
 
@@ -90,22 +92,24 @@ def main() -> None:
         if output_dir.exists():
             for p in output_dir.rglob("*"):
                 if p.is_file():
-                    candidate_paths.add(p)
-        for p in deployed.glob("*"):
-            if p.is_file() and p.name not in {"crew-manifest.json", "package.crewpkg", "deployment.json", "pyproject.toml", "tasks.jsonc", "agents.jsonc"}:
-                if p.suffix in {".md", ".json", ".csv", ".pdf", ".txt", ".png", ".html", ".yaml", ".yml"}:
-                    candidate_paths.add(p)
+                    candidate_paths.add((p, p.name))
 
-        for src_path in candidate_paths:
-            try:
-                rel_path = src_path.relative_to(deployed)
-            except ValueError:
-                rel_path = Path(src_path.name)
-            dest_file = artifacts_dir / rel_path
+        ignored_names = {
+            "crew-manifest.json", "package.crewpkg", "deployment.json",
+            "pyproject.toml", "tasks.jsonc", "agents.jsonc", "process.jsonc",
+            "README.md", "artifacts", ".crewai_storage", "__pycache__", ".venv"
+        }
+        for p in deployed.glob("*"):
+            if p.is_file() and p.name not in ignored_names:
+                if p.suffix in {".md", ".json", ".csv", ".pdf", ".txt", ".png", ".html", ".yaml", ".yml"}:
+                    candidate_paths.add((p, p.name))
+
+        for src_path, filename in candidate_paths:
+            dest_file = artifacts_dir / filename
             dest_file.parent.mkdir(parents=True, exist_ok=True)
             shutil.copy2(src_path, dest_file)
             artifacts_list.append({
-                "filename": str(rel_path),
+                "filename": filename,
                 "size": src_path.stat().st_size
             })
 

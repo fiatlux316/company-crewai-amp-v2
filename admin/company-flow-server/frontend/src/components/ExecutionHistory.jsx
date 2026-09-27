@@ -93,6 +93,29 @@ export default function ExecutionHistory({ initialRunId }) {
     }
   };
 
+  const handleDownload = async (runId, filename) => {
+    const cleanName = filename.split('/').pop() || filename;
+    try {
+      const res = await fetch(`/api/v1/runs/${runId}/artifacts/${encodeURIComponent(cleanName)}`);
+      if (!res.ok) {
+        const errText = await res.text();
+        alert(`다운로드 실패 (${res.status}): ${errText}`);
+        return;
+      }
+      const blob = await res.blob();
+      const url = window.URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = cleanName;
+      document.body.appendChild(a);
+      a.click();
+      a.remove();
+      window.URL.revokeObjectURL(url);
+    } catch (e) {
+      alert(`다운로드 중 오류가 발생했습니다: ${e.message}`);
+    }
+  };
+
   return (
     <section id="history" className="view active">
       <div className="simple historyList">
@@ -151,17 +174,19 @@ export default function ExecutionHistory({ initialRunId }) {
                 <div className="panel">
                   <h3>Generated Artifacts (산출물 파일)</h3>
                   <div style={{ display: 'flex', gap: '8px', flexWrap: 'wrap', marginTop: '8px' }}>
-                    {currentRun.artifacts.map((art) => (
-                      <a
-                        key={art.filename}
-                        href={`/api/v1/runs/${currentRun.run_id}/artifacts/${art.filename}`}
-                        download
-                        className="btn secondary"
-                        style={{ display: 'inline-flex', alignItems: 'center', gap: '6px', textDecoration: 'none' }}
-                      >
-                        📥 {art.filename} <span style={{ fontSize: '11px', color: '#6b7280' }}>({(art.size / 1024).toFixed(1)} KB)</span>
-                      </a>
-                    ))}
+                    {currentRun.artifacts.map((art) => {
+                      const cleanName = art.filename.split('/').pop() || art.filename;
+                      return (
+                        <button
+                          key={art.filename}
+                          onClick={() => handleDownload(currentRun.run_id, art.filename)}
+                          className="btn secondary"
+                          style={{ display: 'inline-flex', alignItems: 'center', gap: '6px', cursor: 'pointer' }}
+                        >
+                          📥 {cleanName} <span style={{ fontSize: '11px', color: '#6b7280' }}>({(art.size / 1024).toFixed(1)} KB)</span>
+                        </button>
+                      );
+                    })}
                   </div>
                 </div>
               )}
