@@ -146,16 +146,13 @@ def delete_run(run_id: str, confirm: bool=False, p: Principal = Depends(require(
     audit(p.subject,"run.delete",run_id)
     return {"status":"deleted","run_id":run_id}
 
+import shutil
+
 @app.get("/api/v1/runs/{run_id}/artifacts/{filename:path}")
 def download_run_artifact(run_id: str, filename: str, p: Principal = Depends(require("run:read"))):
     artifacts_root = Path(os.getenv("ARTIFACTS_ROOT", "artifacts")).resolve()
     target_dir = (artifacts_root / run_id).resolve()
     pure_filename = Path(filename).name
-
-    print("artifacts_root:", artifacts_root)
-    print("target_dir:", target_dir)
-    print("filename:", filename)
-    print("pure_filename:", pure_filename)
 
     candidates = [
         (target_dir / filename).resolve(),
@@ -168,13 +165,47 @@ def download_run_artifact(run_id: str, filename: str, p: Principal = Depends(req
         if cand.is_file():
             file_path = cand
             break
-    print("file_path:", file_path)
 
-    try:
-        if not target_dir.exists() or not file_path or not file_path.is_file() or not file_path.is_relative_to(target_dir):
-            raise HTTPException(status_code=404, detail=f"Artifact '{pure_filename}' not found for run {run_id}")
-    except ValueError:
-        raise HTTPException(status_code=404, detail="Artifact not found")
+    # 2. Fallback: Search in crew registry for run_id or output directory
+    if not file_path:
+        try:
+            run_info = admin_service.get_run(run_id)
+            cid = run_info.get("crew_id")
+            ver = run_info.get("version")
+            if cid and ver:
+                deployed = registry.resolve(cid, ver)
+                reg_candidates = [
+                    (deployed / "artifacts" / run_id / pure_filename).resolve(),
+                    (deployed / "artifacts" / run_id / "output" / pure_filename).resolve(),
+                    (deployed / "output" / pure_filename).resolve(),
+                    (deployed / pure_filename).resolve(),
+                ]
+                for cand in reg_candidates:
+                    if cand.is_file():
+                        file_path = cand
+                        try:
+                            target_dir.mkdir(parents=True, exist_ok=True)
+                            shutil.copy2(cand, target_dir / pure_filename)
+                        except Exception:
+                            pass
+                        break
+        except Exception:
+            pass
+
+    # 3. Last fallback: rglob across registry for run_id or output/pure_filename
+    if not file_path:
+        for p_cand in registry.root.rglob(pure_filename):
+            if p_cand.is_file() and ("output" in p_cand.parts or "artifacts" in p_cand.parts or run_id in p_cand.parts):
+                file_path = p_cand.resolve()
+                try:
+                    target_dir.mkdir(parents=True, exist_ok=True)
+                    shutil.copy2(p_cand, target_dir / pure_filename)
+                except Exception:
+                    pass
+                break
+
+    if not file_path or not file_path.is_file():
+        raise HTTPException(status_code=404, detail=f"Artifact '{pure_filename}' not found for run {run_id}")
 
     return FileResponse(
         path=file_path,
