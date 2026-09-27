@@ -18,7 +18,7 @@ COPY --from=frontend-builder /frontend/dist ./frontend_dist
 RUN pip install --no-cache-dir .
 
 COPY flows ./flows
-RUN mkdir -p /data/team_registry
+RUN mkdir -p /data/team_registry /app/artifacts
 
-ENV CREW_REGISTRY_ROOT=/data/team_registry FLOW_ROOT=/app/flows
+ENV CREW_REGISTRY_ROOT=/data/team_registry FLOW_ROOT=/app/flows ARTIFACTS_ROOT=/app/artifacts
 CMD ["uvicorn","company_flow_server.app:app","--host","0.0.0.0","--port","8080"]
