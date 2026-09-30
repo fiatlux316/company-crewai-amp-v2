@@ -1,9 +1,16 @@
-
 import React, { useState } from 'react';
 import { api } from '../utils/api';
 
+const WORK_TYPES = {
+  '일반운영': ['단순문의', '단순처리'],
+  '프로그램개발': ['영향도분석', '테스트'],
+  '시스템운영': ['모니터링', '서버관리']
+};
+
 export default function GeneratePersona({ onKickoff }) {
   const [personaName, setPersonaName] = useState('');
+  const [workCategory, setWorkCategory] = useState('일반운영');
+  const [workSubCategory, setWorkSubCategory] = useState('단순문의');
   const [goal, setGoal] = useState('');
   const [steps, setSteps] = useState({
     extract: { name: '추출', checked: true, tools: [] },
@@ -19,6 +26,16 @@ export default function GeneratePersona({ onKickoff }) {
     report: ['teams', 'outlook']
   };
   const colors = { extract: '#6366f1', analysis: '#059669', write: '#d97706', report: '#db2777' };
+
+  const handleCategoryChange = (e) => {
+    const cat = e.target.value;
+    setWorkCategory(cat);
+    if (WORK_TYPES[cat] && WORK_TYPES[cat].length > 0) {
+      setWorkSubCategory(WORK_TYPES[cat][0]);
+    } else {
+      setWorkSubCategory('');
+    }
+  };
 
   const handleStepToggle = (stepId) => {
     setSteps(prev => ({ ...prev, [stepId]: { ...prev[stepId], checked: !prev[stepId].checked } }));
@@ -36,6 +53,7 @@ export default function GeneratePersona({ onKickoff }) {
 
   const submitPersona = async () => {
     if (!personaName.trim()) return alert("Persona 이름을 입력하세요.");
+    if (!workCategory || !workSubCategory) return alert("업무 유형을 선택하세요.");
     if (!goal.trim()) return alert("업무 목적을 입력하세요.");
 
     let stepTools = [];
@@ -59,8 +77,18 @@ export default function GeneratePersona({ onKickoff }) {
 
       if (!targetCrew) return alert("ops.persona_generate 크루를 찾을 수 없습니다.");
 
-      const payload = { inputs: { persona_name: personaName, business_goal: goal, step_tools: stepTools } };
-      if (!window.confirm(`Persona 이름:\n${personaName}\n\n업무목적:\n${goal}\n\n단계별 도구:\n${stepTools.join('\n')}\n\n진행하시겠습니까?`)) return;
+      const payload = {
+        inputs: {
+          persona_name: personaName,
+          work_type: `${workCategory} > ${workSubCategory}`,
+          work_category: workCategory,
+          work_subcategory: workSubCategory,
+          business_goal: goal,
+          step_tools: stepTools
+        }
+      };
+
+      if (!window.confirm(`Persona 이름:\n${personaName}\n\n업무 유형:\n${workCategory} > ${workSubCategory}\n\n업무목적:\n${goal}\n\n단계별 도구:\n${stepTools.join('\n')}\n\n진행하시겠습니까?`)) return;
 
       const res = await api.kickoff(targetCrew.crew_id, targetCrew.version, payload);
       onKickoff(res.run_id);
@@ -86,7 +114,41 @@ export default function GeneratePersona({ onKickoff }) {
       </div>
 
       <div className="panel wide">
-        <h3>2. 업무목적 (Business Goal)</h3>
+        <h3>2. 업무 유형 (Work Type)</h3>
+        <div style={{ display: 'flex', gap: '16px', flexWrap: 'wrap' }}>
+          <div style={{ flex: 1, minWidth: '200px' }}>
+            <label style={{ display: 'block', fontSize: '12px', fontWeight: 'bold', color: '#64748b', marginBottom: '4px' }}>
+              1차 분류 (대분류)
+            </label>
+            <select
+              value={workCategory}
+              onChange={handleCategoryChange}
+              style={{ width: '100%', padding: '10px 12px', fontSize: '14px', borderRadius: '6px', border: '1px solid #cbd5e1', boxSizing: 'border-box', backgroundColor: '#fff', cursor: 'pointer' }}
+            >
+              {Object.keys(WORK_TYPES).map(cat => (
+                <option key={cat} value={cat}>{cat}</option>
+              ))}
+            </select>
+          </div>
+          <div style={{ flex: 1, minWidth: '200px' }}>
+            <label style={{ display: 'block', fontSize: '12px', fontWeight: 'bold', color: '#64748b', marginBottom: '4px' }}>
+              2차 분류 (소분류)
+            </label>
+            <select
+              value={workSubCategory}
+              onChange={e => setWorkSubCategory(e.target.value)}
+              style={{ width: '100%', padding: '10px 12px', fontSize: '14px', borderRadius: '6px', border: '1px solid #cbd5e1', boxSizing: 'border-box', backgroundColor: '#fff', cursor: 'pointer' }}
+            >
+              {(WORK_TYPES[workCategory] || []).map(sub => (
+                <option key={sub} value={sub}>{sub}</option>
+              ))}
+            </select>
+          </div>
+        </div>
+      </div>
+
+      <div className="panel wide">
+        <h3>3. 업무 목적 (Business Goal)</h3>
         <textarea
           value={goal}
           onChange={e => setGoal(e.target.value)}
@@ -96,7 +158,7 @@ export default function GeneratePersona({ onKickoff }) {
 
       <div className="panel wide">
         <h3>
-          3. 단계별 도구 (Step Tools)
+          4. 단계별 도구 (Step Tools)
           <span style={{ display: 'block', fontSize: '50%', fontWeight: 'normal', color: '#64748b', marginTop: '4px' }}>
             * 불필요한 단계는 체크 해제해 주세요. 선택된 도구에 맞는 mcp tools 을 자동으로 추천해 줍니다.
           </span>
