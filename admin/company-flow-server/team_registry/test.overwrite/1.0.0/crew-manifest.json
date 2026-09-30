@@ -1,0 +1,1 @@
+{"schema_version": 1, "crew_id": "test.overwrite", "version": "1.0.0", "name": "Test Overwrite", "owner": "tester", "entrypoint": "demo.entrypoint:run", "input_schema": {"type": "object", "required": [], "properties": {}}, "output_schema": {"type": "object", "required": [], "properties": {}}}

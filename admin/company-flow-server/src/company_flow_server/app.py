@@ -5,7 +5,7 @@ from pathlib import Path
 import tempfile
 from contextlib import asynccontextmanager
 
-from fastapi import FastAPI, Header, HTTPException, Request, Depends
+from fastapi import FastAPI, Header, HTTPException, Request, Depends, Query
 from fastapi.responses import FileResponse
 from fastapi.staticfiles import StaticFiles
 from pydantic import BaseModel, Field
@@ -325,6 +325,8 @@ def list_versions(crew_id: str) -> dict:
 async def deploy_crew(
     request: Request,
     x_crew_filename: str | None = Header(default=None),
+    x_crew_overwrite: bool | None = Header(default=None, alias="X-Crew-Overwrite"),
+    overwrite: bool = Query(default=False),
     p: Principal = Depends(require("crew:deploy")),
 ) -> dict:
     if not x_crew_filename or not x_crew_filename.endswith(".crewpkg"):
@@ -332,11 +334,12 @@ async def deploy_crew(
     payload = await request.body()
     if not payload:
         raise HTTPException(status_code=400, detail="empty package")
+    is_overwrite = bool(overwrite or x_crew_overwrite)
     with tempfile.TemporaryDirectory() as tmp:
         artifact = Path(tmp) / Path(x_crew_filename).name
         artifact.write_bytes(payload)
         try:
-            manifest = registry.deploy(artifact)
+            manifest = registry.deploy(artifact, overwrite=is_overwrite)
         except FileExistsError as exc:
             raise HTTPException(status_code=409, detail=str(exc)) from exc
         except (ValueError, KeyError) as exc:

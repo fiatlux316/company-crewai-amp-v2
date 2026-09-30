@@ -9,6 +9,7 @@ def deploy_package(
     *,
     server_url: str,
     token: str | None = None,
+    overwrite: bool = False,
     timeout_seconds: float = 60.0,
 ) -> dict:
     path = Path(artifact).resolve()
@@ -18,9 +19,13 @@ def deploy_package(
         "Content-Type": "application/octet-stream",
         "X-Crew-Filename": path.name,
     }
+    if overwrite:
+        headers["X-Crew-Overwrite"] = "true"
     if token:
         headers["Authorization"] = f"Bearer {token}"
     url = server_url.rstrip("/") + "/api/v1/crews/deploy"
+    if overwrite:
+        url += "?overwrite=true"
     with httpx.Client(timeout=timeout_seconds) as client:
         response = client.post(url, content=path.read_bytes(), headers=headers)
         response.raise_for_status()

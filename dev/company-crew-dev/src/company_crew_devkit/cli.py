@@ -37,6 +37,7 @@ def main() -> None:
 
     p = sub.add_parser("deploy")
     p.add_argument("artifact")
+    p.add_argument("--overwrite", action="store_true", help="Overwrite existing crew deployment if version matches")
     p.add_argument("--server-url", default=os.getenv("CREW_SERVER_URL", "http://localhost:8080"))
     p.add_argument("--token", default=os.getenv("CREW_DEPLOY_TOKEN"))
 
@@ -47,7 +48,7 @@ def main() -> None:
     elif args.command == "package":
         print(build_package(args.project_dir, args.output))
     elif args.command == "deploy":
-        print(json.dumps(deploy_package(args.artifact, server_url=args.server_url, token=args.token), indent=2, ensure_ascii=False))
+        print(json.dumps(deploy_package(args.artifact, server_url=args.server_url, token=args.token, overwrite=args.overwrite), indent=2, ensure_ascii=False))
 
 
 if __name__ == "__main__":
