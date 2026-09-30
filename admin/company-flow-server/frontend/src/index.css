@@ -228,8 +228,9 @@ input:focus, textarea:focus, select:focus { outline: none; border-color: #6366f1
 .liveTag::before { content: ''; width: 8px; height: 8px; border-radius: 50%; background: #059669; animation: pulse 1s ease-in-out infinite; }
 .runMeta { display: flex; gap: 14px; flex-wrap: wrap; margin: 8px 0; font-size: 12px; color: #6b7280; }
 .runMeta span { display: flex; align-items: center; gap: 4px; }
-.verboseLive { background: #111827; color: #e5e7eb; padding: 16px; border-radius: 10px; white-space: pre-wrap; max-height: 540px; overflow: auto; font: 12px/1.6 ui-monospace, monospace; scroll-behavior: smooth; }
-.schema { font: 11px ui-monospace, monospace; background: #f8fafc; border: 1px solid #e2e8f0; padding: 10px; border-radius: 8px; white-space: pre-wrap; }
+.verboseLive { background: #111827; color: #e5e7eb; padding: 16px; border-radius: 10px; white-space: pre-wrap; word-break: break-word; overflow-wrap: break-word; max-height: 540px; overflow: auto; font: 12px/1.6 ui-monospace, monospace; scroll-behavior: smooth; }
+.verbose { background: #fef2f2; color: #991b1b; border: 1px solid #fecaca; padding: 14px; border-radius: 10px; white-space: pre-wrap; word-break: break-word; overflow-wrap: break-word; max-height: 400px; overflow-y: auto; font: 12px/1.6 ui-monospace, monospace; }
+.schema { font: 11px ui-monospace, monospace; background: #f8fafc; border: 1px solid #e2e8f0; padding: 10px; border-radius: 8px; white-space: pre-wrap; word-break: break-word; overflow-wrap: break-word; }
 .empty { text-align: center; color: #6b7280; padding: 90px; }
 
 /* Schema Table Styling in MCP Tools */
