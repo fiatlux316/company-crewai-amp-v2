@@ -88,7 +88,7 @@ export default function GeneratePersona({ onKickoff }) {
         }
       };
 
-      if (!window.confirm(`Persona 이름:\n${personaName}\n\n업무 유형:\n${workCategory} > ${workSubCategory}\n\n업무목적:\n${goal}\n\n단계별 도구:\n${stepTools.join('\n')}\n\n진행하시겠습니까?`)) return;
+      if (!window.confirm(`Persona 이름:\n${personaName}\n\n업무 유형:\n${workCategory} > ${workSubCategory}\n\n업무 목적:\n${goal}\n\n단계별 도구:\n${stepTools.join('\n')}\n\n진행하시겠습니까?`)) return;
 
       const res = await api.kickoff(targetCrew.crew_id, targetCrew.version, payload);
       onKickoff(res.run_id);
