@@ -50,11 +50,11 @@ def run_local_crew(
             llm_gateway_url=cfg.runtime_url,
             mcp_url=cfg.mcp_url,
             token=cfg.access_token,
-            business_context={
-                "crew_id": manifest.crew_id,
-                "system_id": inputs.get("system_id"),
-                "incident_id": inputs.get("incident_id"),
-            },
+            # business_context={
+            #     "crew_id": manifest.crew_id,
+            #     "system_id": inputs.get("system_id"),
+            #     "incident_id": inputs.get("incident_id"),
+            # },
         )
         result = entrypoint(inputs, runtime)
         if not isinstance(result, dict):

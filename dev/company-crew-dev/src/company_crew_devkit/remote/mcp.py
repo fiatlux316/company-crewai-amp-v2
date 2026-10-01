@@ -21,12 +21,12 @@ class RemoteMCPToolProvider:
         *,
         mcp_url: str,
         token: str,
-        business_context: dict[str, Any] | None = None,
+        #business_context: dict[str, Any] | None = None,
         required_names: Iterable[str] | None = None,
     ) -> None:
         self.mcp_url = mcp_url
         self.token = token
-        self.business_context = business_context or {}
+        #self.business_context = business_context or {}
         self.required_names = list(required_names) if required_names is not None else None
         self._adapter: Any | None = None
 
@@ -37,15 +37,15 @@ class RemoteMCPToolProvider:
 
         headers = {"Authorization": f"Bearer {self.token}"}
         # Explicit allow-list: these are scope inputs, not authorization claims.
-        header_map = {
-            "system_id": "X-Business-System-Id",
-            "incident_id": "X-Business-Incident-Id",
-            "crew_id": "X-Crew-Id",
-        }
-        for key, header in header_map.items():
-            value = self.business_context.get(key)
-            if value is not None:
-                headers[header] = quote(str(value), safe="-_.:")
+        # header_map = {
+        #     "system_id": "X-Business-System-Id",
+        #     "incident_id": "X-Business-Incident-Id",
+        #     "crew_id": "X-Crew-Id",
+        # }
+        # for key, header in header_map.items():
+        #     value = self.business_context.get(key)
+        #     if value is not None:
+        #         headers[header] = quote(str(value), safe="-_.:")
 
         server_params = {
             "url": self.mcp_url, 

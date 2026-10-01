@@ -18,7 +18,7 @@ class RemoteCrewRuntime:
     llm_gateway_url: str
     mcp_url: str
     token: str
-    business_context: dict[str, Any] = field(default_factory=dict)
+    #business_context: dict[str, Any] = field(default_factory=dict)
 
     def get_llm(self, alias: str) -> Any:
         return RemoteLLMClient(
@@ -31,6 +31,6 @@ class RemoteCrewRuntime:
         return RemoteMCPToolProvider(
             mcp_url=self.mcp_url,
             token=self.token,
-            business_context=self.business_context,
+            #business_context=self.business_context,
             required_names=required_names,
         )
