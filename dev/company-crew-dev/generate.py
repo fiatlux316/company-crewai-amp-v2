@@ -1,9 +1,11 @@
 import sys
 import os
 import json
+import re
 from pathlib import Path
 import pandas as pd
 import math
+from typing import Any
 
 def is_nan(val):
     if isinstance(val, float) and math.isnan(val):
@@ -42,6 +44,7 @@ def main():
     agents = {}
     tasks = {}
     process_tasks = []
+    input_placeholders = set()
     
     for idx, row in df.iterrows():
         task_name = str(row.get("task_name", "")).strip()
@@ -62,6 +65,11 @@ def main():
         if not task_name or not agent_id:
             continue
             
+        # Extract placeholder parameters defined with {param} in task_description
+        if task_desc:
+            found = re.findall(r"\{([a-zA-Z_][a-zA-Z0-9_]*)\}", task_desc)
+            input_placeholders.update(found)
+
         tool_refs = [t.strip() for t in mcp.split(",") if t.strip()] if mcp else []
         
         if agent_id not in agents:
@@ -102,7 +110,20 @@ def main():
             "tools": tool_refs,
             "next": []
         })
-        
+
+    # Generate default inputs.json data & input_schema properties
+    inputs_data = {}
+    input_properties = {}
+    for key in sorted(input_placeholders):
+        inputs_data[key] = "값을 설정하세요"
+        input_properties[key] = {"type": "string"}
+
+    # Write inputs.json to crew package directory (both src_dir and base_dir)
+    with open(src_dir / "inputs.json", "w", encoding="utf-8") as f:
+        json.dump(inputs_data, f, indent=2, ensure_ascii=False)
+    # with open(base_dir / "inputs.json", "w", encoding="utf-8") as f:
+    #     json.dump(inputs_data, f, indent=2, ensure_ascii=False)
+
     # Write agents.jsonc
     with open(src_dir / "agents.jsonc", "w", encoding="utf-8") as f:
         json.dump(agents, f, indent=2, ensure_ascii=False)
@@ -134,7 +155,7 @@ def main():
       "entrypoint": f"{crew_dir_name}.entrypoint:run",
       "input_schema": {
         "type": "object",
-        "properties": {}
+        "properties": input_properties
       },
       "output_schema": {
         "type": "object",
@@ -204,15 +225,15 @@ def run(inputs: dict[str, Any], runtime: Any) -> dict[str, Any]:
             t_agent = agents[task_def["agent"]]
             
             desc = t_cfg["description"]
-            # Dynamic template formatting if inputs exist
-            try:
-                desc = desc.format(**inputs)
-            except KeyError:
-                pass
+            expected = t_cfg["expected_output"]
+            for k, v in (inputs or {{}}).items():
+                v_str = json.dumps(v, ensure_ascii=False) if isinstance(v, (dict, list)) else str(v)
+                desc = desc.replace("{" + k + "}", v_str)
+                expected = expected.replace("{" + k + "}", v_str)
                 
             task_kwargs = {{
                 "description": desc,
-                "expected_output": t_cfg["expected_output"],
+                "expected_output": expected,
                 "agent": t_agent,
             }}
             if "output_file" in t_cfg and t_cfg["output_file"]:
@@ -250,7 +271,7 @@ def run(inputs: dict[str, Any], runtime: Any) -> dict[str, Any]:
     with open(src_dir / "entrypoint.py", "w", encoding="utf-8") as f:
         f.write(entrypoint_code)
         
-    print(f"Successfully generated Crew package: {crew_dir_name}")
+    print(f"Successfully generated Crew package with inputs.json: {crew_dir_name}")
 
 if __name__ == "__main__":
     main()
