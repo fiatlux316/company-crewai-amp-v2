@@ -23,6 +23,8 @@ def _load_json(value: str) -> dict:
 
 
 def _resolve_inputs(project_dir: str | Path, inputs_arg: str | None) -> dict:
+
+    print("inputs_arg : ", inputs_arg)
     if inputs_arg:
         return _load_json(inputs_arg)
 
@@ -41,15 +43,16 @@ def _resolve_inputs(project_dir: str | Path, inputs_arg: str | None) -> dict:
         except Exception:
             pass
 
-    candidates.extend([
-        #project / "inputs.json",
-        project / "src" / "inputs.json",
-    ])
+    # candidates.extend([
+    #     project / "inputs.json",
+    #     project / "src" / "inputs.json",
+    # ])
 
     for candidate in candidates:
         if candidate.is_file():
             text = candidate.read_text(encoding="utf-8")
             parsed = json.loads(text)
+            print("inputs.json : ", parsed)
             if not isinstance(parsed, dict):
                 raise ValueError(f"JSON input in {candidate} must be an object")
             return parsed
