@@ -42,7 +42,7 @@ def _resolve_inputs(project_dir: str | Path, inputs_arg: str | None) -> dict:
             pass
 
     candidates.extend([
-        project / "inputs.json",
+        #project / "inputs.json",
         project / "src" / "inputs.json",
     ])
 
@@ -80,6 +80,8 @@ def main() -> None:
 
     args = parser.parse_args()
     if args.command == "run-local":
+
+        # --inputs 에 입력 값이 오면 해당 값으로 설정하고, 없으면 src 하위에 inputs.json 을 을 참조한다.
         inputs = _resolve_inputs(args.project_dir, args.inputs)
         outputs, metadata = run_local_crew(args.project_dir, inputs, settings=Settings.from_env())
         print(json.dumps({"outputs": outputs, "metadata": metadata}, indent=2, ensure_ascii=False))
