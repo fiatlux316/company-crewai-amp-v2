@@ -228,8 +228,8 @@ def run(inputs: dict[str, Any], runtime: Any) -> dict[str, Any]:
             expected = t_cfg["expected_output"]
             for k, v in (inputs or {{}}).items():
                 v_str = json.dumps(v, ensure_ascii=False) if isinstance(v, (dict, list)) else str(v)
-                desc = desc.replace("{" + k + "}", v_str)
-                expected = expected.replace("{" + k + "}", v_str)
+                desc = desc.replace("{{" + k + "}}", v_str)
+                expected = expected.replace("{{" + k + "}}", v_str)
                 
             task_kwargs = {{
                 "description": desc,
