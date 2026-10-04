@@ -130,7 +130,7 @@ def update_crew_node(crew_id: str, version: str, node_type: str, node_id: str, p
     with open(file_path, "r", encoding="utf-8") as f:
         text = f.read()
     
-    clean_text = re.sub(r"/\\*.*?\\*/", "", text, flags=re.S)
+    clean_text = re.sub(r"/\*.*?\*/", "", text, flags=re.S)
     clean_text = re.sub(r"(^|\s)//.*$", r"\1", clean_text, flags=re.M)
     
     try:
