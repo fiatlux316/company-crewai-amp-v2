@@ -1,7 +1,7 @@
 
 export const api = {
   fetchCrews: () => fetch('/api/v1/crews').then(r => r.json()),
-  fetchGraph: (crew_id, version) => fetch(`/api/v1/crews/${encodeURIComponent(crew_id)}/${version}/graph`).then(r => r.json()),
+  fetchGraph: (crew_id, version) => fetch(`/api/v1/crews/${encodeURIComponent(crew_id)}/${version}/graph?t=${Date.now()}`, { headers: { 'Cache-Control': 'no-cache' } }).then(r => r.json()),
   fetchRuns: () => fetch('/api/v1/runs').then(r => r.json()),
   fetchRun: (id) => fetch('/api/v1/runs/'+id).then(r => r.json()),
   fetchMcpTools: () => fetch('/api/v1/mcp/tools').then(r => r.json()),
@@ -15,5 +15,8 @@ export const api = {
   deleteCrew: (crew_id, version) => fetch(`/api/v1/crews/${encodeURIComponent(crew_id)}/${version}?confirm=true`, { method: 'DELETE' }),
   saveCrewSettings: (crew_id, body) => fetch(`/api/v1/crews/${encodeURIComponent(crew_id)}/settings`, {
     method: 'PATCH', headers: {'Content-Type': 'application/json'}, body: JSON.stringify(body)
+  }),
+  updateCrewNode: (crew_id, version, node_type, node_id, body) => fetch(`/api/v1/crews/${encodeURIComponent(crew_id)}/${version}/nodes/${node_type}/${node_id}`, {
+    method: 'PUT', headers: {'Content-Type': 'application/json'}, body: JSON.stringify(body)
   })
 };

@@ -75,15 +75,29 @@ const describeCron = (expr) => {
   }
 };
 
-function CrewDiagram({ graph }) {
+function CrewDiagram({ graph, crewId, version, onUpdate }) {
   const diagramRef = useRef(null);
   const svgRef = useRef(null);
   const nodesRef = useRef(null);
   const [selectedNode, setSelectedNode] = useState(null);
+  const [editData, setEditData] = useState(null);
+  const [isSaving, setIsSaving] = useState(false);
 
   useEffect(() => {
     if (!graph) return;
     renderDiagram();
+    
+    if (selectedNode) {
+      const ns = graph.nodes || [];
+      const updatedNode = ns.find(n => n.id === selectedNode.id);
+      if (updatedNode) {
+        setSelectedNode(updatedNode);
+        setEditData(updatedNode.detail ? { ...updatedNode.detail } : {});
+      } else {
+        setSelectedNode(null);
+        setEditData(null);
+      }
+    }
   }, [graph]);
 
   const renderDiagram = () => {
@@ -178,7 +192,7 @@ function CrewDiagram({ graph }) {
           el.classList.add('active');
           const nodeId = el.dataset.nodeId;
           const node = ns.find(n => n.id === nodeId);
-          setSelectedNode(node);
+          setSelectedNode(node); setEditData(node.detail ? { ...node.detail } : {});
         });
       });
     }
@@ -304,7 +318,52 @@ function CrewDiagram({ graph }) {
           <>
             <h3>{selectedNode.label}</h3>
             <div className="meta">{selectedNode.type} · {selectedNode.id}</div>
-            <pre className="schema">{JSON.stringify(selectedNode.detail || {}, null, 2)}</pre>
+            
+            {editData && (selectedNode.type === 'agent' || selectedNode.type === 'task') ? (
+              <div className="edit-form" style={{ display: 'flex', flexDirection: 'column', gap: '8px', marginTop: '12px' }}>
+                {Object.keys(editData).map(k => (
+                  <div key={k} style={{ display: 'flex', flexDirection: 'column' }}>
+                    <label style={{ fontSize: '12px', fontWeight: 'bold', marginBottom: '4px', color: '#64748b' }}>{k}</label>
+                    {typeof editData[k] === 'string' ? (
+                      <textarea 
+                        style={{ width: '100%', minHeight: '80px', padding: '8px', border: '1px solid #cbd5e1', borderRadius: '4px', fontFamily: 'monospace', resize: 'vertical' }}
+                        value={(editData[k] || '').replace(/\\n/g, '\n')}
+                        onChange={e => setEditData({...editData, [k]: e.target.value.replace(/\n/g, '\\n')})}
+                      />
+                    ) : (
+                      <input 
+                        type="text"
+                        style={{ width: '100%', padding: '8px', border: '1px solid #cbd5e1', borderRadius: '4px' }}
+                        value={JSON.stringify(editData[k])}
+                        readOnly
+                      />
+                    )}
+                  </div>
+                ))}
+                <div style={{ marginTop: '8px' }}>
+                  <button 
+                    disabled={isSaving}
+                    style={{ padding: '8px 16px', background: '#3b82f6', color: '#fff', border: 'none', borderRadius: '4px', cursor: 'pointer' }}
+                    onClick={async () => {
+                      try {
+                        setIsSaving(true);
+                        await api.updateCrewNode(crewId, version, selectedNode.type, selectedNode.id, editData);
+                        alert('저장되었습니다.');
+                        if (onUpdate) onUpdate();
+                      } catch (e) {
+                        alert('저장 실패: ' + e.message);
+                      } finally {
+                        setIsSaving(false);
+                      }
+                    }}
+                  >
+                    {isSaving ? '저장 중...' : '수정 사항 저장'}
+                  </button>
+                </div>
+              </div>
+            ) : (
+              <pre className="schema">{JSON.stringify(selectedNode.detail || {}, null, 2).replace(/\\n/g, '\n')}</pre>
+            )}
           </>
         ) : (
           <pre className="schema">노드를 클릭하면 상세 설정을 표시합니다.</pre>
@@ -466,7 +525,7 @@ export default function CrewProcess({ onNavigateHistory }) {
               {/* 3. Task · Agent · Tool Process (Full-Width Single Row) */}
               <div className="panel">
                 <h3>Task · Agent · Tool Process</h3>
-                {graph ? <CrewDiagram graph={graph} /> : <div className="hint">프로세스 그래프를 로딩 중...</div>}
+                {graph ? <CrewDiagram graph={graph} crewId={selectedCrew.crew_id} version={selectedCrew.version} onUpdate={() => showCrew(selectedCrew)} /> : <div className="hint">프로세스 그래프를 로딩 중...</div>}
               </div>
 
               {/* 4. Execution History Link (Full-Width Single Row) */}

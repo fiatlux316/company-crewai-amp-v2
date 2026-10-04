@@ -107,6 +107,50 @@ def update_crew_settings(crew_id: str, request: CrewSettingsRequest, p: Principa
         result=admin_service.patch_settings(crew_id, patch); audit(p.subject,"crew.settings",crew_id,detail=patch); return result
     except ValueError as exc: raise HTTPException(status_code=400, detail=str(exc)) from exc
 
+@app.put("/api/v1/crews/{crew_id}/{version}/nodes/{node_type}/{node_id}")
+def update_crew_node(crew_id: str, version: str, node_type: str, node_id: str, payload: dict, p: Principal = Depends(require("crew:settings"))) -> dict:
+    import json
+    import re
+    try:
+        pkg_dir = registry.resolve(crew_id, version)
+    except KeyError as exc:
+        raise HTTPException(404, str(exc))
+    
+    base_name = crew_id.split(".")[-1]
+    if node_type == "task":
+        file_path = pkg_dir / "src" / base_name / "tasks.jsonc"
+    elif node_type == "agent":
+        file_path = pkg_dir / "src" / base_name / "agents.jsonc"
+    else:
+        raise HTTPException(400, "invalid node_type")
+
+    if not file_path.exists():
+        raise HTTPException(404, "file not found")
+        
+    with open(file_path, "r", encoding="utf-8") as f:
+        text = f.read()
+    
+    clean_text = re.sub(r"/\\*.*?\\*/", "", text, flags=re.S)
+    clean_text = re.sub(r"(^|\s)//.*$", r"\1", clean_text, flags=re.M)
+    
+    try:
+        data = json.loads(clean_text)
+    except Exception as e:
+        raise HTTPException(500, f"Error parsing jsonc: {e}")
+        
+    actual_id = node_id.split(":", 1)[-1]
+        
+    if actual_id not in data:
+        raise HTTPException(404, f"node_id {actual_id} not found in {node_type}s")
+        
+    payload.pop("id", None)
+    data[actual_id].update(payload)
+    
+    with open(file_path, "w", encoding="utf-8") as f:
+        json.dump(data, f, ensure_ascii=False, indent=2)
+        
+    return {"status": "success", "node_id": actual_id}
+
 @app.delete("/api/v1/crews/{crew_id}/{version}")
 def delete_crew(crew_id: str, version: str, confirm: bool=False, p: Principal = Depends(require("crew:delete"))) -> dict:
     if not confirm: raise HTTPException(status_code=400, detail="confirmation required")
