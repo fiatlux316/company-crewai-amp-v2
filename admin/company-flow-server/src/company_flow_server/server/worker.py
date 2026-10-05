@@ -88,10 +88,15 @@ def main() -> None:
 
         artifacts_list = []
         candidate_paths = set()
+        
+        # Load allowed extensions from environment variable, default to only .xlsx
+        allowed_exts_env = os.getenv("ARTIFACT_EXTENSIONS", ".xlsx")
+        allowed_exts = {ext.strip().lower() for ext in allowed_exts_env.split(",") if ext.strip()}
+
         output_dir = deployed / "output"
         if output_dir.exists():
             for p in output_dir.rglob("*"):
-                if p.is_file():
+                if p.is_file() and p.suffix.lower() in allowed_exts:
                     candidate_paths.add((p, p.name))
 
         ignored_names = {
@@ -101,7 +106,7 @@ def main() -> None:
         }
         for p in deployed.glob("*"):
             if p.is_file() and p.name not in ignored_names:
-                if p.suffix in {".md", ".json", ".csv", ".pdf", ".txt", ".png", ".html", ".yaml", ".yml", ".xlsx"}:
+                if p.suffix.lower() in allowed_exts:
                     candidate_paths.add((p, p.name))
 
         for src_path, filename in candidate_paths:
