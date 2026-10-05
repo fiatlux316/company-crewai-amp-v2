@@ -294,12 +294,31 @@ function CrewDiagram({ graph, crewId, version, onUpdate }) {
                   <text class="crewEdgeLabel" x="${mx + 4}" y="${my - 4}">${E(e.label)}</text>`;
         }).join('');
 
-        svgRef.current.innerHTML = svgContent;
+        if (svgRef.current) {
+          svgRef.current.innerHTML = svgContent;
+          // 화살표가 짤리지 않도록 SVG 크기를 스크롤 영역에 맞게 확장
+          if (diagramRef.current) {
+            svgRef.current.style.minWidth = '900px';
+            svgRef.current.style.minHeight = maxY + 'px';
+          }
+        }
       }
     };
 
     drawEdges();
     requestAnimationFrame(drawEdges);
+
+    // 사이드바 토글 등으로 인해 컨테이너 크기가 변할 때 화살표(edge) 위치를 즉시 재계산
+    if (diagramRef.current && window.ResizeObserver) {
+      if (diagramRef.current.__ro) {
+        diagramRef.current.__ro.disconnect();
+      }
+      const ro = new ResizeObserver(() => {
+        requestAnimationFrame(drawEdges);
+      });
+      ro.observe(diagramRef.current);
+      diagramRef.current.__ro = ro;
+    }
   };
 
   return (
