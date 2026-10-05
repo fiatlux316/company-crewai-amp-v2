@@ -1,0 +1,21 @@
+{
+  "process": "sequential",
+  "tasks": [
+    {
+      "id": "generate_persona",
+      "agent": "crewai_specialist",
+      "tools": [
+        "all.mcp.list"
+      ],
+      "next": ["convert_to_excel"]
+    },
+    {
+      "id": "convert_to_excel",
+      "agent": "report_agent",
+      "tools": [
+        "markdown_to_excel_converter"
+      ],
+      "next": []
+    }
+  ]
+}

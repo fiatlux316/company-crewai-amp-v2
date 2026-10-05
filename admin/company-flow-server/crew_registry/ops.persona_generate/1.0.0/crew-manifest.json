@@ -1,0 +1,37 @@
+{
+  "schema_version": 1,
+  "crew_id": "ops.persona_generate",
+  "version": "1.0.0",
+  "name": "persona_generate Crew",
+  "description": "Generated crew from persona_generate.xlsx",
+  "owner": "SW Engineer",
+  "entrypoint": "persona_generate.entrypoint:run",
+  "input_schema": {
+    "type": "object",
+    "properties": {
+      "business_goal": {
+        "type": "string"
+      },
+      "persona_name": {
+        "type": "string"
+      },
+      "step_tools": {
+        "type": "list"
+      },
+      "work_type": {
+        "type": "string"
+      }
+    }
+  },
+  "output_schema": {
+    "type": "object",
+    "properties": {}
+  },
+  "tags": [
+    "generated"
+  ],
+  "runtime": {
+    "crewai": ">=1.15.17,<1.16"
+  },
+  "process_definition": "src/persona_generate/process.jsonc"
+}

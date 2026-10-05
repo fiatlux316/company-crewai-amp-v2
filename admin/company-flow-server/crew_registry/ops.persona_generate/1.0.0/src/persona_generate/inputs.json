@@ -1,0 +1,10 @@
+{
+  "business_goal": "장애를 실시간 탐색, 원인분석, 대응 방안을 리포팅 한다.",
+  "step_tools": [
+    "extract:[database,datadog]",
+    "analysis",
+    "report"
+  ],
+  "persona_name": "장애분석 전문가",
+  "work_type": "시스템운영 > 모니터링"
+}

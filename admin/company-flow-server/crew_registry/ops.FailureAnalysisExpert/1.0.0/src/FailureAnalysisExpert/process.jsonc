@@ -1,0 +1,30 @@
+{
+  "process": "sequential",
+  "tasks": [
+    {
+      "id": "ExtractDataForFailureAnalysis",
+      "agent": "DataExtractionSpecialist",
+      "tools": [
+        "datadog.logs.search",
+        "datadog.apm.search"
+      ],
+      "next": []
+    },
+    {
+      "id": "AnalyzeFailureCauses",
+      "agent": "FailureCauseAnalyst",
+      "tools": [
+        "-"
+      ],
+      "next": []
+    },
+    {
+      "id": "ReportFailureResponse",
+      "agent": "FailureResponseReporter",
+      "tools": [
+        "-"
+      ],
+      "next": []
+    }
+  ]
+}

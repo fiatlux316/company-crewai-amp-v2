@@ -4,5 +4,5 @@ __pycache__
 *.pyc
 .env
 .venv
-crew_registry
+#crew_registry
 artifacts
