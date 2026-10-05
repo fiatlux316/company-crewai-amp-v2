@@ -1,44 +1,20 @@
-import sys
 import os
-import json
 import re
+import json
 from pathlib import Path
 import pandas as pd
-import math
-from typing import Any
+from fastapi import APIRouter, UploadFile, File, HTTPException, Depends
+from pydantic import BaseModel
+from .auth.rbac import Principal, require
 
-def is_nan(val):
-    if isinstance(val, float) and math.isnan(val):
-        return True
-    return pd.isna(val)
+router = APIRouter()
 
-def main():
-    if len(sys.argv) < 2:
-        print("Usage: uv run --with pandas --with openpyxl python generate.py <excel_file_name>")
-        sys.exit(1)
-        
-    arg_name = sys.argv[1]
-    base_dir = Path(__file__).parent
-    excel_path = base_dir / "crew_specs" / arg_name
-    
-    if not excel_path.exists() and not excel_path.suffix:
-        excel_path = excel_path.with_suffix(".xlsx")
-        
-    if not excel_path.exists():
-        print(f"File not found: {excel_path}")
-        sys.exit(1)
-        
-    excel_name = excel_path.stem
-    crew_dir_name = f"{excel_name}"
-    
-    base_dir = Path(__file__).parent / "crew_packages" / crew_dir_name
-    src_dir = base_dir / "src" / crew_dir_name
-    
-    src_dir.mkdir(parents=True, exist_ok=True)
-    
-    df = pd.read_excel(excel_path)
-    
-    # Fill nan with empty strings for text columns
+# Dependency or mock of registry for path resolution, to be used inside app.py
+# We will just inject the router into app.py and use the existing registry.
+
+def generate_crew_from_excel(excel_bytes: bytes, excel_name: str, registry_root: Path):
+    import io
+    df = pd.read_excel(io.BytesIO(excel_bytes))
     df = df.fillna("")
     
     agents = {}
@@ -65,7 +41,6 @@ def main():
         if not task_name or not agent_id:
             continue
             
-        # Extract placeholder parameters defined with {param} in task_description
         if task_desc:
             found = re.findall(r"\{([a-zA-Z_][a-zA-Z0-9_]*)\}", task_desc)
             input_placeholders.update(found)
@@ -86,12 +61,10 @@ def main():
                 }
             }
         else:
-            # If agent already exists, append new tools if any
             for t in tool_refs:
                 if t not in agents[agent_id]["tool_refs"]:
                     agents[agent_id]["tool_refs"].append(t)
                     
-        # Parse context dependencies
         context_list = [c.strip() for c in task_context.split(",") if c.strip()] if task_context else []
         
         task_entry = {
@@ -111,28 +84,28 @@ def main():
             "next": []
         })
 
-    # Generate default inputs.json data & input_schema properties
     inputs_data = {}
     input_properties = {}
     for key in sorted(input_placeholders):
         inputs_data[key] = "값을 설정하세요"
         input_properties[key] = {"type": "string"}
 
-    # Write inputs.json to crew package directory (both src_dir and base_dir)
+    crew_dir_name = excel_name
+    version = "1.0.0"
+    base_dir = registry_root / f"ops.{crew_dir_name}" / version
+    src_dir = base_dir / "src" / crew_dir_name
+    
+    src_dir.mkdir(parents=True, exist_ok=True)
+    
     with open(src_dir / "inputs.json", "w", encoding="utf-8") as f:
         json.dump(inputs_data, f, indent=2, ensure_ascii=False)
-    # with open(base_dir / "inputs.json", "w", encoding="utf-8") as f:
-    #     json.dump(inputs_data, f, indent=2, ensure_ascii=False)
 
-    # Write agents.jsonc
     with open(src_dir / "agents.jsonc", "w", encoding="utf-8") as f:
         json.dump(agents, f, indent=2, ensure_ascii=False)
         
-    # Write tasks.jsonc
     with open(src_dir / "tasks.jsonc", "w", encoding="utf-8") as f:
         json.dump(tasks, f, indent=2, ensure_ascii=False)
         
-    # Write process.jsonc
     process_cfg = {
         "process": "sequential",
         "tasks": process_tasks
@@ -140,16 +113,14 @@ def main():
     with open(src_dir / "process.jsonc", "w", encoding="utf-8") as f:
         json.dump(process_cfg, f, indent=2, ensure_ascii=False)
         
-    # Write __init__.py
     with open(src_dir / "__init__.py", "w", encoding="utf-8") as f:
         f.write("")
         
-    # Write crew-manifest.json
     manifest = {
       "schema_version": 1,
-      "crew_id": f"ops.{excel_name}",
-      "version": "1.0.0",
-      "name": f"{excel_name} Crew",
+      "crew_id": f"ops.{crew_dir_name}",
+      "version": version,
+      "name": f"{crew_dir_name} Crew",
       "description": f"Generated crew from {excel_name}.xlsx",
       "owner": "SW Engineer",
       "entrypoint": f"{crew_dir_name}.entrypoint:run",
@@ -170,7 +141,6 @@ def main():
     with open(base_dir / "crew-manifest.json", "w", encoding="utf-8") as f:
         json.dump(manifest, f, indent=2, ensure_ascii=False)
         
-    # Write entrypoint.py
     entrypoint_code = f"""from __future__ import annotations
 
 import json
@@ -268,10 +238,31 @@ def run(inputs: dict[str, Any], runtime: Any) -> dict[str, Any]:
         "metadata": {{"crew": "ops.{excel_name}", "version": "1.0.0"}},
     }}
 """
+    # Fix the regex bug in the generated entrypoint as well
+    entrypoint_code = entrypoint_code.replace('r"/\\\\*.*?\\\\*/"', 'r"/\\*.*?\\*/"')
+    
     with open(src_dir / "entrypoint.py", "w", encoding="utf-8") as f:
         f.write(entrypoint_code)
         
-    print(f"Successfully generated Crew package with inputs.json: {crew_dir_name}")
+    return f"ops.{crew_dir_name}", version
 
-if __name__ == "__main__":
-    main()
+
+@router.post("/api/v1/crews/generate")
+async def api_generate_crew(file: UploadFile = File(...)):
+    # We will use the FlowRegistry root as the base dir
+    # To avoid circular imports, we just know the registry path or import it
+    from .app import registry
+    
+    excel_bytes = await file.read()
+    if not file.filename.endswith(".xlsx"):
+        raise HTTPException(status_code=400, detail="Only .xlsx files are supported")
+    
+    excel_name = Path(file.filename).stem
+    
+    try:
+        crew_id, version = generate_crew_from_excel(excel_bytes, excel_name, registry.root)
+        return {"status": "success", "crew_id": crew_id, "version": version}
+    except Exception as e:
+        import traceback
+        traceback.print_exc()
+        raise HTTPException(status_code=500, detail=f"Generation failed: {str(e)}")

@@ -12,6 +12,9 @@ export default function Sidebar({ activeTab, setActiveTab, collapsed, onToggle }
         <button className={activeTab === 'persona' ? 'active' : ''} onClick={() => setActiveTab('persona')}>
           👤 <span className="tab-text">Generate Persona</span>
         </button>
+        <button className={activeTab === 'generate_crew' ? 'active' : ''} onClick={() => setActiveTab('generate_crew')}>
+          ✨ <span className="tab-text">Generate Crew</span>
+        </button>
         <button className={activeTab === 'crew' ? 'active' : ''} onClick={() => setActiveTab('crew')}>
           ⚙️ <span className="tab-text">Crew Management</span>
         </button>

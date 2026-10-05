@@ -18,5 +18,13 @@ export const api = {
   }),
   updateCrewNode: (crew_id, version, node_type, node_id, body) => fetch(`/api/v1/crews/${encodeURIComponent(crew_id)}/${version}/nodes/${node_type}/${node_id}`, {
     method: 'PUT', headers: {'Content-Type': 'application/json'}, body: JSON.stringify(body)
-  })
+  }),
+  generateCrew: (file) => {
+    const formData = new FormData();
+    formData.append('file', file);
+    return fetch('/api/v1/crews/generate', {
+      method: 'POST',
+      body: formData
+    }).then(r => r.json());
+  }
 };

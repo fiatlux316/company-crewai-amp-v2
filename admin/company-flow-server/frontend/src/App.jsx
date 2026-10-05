@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import Sidebar from './components/Sidebar';
 import Header from './components/Header';
 import GeneratePersona from './components/GeneratePersona';
+import GenerateCrew from './components/GenerateCrew';
 import CrewProcess from './components/CrewProcess';
 import ExecutionHistory from './components/ExecutionHistory';
 import NodeFlowDesigner from './components/NodeFlowDesigner';
@@ -32,6 +33,7 @@ function App() {
         <Header activeTab={activeTab} setActiveTab={setActiveTab} />
         <div className="main-content">
           {activeTab === 'persona' && <GeneratePersona onKickoff={handleNavigateHistory} />}
+          {activeTab === 'generate_crew' && <GenerateCrew />}
           {activeTab === 'crew' && <CrewProcess onNavigateHistory={handleNavigateHistory} />}
           {activeTab === 'history' && <ExecutionHistory initialRunId={initialRunId} />}
           {activeTab === 'flow' && <NodeFlowDesigner />}

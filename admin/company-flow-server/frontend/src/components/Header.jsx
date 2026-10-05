@@ -2,6 +2,7 @@ import React from 'react';
 
 const TAB_TITLES = {
   persona: '👤 Generate Persona',
+  generate_crew: '✨ Generate Crew',
   crew: '⚙️ Crew Management',
   history: '📋 Execution History',
   flow: '🔀 Node Flow Designer',
