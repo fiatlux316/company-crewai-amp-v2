@@ -33,9 +33,9 @@ export default function GenerateCrew() {
   };
 
   return (
-    <div style={{ padding: '20px', color: '#f3f4f6' }}>
-      <h2>Generate Crew from Excel</h2>
-      <p style={{ marginBottom: '20px', color: '#9ca3af' }}>
+    <section id="generate_crew" className="view active" style={{ padding: '24px', overflow: 'auto', height: 'calc(100vh)' }}>
+      <h2 style={{ marginTop: 0, marginBottom: '4px' }}>Generate Crew</h2>
+      <p className="hint" style={{ marginTop: 0, marginBottom: '24px' }}>
         Crew AI Spec 문서(Excel)를 업로드하여 tasks.jsonc, agents.jsonc, process.jsonc 등의 설정을 자동 생성합니다.
       </p>
 
@@ -86,6 +86,6 @@ export default function GenerateCrew() {
           </div>
         )}
       </div>
-    </div>
+    </section>
   );
 }

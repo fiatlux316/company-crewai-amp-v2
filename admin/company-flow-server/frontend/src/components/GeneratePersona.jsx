@@ -269,7 +269,7 @@ export default function GeneratePersona({ onKickoff }) {
       </div>
 
       <div className="actions" style={{ marginTop: '20px' }}>
-        <button className="btn primary" onClick={submitPersona}>▶ Generate Persona Crew</button>
+        <button className="btn primary" onClick={submitPersona}>▶ Generate Persona</button>
       </div>
     </section>
   );

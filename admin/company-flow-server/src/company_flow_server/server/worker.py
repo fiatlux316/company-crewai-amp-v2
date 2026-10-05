@@ -101,7 +101,7 @@ def main() -> None:
         }
         for p in deployed.glob("*"):
             if p.is_file() and p.name not in ignored_names:
-                if p.suffix in {".md", ".json", ".csv", ".pdf", ".txt", ".png", ".html", ".yaml", ".yml"}:
+                if p.suffix in {".md", ".json", ".csv", ".pdf", ".txt", ".png", ".html", ".yaml", ".yml", ".xlsx"}:
                     candidate_paths.add((p, p.name))
 
         for src_path, filename in candidate_paths:

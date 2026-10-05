@@ -116,6 +116,21 @@ export default function ExecutionHistory({ initialRunId }) {
     }
   };
 
+  const handleGenerateCrew = async (runId, filename) => {
+    const cleanName = filename.split('/').pop() || filename;
+    try {
+      const res = await fetch(`/api/v1/runs/${runId}/artifacts/${encodeURIComponent(cleanName)}`);
+      if (!res.ok) throw new Error('파일을 가져올 수 없습니다.');
+      const blob = await res.blob();
+      const file = new File([blob], cleanName, { type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' });
+      
+      const result = await api.generateCrew(file);
+      alert(`성공적으로 Crew가 생성되었습니다!\nID: ${result.crew_id}\nVersion: ${result.version}\n이제 Crew Management 탭에서 확인하세요.`);
+    } catch (err) {
+      alert(`Crew 생성 오류: ${err.message}`);
+    }
+  };
+
   return (
     <section id="history" className="view active">
       <div className="simple historyList">
@@ -177,14 +192,25 @@ export default function ExecutionHistory({ initialRunId }) {
                     {currentRun.artifacts.map((art) => {
                       const cleanName = art.filename.split('/').pop() || art.filename;
                       return (
-                        <button
-                          key={art.filename}
-                          onClick={() => handleDownload(currentRun.run_id, art.filename)}
-                          className="btn secondary"
-                          style={{ display: 'inline-flex', alignItems: 'center', gap: '6px', cursor: 'pointer' }}
-                        >
-                          📥 {cleanName} <span style={{ fontSize: '11px', color: '#6b7280' }}>({(art.size / 1024).toFixed(1)} KB)</span>
-                        </button>
+                        <div key={art.filename} style={{ display: 'flex', alignItems: 'center', gap: '4px' }}>
+                          <button
+                            onClick={() => handleDownload(currentRun.run_id, art.filename)}
+                            className="btn secondary"
+                            style={{ display: 'inline-flex', alignItems: 'center', gap: '6px', cursor: 'pointer' }}
+                          >
+                            📥 {cleanName} <span style={{ fontSize: '11px', color: '#6b7280' }}>({(art.size / 1024).toFixed(1)} KB)</span>
+                          </button>
+                          {cleanName.endsWith('.xlsx') && (
+                            <button
+                              onClick={() => handleGenerateCrew(currentRun.run_id, art.filename)}
+                              className="btn primary"
+                              style={{ padding: '6px 12px', fontSize: '13px', background: '#3b82f6', color: 'white', border: 'none', borderRadius: '4px', cursor: 'pointer' }}
+                              title="이 엑셀 파일을 사용하여 Crew를 생성합니다"
+                            >
+                              ✨ Crew 생성
+                            </button>
+                          )}
+                        </div>
                       );
                     })}
                   </div>
