@@ -92,4 +92,13 @@ def build_crew_graph(deployment_dir: Path) -> dict[str, Any]:
             t2 = str(task_items[i + 1]["id"])
             add_edge(f"task:{t1}", f"task:{t2}", "next")
 
-    return {"process": process.get("process", "sequential"), "nodes": nodes, "edges": edges}
+    # Parse inputs.json if it exists
+    inputs_json = {}
+    inputs_files = list(src.rglob("inputs.json"))
+    if inputs_files:
+        try:
+            inputs_json = json.loads(inputs_files[0].read_text(encoding="utf-8"))
+        except Exception:
+            pass
+
+    return {"process": process.get("process", "sequential"), "nodes": nodes, "edges": edges, "inputs_json": inputs_json}

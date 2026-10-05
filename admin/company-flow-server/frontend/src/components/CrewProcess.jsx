@@ -405,11 +405,18 @@ export default function CrewProcess({ onNavigateHistory }) {
     setSchCron(cfg.schedule?.cron || '');
     setMetaOwner(c.owner || '');
     setMetaDate(c.deployed_at || '');
-    setDefaultInputs(JSON.stringify(cfg.default_inputs || {}, null, 2));
+    
+    let currentInputs = cfg.default_inputs || {};
+    setDefaultInputs(JSON.stringify(currentInputs, null, 2));
 
     try {
       const g = await api.fetchGraph(c.crew_id, c.version);
       setGraph(g);
+      
+      // db에 기본 세팅이 비어있다면, inputs.json 파싱결과를 보여줌
+      if (Object.keys(currentInputs).length === 0 && g.inputs_json && Object.keys(g.inputs_json).length > 0) {
+        setDefaultInputs(JSON.stringify(g.inputs_json, null, 2));
+      }
     } catch (e) {
       setGraph(null);
     }
