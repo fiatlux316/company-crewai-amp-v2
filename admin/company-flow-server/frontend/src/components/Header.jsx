@@ -15,7 +15,7 @@ export default function Header({ activeTab, setActiveTab }) {
     <header className="top-header">
       <div className="header-left">
         <span className="current-view-title">{TAB_TITLES[activeTab] || 'Agent Platform'}</span>
-        <span className="environment-badge">v2.0 Enterprise</span>
+        <span className="environment-badge">v1.0 Enterprise</span>
       </div>
       <div className="header-right">
         <div className="system-status">
