@@ -81,6 +81,7 @@ function CrewDiagram({ graph, crewId, version, onUpdate }) {
   const nodesRef = useRef(null);
   const [selectedNode, setSelectedNode] = useState(null);
   const [editData, setEditData] = useState(null);
+  const [collapsedFields, setCollapsedFields] = useState({});
   const [isSaving, setIsSaving] = useState(false);
 
   useEffect(() => {
@@ -339,26 +340,61 @@ function CrewDiagram({ graph, crewId, version, onUpdate }) {
             <div className="meta">{selectedNode.type} · {selectedNode.id}</div>
             
             {editData && (selectedNode.type === 'agent' || selectedNode.type === 'task') ? (
-              <div className="edit-form" style={{ display: 'flex', flexDirection: 'column', gap: '8px', marginTop: '12px' }}>
-                {Object.keys(editData).map(k => (
-                  <div key={k} style={{ display: 'flex', flexDirection: 'column' }}>
-                    <label style={{ fontSize: '12px', fontWeight: 'bold', marginBottom: '4px', color: '#64748b' }}>{k}</label>
-                    {typeof editData[k] === 'string' ? (
-                      <textarea 
-                        style={{ width: '100%', minHeight: '80px', padding: '8px', border: '1px solid #cbd5e1', borderRadius: '4px', fontFamily: 'monospace', resize: 'vertical' }}
-                        value={(editData[k] || '').replace(/\\n/g, '\n')}
-                        onChange={e => setEditData({...editData, [k]: e.target.value.replace(/\n/g, '\\n')})}
-                      />
-                    ) : (
-                      <input 
-                        type="text"
-                        style={{ width: '100%', padding: '8px', border: '1px solid #cbd5e1', borderRadius: '4px' }}
-                        value={JSON.stringify(editData[k])}
-                        readOnly
-                      />
-                    )}
-                  </div>
-                ))}
+              <div className="edit-form" style={{ display: 'flex', flexDirection: 'column', gap: '12px', marginTop: '12px' }}>
+                {Object.keys(editData).map(k => {
+                  const isCollapsed = collapsedFields[k];
+                  const toggleCollapse = () => setCollapsedFields(prev => ({...prev, [k]: !prev[k]}));
+                  
+                  return (
+                    <div key={k} style={{ display: 'flex', flexDirection: 'column' }}>
+                      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '4px' }}>
+                        <label style={{ fontSize: '12px', fontWeight: 'bold', color: '#64748b' }}>{k}</label>
+                        <button 
+                          onClick={toggleCollapse}
+                          style={{ background: 'transparent', border: 'none', cursor: 'pointer', fontSize: '10px', color: '#3b82f6', padding: '2px 4px' }}
+                        >
+                          {isCollapsed ? '▼ 펼치기' : '▲ 접기'}
+                        </button>
+                      </div>
+                      
+                      {!isCollapsed && (
+                        typeof editData[k] === 'string' ? (
+                          <textarea 
+                            style={{ 
+                              width: '100%', 
+                              minHeight: '40px', 
+                              padding: '8px', 
+                              border: '1px solid #cbd5e1', 
+                              borderRadius: '4px', 
+                              fontFamily: 'monospace', 
+                              resize: 'none',
+                              overflow: 'hidden'
+                            }}
+                            value={(editData[k] || '').replace(/\\n/g, '\n')}
+                            onChange={e => {
+                              e.target.style.height = 'auto';
+                              e.target.style.height = e.target.scrollHeight + 'px';
+                              setEditData({...editData, [k]: e.target.value.replace(/\n/g, '\\n')})
+                            }}
+                            ref={el => {
+                              if (el) {
+                                el.style.height = 'auto';
+                                el.style.height = el.scrollHeight + 'px';
+                              }
+                            }}
+                          />
+                        ) : (
+                          <input 
+                            type="text"
+                            style={{ width: '100%', padding: '8px', border: '1px solid #cbd5e1', borderRadius: '4px' }}
+                            value={JSON.stringify(editData[k])}
+                            readOnly
+                          />
+                        )
+                      )}
+                    </div>
+                  );
+                })}
                 <div style={{ marginTop: '8px' }}>
                   <button 
                     disabled={isSaving}
