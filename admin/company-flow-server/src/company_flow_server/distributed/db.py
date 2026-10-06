@@ -9,6 +9,18 @@ engine=create_engine(DATABASE_URL,pool_pre_ping=True)
 SessionLocal=sessionmaker(engine,expire_on_commit=False)
 
 class Base(DeclarativeBase): pass
+
+class User(Base):
+    __tablename__="users"
+    id:Mapped[str]=mapped_column(String(36),primary_key=True,default=lambda:str(uuid.uuid4()))
+    user_id:Mapped[str]=mapped_column(String(6),unique=True,index=True)
+    name:Mapped[str]=mapped_column(String(255))
+    password:Mapped[str]=mapped_column(String(64))
+    user_type:Mapped[str]=mapped_column(String(1))
+    status:Mapped[str]=mapped_column(String(1),default="0")
+    created_at:Mapped[datetime]=mapped_column(DateTime(timezone=True),default=lambda:datetime.now(timezone.utc))
+    updated_at:Mapped[datetime]=mapped_column(DateTime(timezone=True),default=lambda:datetime.now(timezone.utc),onupdate=lambda:datetime.now(timezone.utc))
+
 class CrewSetting(Base):
     __tablename__="crew_settings"
     crew_id:Mapped[str]=mapped_column(String(255),primary_key=True)

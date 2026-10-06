@@ -10,7 +10,7 @@ const TAB_TITLES = {
   swagger: '📖 Swagger API Specification'
 };
 
-export default function Header({ activeTab, setActiveTab }) {
+export default function Header({ activeTab, setActiveTab, onLogout }) {
   return (
     <header className="top-header">
       <div className="header-left">
@@ -35,6 +35,9 @@ export default function Header({ activeTab, setActiveTab }) {
         <div className="workspace-tag">
           🚀 Company Private AMP
         </div>
+        <button onClick={onLogout} className="btn secondary" style={{ marginLeft: '15px' }}>
+          로그아웃
+        </button>
       </div>
     </header>
   );

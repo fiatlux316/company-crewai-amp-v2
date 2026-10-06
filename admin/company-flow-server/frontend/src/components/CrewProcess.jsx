@@ -431,7 +431,7 @@ function CrewDiagram({ graph, crewId, version, onUpdate }) {
   );
 }
 
-export default function CrewProcess({ onNavigateHistory, initialCrewId }) {
+export default function CrewProcess({ onNavigateHistory, initialCrewId, userType, userId }) {
   const [crews, setCrews] = useState([]);
   const [selectedCrew, setSelectedCrew] = useState(null);
   const [graph, setGraph] = useState(null);
@@ -576,7 +576,14 @@ export default function CrewProcess({ onNavigateHistory, initialCrewId }) {
 
               <div className="actions" style={{ marginTop: '10px', display: 'flex', gap: '12px', alignItems: 'center' }}>
                 <button className="btn primary" onClick={kickoff}>▶ Kickoff</button>
-                <button className="btn danger" onClick={deleteCrew}>Delete Crew</button>
+                <button 
+                  className="btn danger" 
+                  onClick={deleteCrew}
+                  disabled={userType === '3' && selectedCrew.owner !== userId}
+                  title={userType === '3' && selectedCrew.owner !== userId ? "자신이 배포한 Crew만 삭제할 수 있습니다." : ""}
+                >
+                  Delete Crew
+                </button>
               </div>
 
               {/* 1. Schedule (Cron) & Metadata 2-Column Row */}

@@ -152,8 +152,20 @@ def update_crew_node(crew_id: str, version: str, node_type: str, node_id: str, p
     return {"status": "success", "node_id": actual_id}
 
 @app.delete("/api/v1/crews/{crew_id}/{version}")
-def delete_crew(crew_id: str, version: str, confirm: bool=False, p: Principal = Depends(require("crew:delete"))) -> dict:
+def delete_crew(crew_id: str, version: str, confirm: bool=False, p: Principal = Depends(current_principal)) -> dict:
     if not confirm: raise HTTPException(status_code=400, detail="confirmation required")
+    # Check permissions
+    if "platform_admin" not in p.roles and "flow_admin" not in p.roles and "operator" not in p.roles:
+        if "developer" in p.roles or "crew_owner" in p.roles:
+            try:
+                manifest = registry.resolve_manifest(crew_id, version)
+                if manifest.get("owner") != p.subject:
+                    raise HTTPException(status_code=403, detail="doer can only delete their own crews")
+            except KeyError:
+                pass
+        else:
+            raise HTTPException(status_code=403, detail="permission denied")
+
     try: registry.delete(crew_id, version)
     except KeyError as exc: raise HTTPException(status_code=404, detail=str(exc)) from exc
     audit(p.subject,"crew.delete",f"{crew_id}@{version}")
@@ -183,8 +195,23 @@ def run_detail(run_id: str, p: Principal = Depends(require("run:read"))) -> dict
     except KeyError as exc: raise HTTPException(status_code=404, detail="run not found") from exc
 
 @app.delete("/api/v1/runs/{run_id}")
-def delete_run(run_id: str, confirm: bool=False, p: Principal = Depends(require("run:delete"))) -> dict:
+def delete_run(run_id: str, confirm: bool=False, p: Principal = Depends(current_principal)) -> dict:
     if not confirm: raise HTTPException(status_code=400, detail="confirmation required")
+    # Check permissions
+    if "platform_admin" not in p.roles and "flow_admin" not in p.roles and "operator" not in p.roles:
+        if "developer" in p.roles or "crew_owner" in p.roles:
+            try:
+                run_data = admin_service.get_run(run_id)
+                crew_id = run_data.get("crew_id")
+                version = run_data.get("version")
+                manifest = registry.resolve_manifest(crew_id, version)
+                if manifest.get("owner") != p.subject:
+                    raise HTTPException(status_code=403, detail="doer can only delete their own crew history")
+            except Exception:
+                pass
+        else:
+            raise HTTPException(status_code=403, detail="permission denied")
+
     try: admin_service.delete_run(run_id)
     except KeyError as exc: raise HTTPException(status_code=404, detail="run not found") from exc
     audit(p.subject,"run.delete",run_id)
@@ -259,8 +286,10 @@ def download_run_artifact(run_id: str, filename: str, p: Principal = Depends(req
 
 from .mcp.registry import get_mcp_catalog, invoke_mcp_tool
 from .api_crew_generate import router as generate_router
+from .api_auth import router as auth_router
 
 app.include_router(generate_router)
+app.include_router(auth_router)
 
 class McpTestRequest(BaseModel):
     tool_name: str

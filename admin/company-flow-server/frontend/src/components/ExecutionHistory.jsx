@@ -12,8 +12,9 @@ const KST = s => {
   } catch(e) { return s; }
 };
 
-export default function ExecutionHistory({ initialRunId, onNavigateCrew }) {
+export default function ExecutionHistory({ initialRunId, onNavigateCrew, userType, userId }) {
   const [runs, setRuns] = useState([]);
+  const [crews, setCrews] = useState([]);
   const [selectedRunId, setSelectedRunId] = useState(initialRunId || null);
   const [currentRun, setCurrentRun] = useState(null);
   const [loading, setLoading] = useState(false);
@@ -51,6 +52,8 @@ export default function ExecutionHistory({ initialRunId, onNavigateCrew }) {
       try {
         const data = await api.fetchRuns();
         setRuns(data.runs || []);
+        const crewsData = await api.fetchCrews();
+        setCrews(crewsData.crews || []);
       } catch(e) {
         console.error(e);
       }
@@ -162,7 +165,14 @@ export default function ExecutionHistory({ initialRunId, onNavigateCrew }) {
                 <span className={`badge ${currentRun.status}`}>{currentRun.status}</span>
                 {(currentRun.status === 'running' || currentRun.status === 'queued') && <span className="liveTag">Live</span>}
                 <div style={{marginLeft: 'auto'}}>
-                  <button className="btn danger" onClick={() => deleteHistory(currentRun.run_id)}>Delete</button>
+                  <button 
+                    className="btn danger" 
+                    onClick={() => deleteHistory(currentRun.run_id)}
+                    disabled={userType === '3' && crews.find(c => c.crew_id === currentRun.crew_id && c.version === currentRun.version)?.owner !== userId}
+                    title={userType === '3' && crews.find(c => c.crew_id === currentRun.crew_id && c.version === currentRun.version)?.owner !== userId ? "자신이 배포한 Crew의 이력만 삭제할 수 있습니다." : ""}
+                  >
+                    Delete
+                  </button>
                 </div>
               </div>
               <div className="runMeta">

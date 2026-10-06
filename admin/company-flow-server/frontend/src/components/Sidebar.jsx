@@ -1,7 +1,7 @@
 
 import React from 'react';
 
-export default function Sidebar({ activeTab, setActiveTab, collapsed, onToggle }) {
+export default function Sidebar({ activeTab, setActiveTab, collapsed, onToggle, userType }) {
   return (
     <aside className={`sidebar ${collapsed ? 'collapsed' : ''}`} id="appSidebar">
       <div className="sidebar-header">
@@ -31,6 +31,14 @@ export default function Sidebar({ activeTab, setActiveTab, collapsed, onToggle }
           📖 <span className="tab-text">Swagger API</span>
         </button>
       </div>
+
+      {userType === '1' && (
+        <div className="tabs" style={{ marginTop: 'auto', borderTop: '1px solid #1f2937' }}>
+          <button className={activeTab === 'users' ? 'active' : ''} onClick={() => setActiveTab('users')}>
+            👥 <span className="tab-text">User Management</span>
+          </button>
+        </div>
+      )}
     </aside>
   );
 }

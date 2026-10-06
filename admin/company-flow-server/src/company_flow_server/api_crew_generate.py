@@ -5,14 +5,14 @@ from pathlib import Path
 import pandas as pd
 from fastapi import APIRouter, UploadFile, File, HTTPException, Depends
 from pydantic import BaseModel
-from .auth.rbac import Principal, require
+from .auth.rbac import Principal, current_principal, require
 
 router = APIRouter()
 
 # Dependency or mock of registry for path resolution, to be used inside app.py
 # We will just inject the router into app.py and use the existing registry.
 
-def generate_crew_from_excel(excel_bytes: bytes, excel_name: str, registry_root: Path):
+def generate_crew_from_excel(excel_bytes: bytes, excel_name: str, registry_root: Path, owner_id: str):
     import io
     df = pd.read_excel(io.BytesIO(excel_bytes))
     df = df.fillna("")
@@ -122,7 +122,7 @@ def generate_crew_from_excel(excel_bytes: bytes, excel_name: str, registry_root:
       "version": version,
       "name": crew_dir_name,
       "description": f"Generated crew from {excel_name}.xlsx",
-      "owner": "SW Engineer",
+      "owner": owner_id,
       "entrypoint": f"{crew_dir_name}.entrypoint:run",
       "input_schema": {
         "type": "object",
@@ -258,7 +258,7 @@ def run(inputs: dict[str, Any], runtime: Any) -> dict[str, Any]:
 
 
 @router.post("/api/v1/crews/generate")
-async def api_generate_crew(file: UploadFile = File(...)):
+async def api_generate_crew(file: UploadFile = File(...), p: Principal = Depends(current_principal)):
     # We will use the FlowRegistry root as the base dir
     # To avoid circular imports, we just know the registry path or import it
     from .app import registry
@@ -270,7 +270,7 @@ async def api_generate_crew(file: UploadFile = File(...)):
     excel_name = Path(file.filename).stem
     
     try:
-        crew_id, version = generate_crew_from_excel(excel_bytes, excel_name, registry.root)
+        crew_id, version = generate_crew_from_excel(excel_bytes, excel_name, registry.root, p.subject)
         return {"status": "success", "crew_id": crew_id, "version": version}
     except Exception as e:
         import traceback
