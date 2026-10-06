@@ -7,6 +7,7 @@ import CrewProcess from './components/CrewProcess';
 import ExecutionHistory from './components/ExecutionHistory';
 import NodeFlowDesigner from './components/NodeFlowDesigner';
 import McpCatalog from './components/McpCatalog';
+import DialogContainer from './components/Dialog';
 import './index.css';
 
 function App() {
@@ -47,6 +48,7 @@ function App() {
           )}
         </div>
       </div>
+      <DialogContainer />
     </div>
   );
 }

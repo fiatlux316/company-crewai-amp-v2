@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { api } from '../utils/api';
+import { showAlert } from './Dialog';
 
 export default function GenerateCrew() {
   const [file, setFile] = useState(null);
@@ -15,7 +16,7 @@ export default function GenerateCrew() {
 
   const handleGenerate = async () => {
     if (!file) {
-      alert('파일을 선택해주세요.');
+      await showAlert('파일을 선택해주세요.');
       return;
     }
     setLoading(true);

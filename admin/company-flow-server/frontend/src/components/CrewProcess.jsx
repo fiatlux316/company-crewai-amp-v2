@@ -1,6 +1,6 @@
-
 import React, { useState, useEffect, useRef } from 'react';
 import { api } from '../utils/api';
+import { showAlert, showConfirm } from './Dialog';
 
 const E = s => String(s ?? '');
 const KST = s => {
@@ -406,10 +406,10 @@ function CrewDiagram({ graph, crewId, version, onUpdate }) {
                       try {
                         setIsSaving(true);
                         await api.updateCrewNode(crewId, version, selectedNode.type, selectedNode.id, editData);
-                        alert('저장되었습니다.');
+                        await showAlert('저장되었습니다.');
                         if (onUpdate) onUpdate();
                       } catch (e) {
-                        alert('저장 실패: ' + e.message);
+                        await showAlert('저장 실패: ' + e.message);
                       } finally {
                         setIsSaving(false);
                       }
@@ -483,15 +483,15 @@ export default function CrewProcess({ onNavigateHistory }) {
   const saveSettings = async () => {
     if (!selectedCrew) return;
     let inputs;
-    try { inputs = JSON.parse(defaultInputs || '{}'); } catch (e) { alert('Input JSON 오류'); return; }
+    try { inputs = JSON.parse(defaultInputs || '{}'); } catch (e) { await showAlert('Input JSON 오류'); return; }
     const body = {
       schedule: { enabled: schEnabled, cron: schCron.trim() },
       default_inputs: inputs,
       metadata: { owner: metaOwner.trim(), deployed_at: metaDate.trim() }
     };
     const r = await api.saveCrewSettings(selectedCrew.crew_id, body);
-    if (!r.ok) { alert(await r.text()); return; }
-    alert('저장되었습니다.');
+    if (!r.ok) { await showAlert(await r.text()); return; }
+    await showAlert('저장되었습니다.');
     await loadCrews();
   };
 
@@ -502,22 +502,28 @@ export default function CrewProcess({ onNavigateHistory }) {
       try {
         inputs = JSON.parse(defaultInputs);
       } catch (e) {
-        alert('Initial Input Parameters JSON 형식이 올바르지 않습니다: ' + e.message);
+        await showAlert('Initial Input Parameters JSON 형식이 올바르지 않습니다: ' + e.message);
         return;
       }
     }
-    if (!confirm(`${selectedCrew.crew_id}@${selectedCrew.version} 을(를) 실행합니다.`)) return;
+    
+    const isConfirmed = await showConfirm(`${selectedCrew.crew_id}@${selectedCrew.version} 을(를) 실행합니다.`);
+    if (!isConfirmed) return;
+    
     try {
       const d = await api.kickoff(selectedCrew.crew_id, selectedCrew.version, { inputs });
       if (onNavigateHistory) onNavigateHistory(d.run_id);
-    } catch (e) { alert('Error: ' + e.message); }
+    } catch (e) { await showAlert('Error: ' + e.message); }
   };
 
   const deleteCrew = async () => {
     if (!selectedCrew) return;
-    if (!confirm(`경고: ${selectedCrew.crew_id}@${selectedCrew.version} 배포본을 삭제합니다. Flow에서 참조 중이면 실행이 실패할 수 있습니다. 계속합니까?`)) return;
+    
+    const isConfirmed = await showConfirm(`경고: ${selectedCrew.crew_id}@${selectedCrew.version} 배포본을 삭제합니다.\nFlow에서 참조 중이면 실행이 실패할 수 있습니다. 계속합니까?`);
+    if (!isConfirmed) return;
+    
     const r = await api.deleteCrew(selectedCrew.crew_id, selectedCrew.version);
-    if (!r.ok) { alert(await r.text()); return; }
+    if (!r.ok) { await showAlert(await r.text()); return; }
     setSelectedCrew(null);
     setGraph(null);
     await loadCrews();

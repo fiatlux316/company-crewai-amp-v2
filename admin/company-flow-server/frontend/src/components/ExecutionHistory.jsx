@@ -1,6 +1,6 @@
-
 import React, { useState, useEffect } from 'react';
 import { api } from '../utils/api';
+import { showAlert, showConfirm } from './Dialog';
 
 const E = s => String(s??'').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 const KST = s => {
@@ -82,14 +82,15 @@ export default function ExecutionHistory({ initialRunId }) {
   };
 
   const deleteHistory = async (id) => {
-    if(!window.confirm('경고: 이 실행 이력을 영구 삭제합니다. 계속합니까?')) return;
+    const isConfirmed = await showConfirm('경고: 이 실행 이력을 영구 삭제합니다. 계속합니까?');
+    if(!isConfirmed) return;
     try {
       await api.deleteRun(id);
       setSelectedRunId(null);
       setCurrentRun(null);
       loadHistory();
     } catch(e) {
-      alert(e.message);
+      await showAlert(e.message);
     }
   };
 
@@ -99,7 +100,7 @@ export default function ExecutionHistory({ initialRunId }) {
       const res = await fetch(`/api/v1/runs/${runId}/artifacts/${encodeURIComponent(cleanName)}`);
       if (!res.ok) {
         const errText = await res.text();
-        alert(`다운로드 실패 (${res.status}): ${errText}`);
+        await showAlert(`다운로드 실패 (${res.status}): ${errText}`);
         return;
       }
       const blob = await res.blob();
@@ -112,7 +113,7 @@ export default function ExecutionHistory({ initialRunId }) {
       a.remove();
       window.URL.revokeObjectURL(url);
     } catch (e) {
-      alert(`다운로드 중 오류가 발생했습니다: ${e.message}`);
+      await showAlert(`다운로드 중 오류가 발생했습니다: ${e.message}`);
     }
   };
 
@@ -125,9 +126,9 @@ export default function ExecutionHistory({ initialRunId }) {
       const file = new File([blob], cleanName, { type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' });
       
       const result = await api.generateCrew(file);
-      alert(`성공적으로 Crew가 생성되었습니다!\nID: ${result.crew_id}\nVersion: ${result.version}\n이제 Crew Management 탭에서 확인하세요.`);
+      await showAlert(`성공적으로 Crew가 생성되었습니다!\nID: ${result.crew_id}\nVersion: ${result.version}\n이제 Crew Management 탭에서 확인하세요.`);
     } catch (err) {
-      alert(`Crew 생성 오류: ${err.message}`);
+      await showAlert(`Crew 생성 오류: ${err.message}`);
     }
   };
 

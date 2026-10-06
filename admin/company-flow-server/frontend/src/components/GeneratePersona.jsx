@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { api } from '../utils/api';
+import { showAlert, showConfirm } from './Dialog';
 
 const WORK_TYPES = {
   '일반운영': ['단순문의', '단순처리'],
@@ -52,9 +53,9 @@ export default function GeneratePersona({ onKickoff }) {
   };
 
   const submitPersona = async () => {
-    if (!personaName.trim()) return alert("Persona 이름을 입력하세요.");
-    if (!workCategory || !workSubCategory) return alert("업무 유형을 선택하세요.");
-    if (!goal.trim()) return alert("업무 목적을 입력하세요.");
+    if (!personaName.trim()) { await showAlert("Persona 이름을 입력하세요."); return; }
+    if (!workCategory || !workSubCategory) { await showAlert("업무 유형을 선택하세요."); return; }
+    if (!goal.trim()) { await showAlert("업무 목적을 입력하세요."); return; }
 
     let stepTools = [];
     Object.entries(steps).forEach(([id, config]) => {
@@ -69,13 +70,13 @@ export default function GeneratePersona({ onKickoff }) {
       }
     });
 
-    if (stepTools.length === 0) return alert("최소 하나 이상의 단계를 선택하세요.");
+    if (stepTools.length === 0) { await showAlert("최소 하나 이상의 단계를 선택하세요."); return; }
 
     try {
       const { crews } = await api.fetchCrews();
       const targetCrew = crews.find(c => c.crew_id === 'ops.persona_generate');
 
-      if (!targetCrew) return alert("ops.persona_generate 크루를 찾을 수 없습니다.");
+      if (!targetCrew) { await showAlert("ops.persona_generate 크루를 찾을 수 없습니다."); return; }
 
       const payload = {
         inputs: {
@@ -88,12 +89,14 @@ export default function GeneratePersona({ onKickoff }) {
         }
       };
 
-      if (!window.confirm(`Persona 이름:\n${personaName}\n\n업무 유형:\n${workCategory} > ${workSubCategory}\n\n업무 목적:\n${goal}\n\n단계별 도구:\n${stepTools.join('\n')}\n\n진행하시겠습니까?`)) return;
+      const confirmMsg = `Persona 이름:\n${personaName}\n\n업무 유형:\n${workCategory} > ${workSubCategory}\n\n업무 목적:\n${goal}\n\n단계별 도구:\n${stepTools.join('\n')}\n\n진행하시겠습니까?`;
+      const isConfirmed = await showConfirm(confirmMsg);
+      if (!isConfirmed) return;
 
       const res = await api.kickoff(targetCrew.crew_id, targetCrew.version, payload);
       onKickoff(res.run_id);
     } catch (e) {
-      alert("Error: " + e.message);
+      await showAlert("Error: " + e.message);
     }
   };
 
