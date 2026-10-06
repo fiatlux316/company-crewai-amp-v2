@@ -28,9 +28,10 @@ services:
 
   api:
     build: .
-    command: [ "uvicorn", "company_flow_server.app:app", "--host", "0.0.0.0", "--port", "8080", "--workers", "2" ]
+    command: [ "uvicorn", "company_flow_server.app:app", "--host", "0.0.0.0", "--port", "8080", "--reload", "--reload-dir", "/app/src" ]
     env_file: [ .env ]
     environment: &runtime-env
+      PYTHONPATH: /app/src
       DATABASE_URL: postgresql+psycopg://${POSTGRES_USER}:${POSTGRES_PASSWORD}@postgres:5432/${POSTGRES_DB}
       CELERY_BROKER_URL: redis://redis:6379/0
       CELERY_RESULT_BACKEND: redis://redis:6379/1
@@ -44,6 +45,7 @@ services:
       timeout: 5s
       retries: 10
     volumes:
+      - ./src:/app/src
       - ./crew_registry:/data/team_registry
       - ./flows:/app/flows
       - ./artifacts:/app/artifacts
@@ -51,11 +53,21 @@ services:
       postgres: { condition: service_healthy }
       redis: { condition: service_healthy }
 
+  frontend-dev:
+    image: node:20-slim
+    working_dir: /frontend
+    command: sh -c "npm install && npm run dev -- --host 0.0.0.0"
+    ports:
+      - "5173:5173"
+    volumes:
+      - ./frontend:/frontend
+
   mcp:
     build: .
     command: [ "company-mcp" ]
     env_file: [ .env ]
     environment:
+      PYTHONPATH: /app/src
       DATABASE_URL: postgresql+psycopg://${POSTGRES_USER}:${POSTGRES_PASSWORD}@postgres:5432/${POSTGRES_DB}
       CELERY_BROKER_URL: redis://redis:6379/0
       CELERY_RESULT_BACKEND: redis://redis:6379/1
@@ -66,6 +78,7 @@ services:
       MCP_PORT: 8090
     ports: [ "8090:8090" ]
     volumes:
+      - ./src:/app/src
       - ./crew_registry:/data/team_registry
       - ./flows:/app/flows
       - ./artifacts:/app/artifacts
@@ -79,6 +92,7 @@ services:
     env_file: [ .env ]
     environment: *runtime-env
     volumes:
+      - ./src:/app/src
       - ./crew_registry:/data/team_registry
       - ./flows:/app/flows
       - ./artifacts:/app/artifacts
@@ -92,6 +106,7 @@ services:
     env_file: [ .env ]
     environment: *runtime-env
     volumes:
+      - ./src:/app/src
       - ./crew_registry:/data/team_registry
       - ./flows:/app/flows
       - ./artifacts:/app/artifacts
