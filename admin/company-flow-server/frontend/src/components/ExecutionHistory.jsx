@@ -12,7 +12,7 @@ const KST = s => {
   } catch(e) { return s; }
 };
 
-export default function ExecutionHistory({ initialRunId }) {
+export default function ExecutionHistory({ initialRunId, onNavigateCrew }) {
   const [runs, setRuns] = useState([]);
   const [selectedRunId, setSelectedRunId] = useState(initialRunId || null);
   const [currentRun, setCurrentRun] = useState(null);

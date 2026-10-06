@@ -431,7 +431,7 @@ function CrewDiagram({ graph, crewId, version, onUpdate }) {
   );
 }
 
-export default function CrewProcess({ onNavigateHistory }) {
+export default function CrewProcess({ onNavigateHistory, initialCrewId }) {
   const [crews, setCrews] = useState([]);
   const [selectedCrew, setSelectedCrew] = useState(null);
   const [graph, setGraph] = useState(null);
@@ -446,15 +446,33 @@ export default function CrewProcess({ onNavigateHistory }) {
   const loadCrews = async () => {
     try {
       const data = await api.fetchCrews();
-      setCrews(data.crews || []);
-    } catch (e) { }
+      let fetchedCrews = data.crews || [];
+      // 가장 최근에 생성한 crew가 위로 올라오도록 내림차순 정렬 (deployed_at 기준)
+      fetchedCrews.sort((a, b) => new Date(b.deployed_at || 0) - new Date(a.deployed_at || 0));
+      setCrews(fetchedCrews);
+      return fetchedCrews;
+    } catch (e) { return []; }
   };
 
   useEffect(() => {
-    loadCrews();
+    let active = true;
+    const init = async () => {
+      const fetchedCrews = await loadCrews();
+      if (active && initialCrewId) {
+        const target = fetchedCrews.find(c => c.crew_id === initialCrewId);
+        if (target) {
+          showCrew(target);
+        }
+      }
+    };
+    init();
+    
     const timer = setInterval(loadCrews, 3000);
-    return () => clearInterval(timer);
-  }, []);
+    return () => {
+      active = false;
+      clearInterval(timer);
+    };
+  }, [initialCrewId]);
 
   const showCrew = async (c) => {
     setSelectedCrew(c);
@@ -537,7 +555,7 @@ export default function CrewProcess({ onNavigateHistory }) {
           <div>
             {crews.map(c => (
               <div key={c.crew_id + c.version} className="card" onClick={() => showCrew(c)}>
-                <b>{c.name}</b>
+                <b>{(c.name || '').replace(/\s*Crew$/i, '')}</b>
                 <div className="meta">{c.crew_id} @ {c.version}</div>
                 <div className="meta">{c.owner || ''} · {KST(c.deployed_at)}</div>
               </div>
@@ -549,7 +567,7 @@ export default function CrewProcess({ onNavigateHistory }) {
             <div className="empty">Crew를 선택하세요.</div>
           ) : (
             <div id="crewDetail">
-              <h2>{selectedCrew.name}</h2>
+              <h2>{(selectedCrew.name || '').replace(/\s*Crew$/i, '')}</h2>
               <div className="meta">{selectedCrew.crew_id} @ {selectedCrew.version} · deployed {KST(selectedCrew.deployed_at)}</div>
 
               <div className="actions" style={{ marginTop: '10px', display: 'flex', gap: '12px', alignItems: 'center' }}>

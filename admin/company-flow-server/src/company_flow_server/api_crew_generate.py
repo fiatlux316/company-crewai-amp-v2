@@ -120,7 +120,7 @@ def generate_crew_from_excel(excel_bytes: bytes, excel_name: str, registry_root:
       "schema_version": 1,
       "crew_id": f"ops.{crew_dir_name}",
       "version": version,
-      "name": f"{crew_dir_name} Crew",
+      "name": crew_dir_name,
       "description": f"Generated crew from {excel_name}.xlsx",
       "owner": "SW Engineer",
       "entrypoint": f"{crew_dir_name}.entrypoint:run",
