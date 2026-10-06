@@ -35,33 +35,37 @@ export default function DialogContainer() {
   return (
     <div style={{
       position: 'fixed', top: 0, left: 0, width: '100vw', height: '100vh',
-      background: 'rgba(15, 23, 42, 0.4)', backdropFilter: 'blur(2px)', zIndex: 99999,
+      background: 'rgba(0, 0, 0, 0.6)', backdropFilter: 'blur(3px)', zIndex: 99999,
       display: 'flex', alignItems: 'center', justifyContent: 'center'
     }}>
       <div style={{
-        background: '#ffffff', borderRadius: '12px', width: '420px', maxWidth: '90%',
-        boxShadow: '0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 8px 10px -6px rgba(0, 0, 0, 0.1)', 
-        padding: '24px', border: '1px solid #e2e8f0',
+        background: '#1e293b', borderRadius: '12px', width: '420px', maxWidth: '90%',
+        boxShadow: '0 25px 50px -12px rgba(0, 0, 0, 0.5)', 
+        padding: '24px', border: '1px solid #334155',
         animation: 'fadeIn 0.2s ease-out'
       }}>
-        <h3 style={{ marginTop: 0, marginBottom: '16px', color: '#0f172a', fontSize: '18px', fontWeight: 'bold' }}>
+        <h3 style={{ marginTop: 0, marginBottom: '16px', color: '#f8fafc', fontSize: '18px', fontWeight: 'bold' }}>
           {dialog.title}
         </h3>
-        <div style={{ color: '#475569', fontSize: '14px', lineHeight: '1.6', marginBottom: '24px', whiteSpace: 'pre-wrap', maxHeight: '60vh', overflowY: 'auto' }}>
+        <div style={{ color: '#cbd5e1', fontSize: '14px', lineHeight: '1.6', marginBottom: '24px', whiteSpace: 'pre-wrap', maxHeight: '60vh', overflowY: 'auto' }}>
           {dialog.message}
         </div>
         <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '10px' }}>
           {dialog.type === 'confirm' && (
             <button 
               onClick={() => handleClose(false)}
-              style={{ padding: '10px 16px', borderRadius: '6px', border: '1px solid #cbd5e1', background: '#f8fafc', color: '#475569', cursor: 'pointer', fontWeight: '600', fontSize: '14px' }}
+              style={{ padding: '10px 16px', borderRadius: '6px', border: '1px solid #475569', background: '#334155', color: '#f1f5f9', cursor: 'pointer', fontWeight: '600', fontSize: '14px', transition: 'background 0.2s' }}
+              onMouseOver={(e) => e.target.style.background = '#475569'}
+              onMouseOut={(e) => e.target.style.background = '#334155'}
             >
               취소
             </button>
           )}
           <button 
             onClick={() => handleClose(true)}
-            style={{ padding: '10px 16px', borderRadius: '6px', border: 'none', background: '#3b82f6', color: '#ffffff', cursor: 'pointer', fontWeight: '600', fontSize: '14px', minWidth: '80px' }}
+            style={{ padding: '10px 16px', borderRadius: '6px', border: 'none', background: '#3b82f6', color: '#ffffff', cursor: 'pointer', fontWeight: '600', fontSize: '14px', minWidth: '80px', transition: 'background 0.2s' }}
+            onMouseOver={(e) => e.target.style.background = '#2563eb'}
+            onMouseOut={(e) => e.target.style.background = '#3b82f6'}
           >
             확인
           </button>

@@ -2,7 +2,7 @@
   "schema_version": 1,
   "crew_id": "ops.TESTQA",
   "version": "1.0.0",
-  "name": "TESTQA Crew",
+  "name": "TESTQA",
   "description": "Generated crew from TESTQA.xlsx",
   "owner": "SW Engineer",
   "entrypoint": "TESTQA.entrypoint:run",

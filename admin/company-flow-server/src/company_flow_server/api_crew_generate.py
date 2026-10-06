@@ -141,6 +141,16 @@ def generate_crew_from_excel(excel_bytes: bytes, excel_name: str, registry_root:
     with open(base_dir / "crew-manifest.json", "w", encoding="utf-8") as f:
         json.dump(manifest, f, indent=2, ensure_ascii=False)
         
+    import hashlib
+    from datetime import datetime, timezone
+    digest = hashlib.sha256(excel_bytes).hexdigest()
+    deployment_data = {
+        "sha256": digest,
+        "deployed_at": datetime.now(timezone.utc).isoformat()
+    }
+    with open(base_dir / "deployment.json", "w", encoding="utf-8") as f:
+        json.dump(deployment_data, f, indent=2, ensure_ascii=False)
+        
     entrypoint_code = f"""from __future__ import annotations
 
 import json
