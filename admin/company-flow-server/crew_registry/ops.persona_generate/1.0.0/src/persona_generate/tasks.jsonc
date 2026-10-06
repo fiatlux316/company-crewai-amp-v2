@@ -6,7 +6,7 @@
     "output_file": "./output/{persona_name}.md"
   },
   "convert_to_excel": {
-    "description": "앞선 작업 결과로 생성된 './output/{persona_name}.md' 마크다운 문서가 준비되었습니다. 'markdown_to_excel_converter' 도구를 사용하여 이 파일을 엑셀 파일 ('./output/{persona_name}.xlsx') 로 변환해서 artifacts 폴더로 넣어주세요. 변환 결과 메시지를 반환해야 합니다.",
+    "description": "앞선 작업 결과로 생성된 './output/{persona_name}.md' 마크다운 문서가 준비되었습니다. 'markdown_to_excel_converter' 도구를 사용하여 이 파일을 엑셀 파일 ('./output/{persona_name}.xlsx') 로 변환해주세요. 이때 기존에 ./output/*.xlsx 파일은 모두 삭제 해주세요.  변환 결과 메시지를 반환해야 합니다.",
     "expected_output": "성공적으로 엑셀 파일로 변환되었다는 결과 메시지와 파일 경로",
     "context": [
       "generate_persona"
