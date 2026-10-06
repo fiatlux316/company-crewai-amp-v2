@@ -75,7 +75,7 @@ const describeCron = (expr) => {
   }
 };
 
-function CrewDiagram({ graph, crewId, version, onUpdate }) {
+function CrewDiagram({ graph, crewId, version, onUpdate, isReadOnly }) {
   const diagramRef = useRef(null);
   const svgRef = useRef(null);
   const nodesRef = useRef(null);
@@ -399,9 +399,9 @@ function CrewDiagram({ graph, crewId, version, onUpdate }) {
                   );
                 })}
                 <div style={{ marginTop: '8px' }}>
-                  <button 
-                    disabled={isSaving}
-                    style={{ padding: '8px 16px', background: '#3b82f6', color: '#fff', border: 'none', borderRadius: '4px', cursor: 'pointer' }}
+                                    <button 
+                    disabled={isReadOnly || isSaving}
+                    style={{ padding: '8px 16px', background: isReadOnly || isSaving ? '#9ca3af' : '#3b82f6', color: '#fff', border: 'none', borderRadius: '4px', cursor: isReadOnly || isSaving ? 'not-allowed' : 'pointer' }}
                     onClick={async () => {
                       try {
                         setIsSaving(true);
@@ -433,6 +433,7 @@ function CrewDiagram({ graph, crewId, version, onUpdate }) {
 
 export default function CrewProcess({ onNavigateHistory, initialCrewId, userType, userId }) {
   const [crews, setCrews] = useState([]);
+  const isReadOnly = userType === '3' && selectedCrew?.owner !== userId;
   const [selectedCrew, setSelectedCrew] = useState(null);
   const [graph, setGraph] = useState(null);
 
@@ -579,8 +580,8 @@ export default function CrewProcess({ onNavigateHistory, initialCrewId, userType
                 <button 
                   className="btn danger" 
                   onClick={deleteCrew}
-                  disabled={userType === '3' && selectedCrew.owner !== userId}
-                  title={userType === '3' && selectedCrew.owner !== userId ? "자신이 배포한 Crew만 삭제할 수 있습니다." : ""}
+                  disabled={isReadOnly}
+                  title={isReadOnly ? "자신이 배포한 Crew만 삭제할 수 있습니다." : ""}
                 >
                   Delete Crew
                 </button>
@@ -600,7 +601,7 @@ export default function CrewProcess({ onNavigateHistory, initialCrewId, userType
                       📅 {describeCron(schCron)}
                     </p>
                   )}
-                  <button className="btn secondary" onClick={saveSettings}>Save Schedule</button>
+                  <button className="btn secondary" onClick={saveSettings} disabled={isReadOnly} title={isReadOnly ? "자신이 배포한 Crew만 수정할 수 있습니다." : ""}>Save Schedule</button>
                   <p className="hint">관리자 상태로 별도 저장되므로 Crew 재배포 시 보존됩니다.</p>
                 </div>
 
@@ -611,7 +612,7 @@ export default function CrewProcess({ onNavigateHistory, initialCrewId, userType
                   <input value={metaOwner} onChange={e => setMetaOwner(e.target.value)} />
                   <label>Deployment Date</label>
                   <input value={metaDate} onChange={e => setMetaDate(e.target.value)} />
-                  <button className="btn secondary" onClick={saveSettings}>Save Metadata</button>
+                  <button className="btn secondary" onClick={saveSettings} disabled={isReadOnly} title={isReadOnly ? "자신이 배포한 Crew만 수정할 수 있습니다." : ""}>Save Metadata</button>
                 </div>
               </div>
 
@@ -619,13 +620,13 @@ export default function CrewProcess({ onNavigateHistory, initialCrewId, userType
               <div className="panel">
                 <h3>Initial Input Parameters</h3>
                 <textarea value={defaultInputs} onChange={e => setDefaultInputs(e.target.value)} style={{ minHeight: '160px', fontFamily: 'ui-monospace, monospace' }}></textarea>
-                <button className="btn secondary" onClick={saveSettings}>Save Defaults</button>
+                <button className="btn secondary" onClick={saveSettings} disabled={isReadOnly} title={isReadOnly ? "자신이 배포한 Crew만 수정할 수 있습니다." : ""}>Save Defaults</button>
               </div>
 
               {/* 3. Task · Agent · Tool Process (Full-Width Single Row) */}
               <div className="panel">
                 <h3>Task · Agent · Tool Process</h3>
-                {graph ? <CrewDiagram graph={graph} crewId={selectedCrew.crew_id} version={selectedCrew.version} onUpdate={() => showCrew(selectedCrew)} /> : <div className="hint">프로세스 그래프를 로딩 중...</div>}
+                {graph ? <CrewDiagram graph={graph} crewId={selectedCrew.crew_id} version={selectedCrew.version} onUpdate={() => showCrew(selectedCrew)} isReadOnly={isReadOnly} /> : <div className="hint">프로세스 그래프를 로딩 중...</div>}
               </div>
 
               {/* 4. Execution History Link (Full-Width Single Row) */}
