@@ -9,25 +9,25 @@ export default function Sidebar({ activeTab, setActiveTab, collapsed, onToggle }
         <div className="brand">Agent Platform</div>
       </div>
       <div className="tabs">
-        <button className={activeTab === 'persona' ? 'active' : ''} onClick={() => setActiveTab('persona')}>
+        <button title={collapsed ? "Generate Persona" : ""} className={activeTab === 'persona' ? 'active' : ''} onClick={() => setActiveTab('persona')}>
           👤 <span className="tab-text">Generate Persona</span>
         </button>
-        <button className={activeTab === 'generate_crew' ? 'active' : ''} onClick={() => setActiveTab('generate_crew')}>
+        <button title={collapsed ? "Generate Crew" : ""} className={activeTab === 'generate_crew' ? 'active' : ''} onClick={() => setActiveTab('generate_crew')}>
           ✨ <span className="tab-text">Generate Crew</span>
         </button>
-        <button className={activeTab === 'crew' ? 'active' : ''} onClick={() => setActiveTab('crew')}>
+        <button title={collapsed ? "Crew Management" : ""} className={activeTab === 'crew' ? 'active' : ''} onClick={() => setActiveTab('crew')}>
           ⚙️ <span className="tab-text">Crew Management</span>
         </button>
-        <button className={activeTab === 'history' ? 'active' : ''} onClick={() => setActiveTab('history')}>
+        <button title={collapsed ? "Execution History" : ""} className={activeTab === 'history' ? 'active' : ''} onClick={() => setActiveTab('history')}>
           📋 <span className="tab-text">Execution History</span>
         </button>
-        <button className={activeTab === 'flow' ? 'active' : ''} onClick={() => setActiveTab('flow')}>
+        <button title={collapsed ? "Flow Designer" : ""} className={activeTab === 'flow' ? 'active' : ''} onClick={() => setActiveTab('flow')}>
           🔀 <span className="tab-text">Flow Designer</span>
         </button>
-        <button className={activeTab === 'mcp' ? 'active' : ''} onClick={() => setActiveTab('mcp')}>
+        <button title={collapsed ? "MCP Tools" : ""} className={activeTab === 'mcp' ? 'active' : ''} onClick={() => setActiveTab('mcp')}>
           🛠 <span className="tab-text">MCP Tools</span>
         </button>
-        <button className={activeTab === 'swagger' ? 'active' : ''} onClick={() => setActiveTab('swagger')}>
+        <button title={collapsed ? "Swagger API" : ""} className={activeTab === 'swagger' ? 'active' : ''} onClick={() => setActiveTab('swagger')}>
           📖 <span className="tab-text">Swagger API</span>
         </button>
       </div>
