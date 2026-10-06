@@ -39,16 +39,16 @@ export default function GenerateCrew() {
         Crew AI Spec 문서(Excel)를 업로드하여 tasks.jsonc, agents.jsonc, process.jsonc 등의 설정을 자동 생성합니다.
       </p>
 
-      <div style={{ display: 'flex', flexDirection: 'column', gap: '15px', maxWidth: '500px' }}>
-        <div style={{ background: '#1f2937', padding: '20px', borderRadius: '8px', border: '1px solid #374151' }}>
-          <label style={{ display: 'block', marginBottom: '10px', fontWeight: 'bold' }}>
+      <div style={{ display: 'flex', flexDirection: 'column', gap: '15px', maxWidth: '750px' }}>
+        <div className="panel" style={{ margin: 0 }}>
+          <h3 style={{ marginTop: 0, marginBottom: '12px', color: '#1f2937' }}>
             엑셀 파일 선택 (.xlsx)
-          </label>
+          </h3>
           <input 
             type="file" 
             accept=".xlsx" 
             onChange={handleFileChange}
-            style={{ width: '100%', padding: '10px', background: '#374151', color: 'white', borderRadius: '4px', border: 'none' }}
+            style={{ width: '460px', maxWidth: '100%', padding: '10px', background: '#f8fafc', color: '#374151', borderRadius: '6px', border: '1px solid #cbd5e1', cursor: 'pointer' }}
           />
         </div>
 
@@ -57,7 +57,7 @@ export default function GenerateCrew() {
           disabled={loading || !file}
           style={{
             padding: '12px 20px',
-            background: loading ? '#6b7280' : '#3b82f6',
+            background: loading ? '#9ca3af' : '#3b82f6',
             color: 'white',
             border: 'none',
             borderRadius: '6px',
