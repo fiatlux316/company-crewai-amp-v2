@@ -342,16 +342,19 @@ function CrewDiagram({ graph, crewId, version, onUpdate }) {
             {editData && (selectedNode.type === 'agent' || selectedNode.type === 'task') ? (
               <div className="edit-form" style={{ display: 'flex', flexDirection: 'column', gap: '12px', marginTop: '12px' }}>
                 {Object.keys(editData).map(k => {
-                  const isCollapsed = collapsedFields[k];
-                  const toggleCollapse = () => setCollapsedFields(prev => ({...prev, [k]: !prev[k]}));
+                  // 기본값을 '접힘(true)'으로 처리하기 위해 명시적으로 false가 아닐 경우 true로 간주
+                  const isCollapsed = collapsedFields[k] !== false;
+                  const toggleCollapse = () => setCollapsedFields(prev => ({...prev, [k]: !isCollapsed}));
                   
                   return (
                     <div key={k} style={{ display: 'flex', flexDirection: 'column' }}>
-                      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '4px' }}>
-                        <label style={{ fontSize: '12px', fontWeight: 'bold', color: '#64748b' }}>{k}</label>
+                      <div 
+                        onClick={toggleCollapse}
+                        style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '4px', cursor: 'pointer', userSelect: 'none' }}
+                      >
+                        <label style={{ fontSize: '18px', fontWeight: 'bold', color: '#64748b', cursor: 'pointer' }}>{k}</label>
                         <button 
-                          onClick={toggleCollapse}
-                          style={{ background: 'transparent', border: 'none', cursor: 'pointer', fontSize: '10px', color: '#3b82f6', padding: '2px 4px' }}
+                          style={{ background: 'transparent', border: 'none', cursor: 'pointer', fontSize: '12px', color: '#3b82f6', padding: '2px 4px' }}
                         >
                           {isCollapsed ? '▼ 펼치기' : '▲ 접기'}
                         </button>
