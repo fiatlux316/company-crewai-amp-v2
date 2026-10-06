@@ -609,10 +609,12 @@ export default function CrewProcess({ onNavigateHistory, initialCrewId, userType
                 <div className="panel" style={{ margin: 0 }}>
                   <h3>Metadata</h3>
                   <label>Owner</label>
-                  <input value={metaOwner} onChange={e => setMetaOwner(e.target.value)} />
+                  <input value={metaOwner} onChange={e => setMetaOwner(e.target.value)} disabled={userType === '3'} />
                   <label>Deployment Date</label>
-                  <input value={metaDate} onChange={e => setMetaDate(e.target.value)} />
-                  <button className="btn secondary" onClick={saveSettings} disabled={isReadOnly} title={isReadOnly ? "자신이 배포한 Crew만 수정할 수 있습니다." : ""}>Save Metadata</button>
+                  <input value={metaDate} onChange={e => setMetaDate(e.target.value)} disabled={userType === '3'} />
+                  {userType !== '3' && (
+                    <button className="btn secondary" onClick={saveSettings} disabled={isReadOnly} title={isReadOnly ? "자신이 배포한 Crew만 수정할 수 있습니다." : ""}>Save Metadata</button>
+                  )}
                 </div>
               </div>
 
