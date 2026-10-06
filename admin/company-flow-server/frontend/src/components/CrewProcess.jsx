@@ -433,8 +433,8 @@ function CrewDiagram({ graph, crewId, version, onUpdate, isReadOnly }) {
 
 export default function CrewProcess({ onNavigateHistory, initialCrewId, userType, userId }) {
   const [crews, setCrews] = useState([]);
-  const isReadOnly = userType === '3' && selectedCrew?.owner !== userId;
   const [selectedCrew, setSelectedCrew] = useState(null);
+  const isReadOnly = userType === '3' && selectedCrew?.owner !== userId;
   const [graph, setGraph] = useState(null);
 
   // Settings state
