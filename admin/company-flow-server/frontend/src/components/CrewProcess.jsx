@@ -554,7 +554,11 @@ export default function CrewProcess({ onNavigateHistory, initialCrewId }) {
           <h2>Crew Management</h2>
           <div>
             {crews.map(c => (
-              <div key={c.crew_id + c.version} className="card" onClick={() => showCrew(c)}>
+              <div 
+                key={c.crew_id + c.version} 
+                className={`card ${selectedCrew?.crew_id === c.crew_id && selectedCrew?.version === c.version ? 'selected' : ''}`} 
+                onClick={() => showCrew(c)}
+              >
                 <b>{(c.name || '').replace(/\s*Crew$/i, '')}</b>
                 <div className="meta">{c.crew_id} @ {c.version}</div>
                 <div className="meta">{c.owner || ''} · {KST(c.deployed_at)}</div>
