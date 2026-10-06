@@ -127,6 +127,7 @@ export default function ExecutionHistory({ initialRunId }) {
       
       const result = await api.generateCrew(file);
       await showAlert(`성공적으로 Crew가 생성되었습니다!\nID: ${result.crew_id}\nVersion: ${result.version}\n이제 Crew Management 탭에서 확인하세요.`);
+      if (onNavigateCrew) onNavigateCrew(result.crew_id);
     } catch (err) {
       await showAlert(`Crew 생성 오류: ${err.message}`);
     }

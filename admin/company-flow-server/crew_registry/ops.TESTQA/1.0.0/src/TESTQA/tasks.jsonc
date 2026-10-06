@@ -1,0 +1,16 @@
+{
+  "ExtractTestScenarios": {
+    "description": "테스트 시나리오를 추출하고, 필요한 모든 정보를 수집합니다.",
+    "expected_output": "정의된 테스트 시나리오 목록과 각 시나리오에 필요한 데이터 및 환경 설정 정보",
+    "context": [],
+    "output_file": "extracted_test_scenarios.json"
+  },
+  "AnalyzeTestResults": {
+    "description": "추출된 테스트 시나리오를 분석하고, 테스트 결과를 평가합니다.",
+    "expected_output": "테스트 시나리오 분석 보고서, 잠재적 결함 또는 개선 사항 목록",
+    "context": [
+      "ExtractTestScenarios"
+    ],
+    "output_file": "test_analysis_report.md"
+  }
+}

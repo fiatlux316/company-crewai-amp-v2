@@ -13,6 +13,7 @@ import './index.css';
 function App() {
   const [activeTab, setActiveTab] = useState('persona');
   const [initialRunId, setInitialRunId] = useState(null);
+  const [initialCrewId, setInitialCrewId] = useState(null);
   const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
 
   const handleNavigateHistory = (runId) => {
@@ -20,6 +21,13 @@ function App() {
       setInitialRunId(runId);
     }
     setActiveTab('history');
+  };
+
+  const handleNavigateCrew = (crewId) => {
+    if (crewId) {
+      setInitialCrewId(crewId);
+    }
+    setActiveTab('crew');
   };
 
   return (
@@ -34,9 +42,9 @@ function App() {
         <Header activeTab={activeTab} setActiveTab={setActiveTab} />
         <div className="main-content">
           {activeTab === 'persona' && <GeneratePersona onKickoff={handleNavigateHistory} />}
-          {activeTab === 'generate_crew' && <GenerateCrew />}
-          {activeTab === 'crew' && <CrewProcess onNavigateHistory={handleNavigateHistory} />}
-          {activeTab === 'history' && <ExecutionHistory initialRunId={initialRunId} />}
+          {activeTab === 'generate_crew' && <GenerateCrew onNavigateCrew={handleNavigateCrew} />}
+          {activeTab === 'crew' && <CrewProcess onNavigateHistory={handleNavigateHistory} initialCrewId={initialCrewId} />}
+          {activeTab === 'history' && <ExecutionHistory initialRunId={initialRunId} onNavigateCrew={handleNavigateCrew} />}
           {activeTab === 'flow' && <NodeFlowDesigner />}
           {activeTab === 'mcp' && <McpCatalog />}
           {activeTab === 'swagger' && (

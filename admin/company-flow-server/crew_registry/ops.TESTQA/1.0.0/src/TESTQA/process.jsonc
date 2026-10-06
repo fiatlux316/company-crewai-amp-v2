@@ -1,0 +1,17 @@
+{
+  "process": "sequential",
+  "tasks": [
+    {
+      "id": "ExtractTestScenarios",
+      "agent": "ScenarioExtractorAgent",
+      "tools": [],
+      "next": []
+    },
+    {
+      "id": "AnalyzeTestResults",
+      "agent": "TestAnalyzerAgent",
+      "tools": [],
+      "next": []
+    }
+  ]
+}

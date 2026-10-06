@@ -1,0 +1,24 @@
+{
+  "schema_version": 1,
+  "crew_id": "ops.TESTQA",
+  "version": "1.0.0",
+  "name": "TESTQA Crew",
+  "description": "Generated crew from TESTQA.xlsx",
+  "owner": "SW Engineer",
+  "entrypoint": "TESTQA.entrypoint:run",
+  "input_schema": {
+    "type": "object",
+    "properties": {}
+  },
+  "output_schema": {
+    "type": "object",
+    "properties": {}
+  },
+  "tags": [
+    "generated"
+  ],
+  "runtime": {
+    "crewai": ">=1.15.17,<1.16"
+  },
+  "process_definition": "src/TESTQA/process.jsonc"
+}
