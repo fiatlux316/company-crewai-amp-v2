@@ -103,12 +103,21 @@ export default function GeneratePersona({ onKickoff }) {
       <p className="hint" style={{ marginTop: 0, marginBottom: '24px' }}>업무 목적과 단계별 사용 도구를 매핑하여 Persona Crew를 생성합니다.</p>
 
       <div className="panel wide">
-        <h3>1. Persona 이름 (Persona Name)</h3>
+        <h3 style={{ display: 'flex', alignItems: 'baseline', gap: '8px', flexWrap: 'wrap' }}>
+          1. Persona 이름 (Persona Name)
+          <span style={{ fontSize: '13px', fontWeight: 'normal', color: '#3b82f6' }}>
+            ※ 반드시 영문으로 띄어쓰기 없이 작성해주세요. (예: DevOpsEngineer, SoftwareArchitect)
+          </span>
+        </h3>
         <input
           type="text"
           value={personaName}
-          onChange={e => setPersonaName(e.target.value)}
-          placeholder="생성할 페르소나 이름을 입력하세요 (예: DevOps 엔지니어, QA 테스트 관리자)"
+          onChange={e => {
+            // 영문 대소문자만 입력 가능하도록 필터링 (띄어쓰기 포함 기타 문자 즉시 제거)
+            const filteredValue = e.target.value.replace(/[^a-zA-Z]/g, '');
+            setPersonaName(filteredValue);
+          }}
+          placeholder="예: DevOpsEngineer, QATester"
           style={{ width: '100%', padding: '10px 12px', fontSize: '14px', borderRadius: '6px', border: '1px solid #cbd5e1', boxSizing: 'border-box' }}
         />
       </div>

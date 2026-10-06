@@ -12,6 +12,14 @@ export default defineConfig(() => {
         '/api': {
           target: target,
           changeOrigin: true
+        },
+        '/docs': {
+          target: target,
+          changeOrigin: true
+        },
+        '/openapi.json': {
+          target: target,
+          changeOrigin: true
         }
       }
     }
