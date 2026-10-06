@@ -4,7 +4,9 @@
     "goal": "주어진 요구사항 및 프로그램을 기반으로 효과적인 테스트 시나리오를 정확하게 식별하고 추출하는 것",
     "backstory": "수년간의 테스트 경험을 바탕으로, 복잡한 시스템의 숨겨진 시나리오까지 찾아내는 전문가입니다. 모든 가능한 테스트 경로를 고려하여 완벽한 시나리오를 구성합니다.",
     "llm_ref": "company/devx-llm",
-    "tool_refs": [],
+    "tool_refs": [
+      "jira.get_issue"
+    ],
     "settings": {
       "verbose": true,
       "allow_delegation": false,
