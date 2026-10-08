@@ -134,12 +134,6 @@ services:
     ports: [ "8001:8001" ]
     volumes:
       - ./src:/app/src
-      - ./crew_registry:/data/team_registry
-      - ./flows:/app/flows
-      - ./artifacts:/app/artifacts
-    depends_on:
-      postgres: { condition: service_healthy }
-      redis: { condition: service_healthy }
 
 volumes:
   postgres_data:

@@ -100,6 +100,10 @@ class E5OpenSearchEmbeddings(Base_Request):
 
     def search_item(self, query, open_search_index='EM_chunk'):
         URL = f"https://{self.open_search_id}:{self.open_search_pw}@{self.open_search_url}/{open_search_index.lower()}/_search/?pretty=true&filter_path=-hits.hits._source.text_embedding"
+        query_vec = self.embedder.embed_query(query)
+        if hasattr(query_vec, "tolist"):
+            query_vec = query_vec.tolist()
+
         data_old = {
             "from": 0, "size": 100, 
             "query": {
@@ -110,7 +114,7 @@ class E5OpenSearchEmbeddings(Base_Request):
                     "script": {
                         "source": "cosineSimilarity(params.query_vector, doc['text_embedding']) + 1.0",
                         "params": {
-                            "query_vector": self.embedder.embed_query(query).tolist()
+                            "query_vector": query_vec
                         }
                     }
                 }
@@ -128,7 +132,7 @@ class E5OpenSearchEmbeddings(Base_Request):
                     "script": {
                         "source": "cosineSimilarity(params.query_vector, doc['text_embedding']) + 1.0",
                         "params": {
-                            "query_vector": self.embedder.embed_query(query).tolist()
+                            "query_vector": query_vec
                         }
                     }
                 }
@@ -147,11 +151,14 @@ class E5OpenSearchEmbeddings(Base_Request):
 
     def create_item(self, id, chunk_text, open_search_index='EM_chunk'):
         URL = f"https://{self.open_search_id}:{self.open_search_pw}@{self.open_search_url}/{open_search_index.lower()}/_doc/"
+        chunk_vec = self.embedder.embed_query(chunk_text)
+        if hasattr(chunk_vec, "tolist"):
+            chunk_vec = chunk_vec.tolist()
 
         data = {
             "text": chunk_text,
             "id": id,
-            "text_embedding": self.embedder.embed_query(chunk_text).tolist()
+            "text_embedding": chunk_vec
         }
 
         return self.post_request(URL, data)

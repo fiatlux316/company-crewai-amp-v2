@@ -23,7 +23,7 @@ class E5ChromaEmbeddings:
         if isinstance(input, str):
             # 단일 텍스트
             embedding = self.embedder.embed_query(input)
-            return [embedding.tolist()]
+            return [embedding.tolist() if hasattr(embedding, "tolist") else embedding]
         elif isinstance(input, list):
             # 리스트 형태
             embeddings = []
@@ -31,7 +31,7 @@ class E5ChromaEmbeddings:
                 #print(f"Embedding text: {text[:30]}...")  # 임베딩할 텍스트 일부 출력
                 embedding = self.embedder.embed_query(text)
                 #print(f"Embedding vector (first 5 values): {embedding[:5]}")  # 임베딩 벡터 일부 출력
-                embeddings.append(embedding.tolist())
+                embeddings.append(embedding.tolist() if hasattr(embedding, "tolist") else embedding)
             return embeddings
         else:
             raise ValueError(f"Unsupported input type: {type(input)}")
