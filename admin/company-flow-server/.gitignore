@@ -6,3 +6,5 @@ __pycache__
 .venv
 #crew_registry
 artifacts
+**/multilingual-e5-large-quantized/
+**/chroma_db/

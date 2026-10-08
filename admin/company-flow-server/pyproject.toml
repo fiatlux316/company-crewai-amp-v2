@@ -24,7 +24,21 @@ dependencies = [
   "lxml>=5.0,<6",
   "html5lib>=1.1,<2",
   "beautifulsoup4>=4.12,<5",
-  "crewai[bedrock,google-genai]>=1.15.17,<1.16"
+  "crewai[bedrock,google-genai]>=1.15.17,<1.16",
+  "torch",
+  "transformers",
+  "onnx",
+  "onnxruntime",
+  "numpy",
+  "langchain-ollama",
+  "langchain",
+  "langchain-community",
+  "langchain-text-splitters",
+  "pypdf",
+  "boto3",
+  "chromadb",
+  "langchain-openai",
+  "langchain-aws"
 ]
 
 [project.optional-dependencies]

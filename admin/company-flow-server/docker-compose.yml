@@ -124,6 +124,23 @@ services:
     ports: [ "5555:5555" ]
     depends_on: [ redis ]
 
+  rag-api:
+    build: .
+    command: >
+      sh -c "cd /app/src/company_flow_server/rag &&
+              sh ./create_index.sh && uvicorn backend_fc:app --host 0.0.0.0 --port 8001"
+    env_file: [ .env ]
+    environment: *runtime-env
+    ports: [ "8001:8001" ]
+    volumes:
+      - ./src:/app/src
+      - ./crew_registry:/data/team_registry
+      - ./flows:/app/flows
+      - ./artifacts:/app/artifacts
+    depends_on:
+      postgres: { condition: service_healthy }
+      redis: { condition: service_healthy }
+
 volumes:
   postgres_data:
   redis_data:

@@ -451,4 +451,24 @@ frontend_dist = Path(os.getenv("FRONTEND_DIST_DIR", "/app/frontend_dist"))
 if not frontend_dist.exists():
     frontend_dist = Path(__file__).parent.parent.parent / "frontend" / "dist"
 
+import httpx
+from fastapi.responses import StreamingResponse
+from fastapi import Request
+
+@app.post("/api/v1/chat")
+async def chat_proxy(request: Request):
+    async with httpx.AsyncClient(timeout=120.0) as client:
+        body = await request.body()
+        resp = await client.post("http://rag-api:8001/chat", content=body)
+        return resp.json()
+
+@app.post("/api/v1/chat_stream")
+async def chat_stream_proxy(request: Request):
+    async def stream_generator():
+        async with httpx.AsyncClient(timeout=120.0) as client:
+            body = await request.body()
+            async with client.stream("POST", "http://rag-api:8001/chat_stream", content=body) as response:
+                async for chunk in response.aiter_bytes():
+                    yield chunk
+    return StreamingResponse(stream_generator())
 app.mount("/", StaticFiles(directory=frontend_dist, html=True), name="spa")

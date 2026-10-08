@@ -9,6 +9,7 @@ import NodeFlowDesigner from './components/NodeFlowDesigner';
 import McpCatalog from './components/McpCatalog';
 import UserManagement from './components/UserManagement';
 import Auth from './components/Auth';
+import RAGChatbot from './components/RAGChatbot';
 import DialogContainer from './components/Dialog';
 import './index.css';
 
@@ -74,6 +75,7 @@ function App() {
           {activeTab === 'flow' && <NodeFlowDesigner />}
           {activeTab === 'mcp' && <McpCatalog />}
           {activeTab === 'users' && <UserManagement />}
+          {activeTab === 'rag' && <RAGChatbot />}
           {activeTab === 'swagger' && (
             <iframe
               src="/docs"

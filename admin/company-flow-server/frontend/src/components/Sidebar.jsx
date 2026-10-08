@@ -30,6 +30,9 @@ export default function Sidebar({ activeTab, setActiveTab, collapsed, onToggle, 
         <button className={activeTab === 'swagger' ? 'active' : ''} onClick={() => setActiveTab('swagger')}>
           📖 <span className="tab-text">Swagger API</span>
         </button>
+        <button className={activeTab === 'rag' ? 'active' : ''} onClick={() => setActiveTab('rag')}>
+          💬 <span className="tab-text">AI Chatbot</span>
+        </button>
       </div>
 
       {userType === '1' && (
