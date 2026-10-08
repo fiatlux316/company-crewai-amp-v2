@@ -78,7 +78,7 @@ export default function RAGChatbot() {
       <div className="panel-header" style={{ flexShrink: 0, padding: '1.5rem', borderBottom: '1px solid #e5e7eb', backgroundColor: '#ffffff' }}>
         <h2 style={{ margin: 0, fontSize: '1.25rem', color: '#111827' }}>AI Chatbot</h2>
         <p style={{ margin: '0.5rem 0 0', color: '#6b7280', fontSize: '0.9rem', lineHeight: '1.4' }}>
-          나만의 쇼핑 에이전트 AI 챗봇입니다.<br />
+          RAG 기반 AI 챗봇입니다.<br />
           주문/배송/상품/포인트/프로모션/편의시설 및 매장내 서비스 관련 전반적인 것에 대해서 무엇이든 물어보세요!
         </p>
       </div>
