@@ -74,42 +74,89 @@ export default function RAGChatbot() {
   };
 
   return (
-    <div className="panel" style={{ display: 'flex', flexDirection: 'column', height: 'calc(100vh - 80px)' }}>
-      <div className="panel-header" style={{ flexShrink: 0, paddingBottom: '1rem', borderBottom: '1px solid #374151' }}>
-        <h2>AI 상담 서비스</h2>
-        <p style={{ color: '#9ca3af', fontSize: '0.9rem' }}>나만의 쇼핑 에이전트 AI 챗봇입니다.<br/>주문/배송/상품/포인트/프로모션/편의시설 및 매장내 서비스 관련 전반적인 것에 대해서 무엇이든 물어보세요!</p>
+    <div className="panel" style={{ display: 'flex', flexDirection: 'column', height: 'calc(100vh - 80px)', overflow: 'hidden', padding: 0, backgroundColor: '#ffffff' }}>
+      <div className="panel-header" style={{ flexShrink: 0, padding: '1.5rem', borderBottom: '1px solid #e5e7eb', backgroundColor: '#ffffff' }}>
+        <h2 style={{ margin: 0, fontSize: '1.25rem', color: '#111827' }}>AI Chatbot</h2>
+        <p style={{ margin: '0.5rem 0 0', color: '#6b7280', fontSize: '0.9rem', lineHeight: '1.4' }}>
+          나만의 쇼핑 에이전트 AI 챗봇입니다.<br />
+          주문/배송/상품/포인트/프로모션/편의시설 및 매장내 서비스 관련 전반적인 것에 대해서 무엇이든 물어보세요!
+        </p>
       </div>
-      
-      <div className="chat-messages" style={{ flexGrow: 1, overflowY: 'auto', padding: '1rem', display: 'flex', flexDirection: 'column', gap: '1rem' }}>
-        {messages.map((msg, idx) => (
-          <div key={idx} style={{
-            alignSelf: msg.role === 'user' ? 'flex-end' : 'flex-start',
-            backgroundColor: msg.role === 'user' ? '#2563eb' : '#374151',
-            color: 'white',
-            padding: '0.75rem 1rem',
-            borderRadius: '0.5rem',
-            maxWidth: '80%',
-            whiteSpace: 'pre-wrap'
-          }}>
-            {msg.content}
-          </div>
-        ))}
+
+      <div className="chat-messages" style={{ flexGrow: 1, overflowY: 'auto', padding: '1.5rem', display: 'flex', flexDirection: 'column', gap: '1.5rem', backgroundColor: '#f9fafb' }}>
+        {messages.map((msg, idx) => {
+          const isUser = msg.role === 'user';
+          return (
+            <div key={idx} style={{
+              alignSelf: isUser ? 'flex-end' : 'flex-start',
+              backgroundColor: isUser ? '#0ea5e9' : '#f3f4f6',
+              color: isUser ? '#ffffff' : '#111827',
+              padding: '0.875rem 1.25rem',
+              borderRadius: '1rem',
+              borderBottomRightRadius: isUser ? '0.25rem' : '1rem',
+              borderBottomLeftRadius: !isUser ? '0.25rem' : '1rem',
+              maxWidth: '75%',
+              lineHeight: '1.5',
+              fontSize: '0.95rem',
+              whiteSpace: 'pre-wrap',
+              boxShadow: '0 1px 2px 0 rgba(0, 0, 0, 0.05)'
+            }}>
+              {msg.content}
+            </div>
+          );
+        })}
         <div ref={messagesEndRef} />
       </div>
 
-      <form onSubmit={handleSubmit} style={{ flexShrink: 0, padding: '1rem', display: 'flex', gap: '0.5rem', borderTop: '1px solid #374151' }}>
-        <input 
-          type="text" 
-          value={input} 
-          onChange={(e) => setInput(e.target.value)} 
-          placeholder="안녕하세요. 무엇을 도와드릴까요?" 
-          disabled={isLoading}
-          style={{ flexGrow: 1, padding: '0.5rem 1rem', borderRadius: '0.25rem', border: '1px solid #4b5563', backgroundColor: '#1f2937', color: 'white' }}
-        />
-        <button type="submit" disabled={isLoading} className="btn primary">
-          전송
-        </button>
-      </form>
+      <div style={{ flexShrink: 0, padding: '1.5rem', backgroundColor: '#ffffff', borderTop: '1px solid #e5e7eb' }}>
+        <form onSubmit={handleSubmit} style={{
+          display: 'flex',
+          gap: '0.75rem',
+          maxWidth: '900px',
+          margin: '0 auto',
+          width: '100%',
+          height: '42px'
+        }}>
+          <input
+            type="text"
+            value={input}
+            onChange={(e) => setInput(e.target.value)}
+            placeholder="안녕하세요. 무엇을 도와드릴까요?"
+            disabled={isLoading}
+            style={{
+              flexGrow: 1,
+              height: '100%',
+              padding: '0 1.25rem',
+              borderRadius: '9999px',
+              border: '1px solid #d1d5db',
+              backgroundColor: '#f3f4f6',
+              color: '#111827',
+              fontSize: '1rem',
+              outline: 'none',
+              boxShadow: 'inset 0 2px 4px 0 rgba(0, 0, 0, 0.06)'
+            }}
+          />
+          <button
+            type="submit"
+            disabled={isLoading}
+            className="btn"
+            style={{
+              height: '100%',
+              padding: '0 1.75rem',
+              borderRadius: '9999px',
+              whiteSpace: 'nowrap',
+              fontWeight: '600',
+              fontSize: '1rem',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center'
+              , backgroundColor: "#4b5563", color: "white", border: "none"
+            }}
+          >
+            전송
+          </button>
+        </form>
+      </div>
     </div>
   );
 }
