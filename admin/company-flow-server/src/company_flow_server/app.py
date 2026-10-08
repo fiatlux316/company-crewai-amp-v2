@@ -1,9 +1,13 @@
 from __future__ import annotations
 
+import asyncio
+import logging
 import os
 from pathlib import Path
 import tempfile
 from contextlib import asynccontextmanager
+
+logger = logging.getLogger(__name__)
 
 from fastapi import FastAPI, Header, HTTPException, Request, Depends, Query
 from fastapi.responses import FileResponse
@@ -462,13 +466,25 @@ async def chat_proxy(request: Request):
         resp = await client.post("http://rag-api:8001/chat", content=body)
         return resp.json()
 
+from starlette.requests import ClientDisconnect
+
 @app.post("/api/v1/chat_stream")
 async def chat_stream_proxy(request: Request):
+    try:
+        body = await request.body()
+    except ClientDisconnect:
+        return StreamingResponse(iter([]), media_type="text/event-stream")
+
     async def stream_generator():
-        async with httpx.AsyncClient(timeout=120.0) as client:
-            body = await request.body()
-            async with client.stream("POST", "http://rag-api:8001/chat_stream", content=body) as response:
-                async for chunk in response.aiter_bytes():
-                    yield chunk
-    return StreamingResponse(stream_generator())
+        try:
+            async with httpx.AsyncClient(timeout=120.0) as client:
+                async with client.stream("POST", "http://rag-api:8001/chat_stream", content=body) as response:
+                    async for chunk in response.aiter_bytes():
+                        yield chunk
+        except (ClientDisconnect, asyncio.CancelledError):
+            pass
+        except Exception as e:
+            logger.warning(f"chat_stream_proxy streaming interrupted: {e}")
+
+    return StreamingResponse(stream_generator(), media_type="text/event-stream")
 app.mount("/", StaticFiles(directory=frontend_dist, html=True), name="spa")
