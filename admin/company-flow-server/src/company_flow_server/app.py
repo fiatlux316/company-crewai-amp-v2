@@ -463,7 +463,7 @@ from fastapi import Request
 async def chat_proxy(request: Request):
     async with httpx.AsyncClient(timeout=120.0) as client:
         body = await request.body()
-        resp = await client.post("http://rag-api:8001/chat", content=body)
+        resp = await client.post("http://rag-api:8001/chat", content=body, headers={"Content-Type": "application/json"})
         return resp.json()
 
 from starlette.requests import ClientDisconnect
@@ -478,7 +478,7 @@ async def chat_stream_proxy(request: Request):
     async def stream_generator():
         try:
             async with httpx.AsyncClient(timeout=120.0) as client:
-                async with client.stream("POST", "http://rag-api:8001/chat_stream", content=body) as response:
+                async with client.stream("POST", "http://rag-api:8001/chat_stream", content=body, headers={"Content-Type": "application/json"}) as response:
                     async for chunk in response.aiter_bytes():
                         yield chunk
         except (ClientDisconnect, asyncio.CancelledError):
