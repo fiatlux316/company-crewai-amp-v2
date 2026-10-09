@@ -6,7 +6,7 @@ from pydantic import BaseModel
 from typing import Dict, List, Optional, Tuple
 
 from function import *
-from llm import get_llm
+from company_flow_server.llm.llm_adapter import get_langchain_llm
 from langchain.agents import create_agent
 from langchain_core.messages import AIMessage, HumanMessage
 from langchain_core.prompts import ChatPromptTemplate, PromptTemplate
@@ -18,7 +18,7 @@ from vs_manager import VectorStoreManager
 load_dotenv()
 
 vs_manager = VectorStoreManager(provider=os.getenv("VS_TYPE", "chroma"))
-llm = get_llm()
+llm = get_langchain_llm()
 
 class Turn(BaseModel):
     role: str

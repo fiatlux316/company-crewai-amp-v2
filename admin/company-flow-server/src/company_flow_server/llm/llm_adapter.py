@@ -81,3 +81,40 @@ class DynamicLLMAdapter(CompanyBaseLLM):
         if hasattr(self._inner_llm, "supports_stop_words"):
             return self._inner_llm.supports_stop_words()
         return True
+
+def get_langchain_llm():
+    """LangChain 기반으로 동작하는 컴포넌트(예: RAG 챗봇)를 위한 LLM 팩토리 함수"""
+    from langchain.chat_models import init_chat_model
+    from langchain_openai import ChatOpenAI
+    
+    llm_type = os.getenv("LLM_TYPE", "company-llm-gateway")
+    
+    if llm_type == "company-llm-gateway":
+        devx_model = os.getenv("DEVX_MODEL", "bedrock/global.anthropic.claude-sonnet-5")
+        return ChatOpenAI(
+            model=devx_model,
+            openai_api_base=os.getenv("DEVX_API_URL"),
+            openai_api_key=os.getenv("DEVX_API_KEY"),
+            temperature=float(os.getenv("DEVX_TEMPERATURE", "0.0")),
+            max_tokens=8000
+        )
+    elif llm_type == "aws-bedrock":
+        bedrock_model = os.getenv("BEDROCK_MODEL")
+        top_k_env = os.getenv("BEDROCK_TOP_K", "5")
+        return init_chat_model(
+            model=f"bedrock:{bedrock_model}",
+            region_name=os.getenv('BEDROCK_REGION', 'us-east-1'),
+            temperature=0.0,
+            max_tokens=8000,
+            model_kwargs={"top_k": int(top_k_env)}
+        )
+        
+    elif llm_type == "gemini":
+        gemini_model = os.getenv("GEMINI_MODEL")
+        return init_chat_model(
+            model=f"google_genai:{gemini_model}",
+            api_key=os.getenv('GEMINI_API_KEY'),
+            temperature=0.0
+        )
+    else:
+        raise ValueError(f"지원하지 않는 LLM_TYPE 입니다: {llm_type}")
