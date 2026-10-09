@@ -1,5 +1,7 @@
 # FC(Function Calling) 기반 챗봇
 import os
+import sys
+sys.path.append(os.path.dirname(__file__))
 from fastapi import FastAPI
 from fastapi.responses import StreamingResponse
 from pydantic import BaseModel
@@ -10,7 +12,7 @@ from langchain_core.messages import AIMessage, HumanMessage
 from langchain_core.prompts import ChatPromptTemplate, PromptTemplate
 
 from dotenv import load_dotenv
-from .vs_manager import VectorStoreManager
+from vs_manager import VectorStoreManager
 from company_flow_server.llm.llm_adapter import get_langchain_llm
 
 #from function import *
