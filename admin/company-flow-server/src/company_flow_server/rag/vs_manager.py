@@ -1,3 +1,4 @@
+import os
 import chromadb
 from company_flow_server.rag.embedding_adapter_opensearch import E5OpenSearchEmbeddings
 from company_flow_server.rag.embedding_adapter_chroma import E5ChromaEmbeddings
@@ -16,8 +17,11 @@ class VectorStoreManager:
             print("Vector Store Provider로 ChromaDB가 선택되었습니다.")
             # E5 임베딩 모델 적용
             self._embedding_function = E5ChromaEmbeddings()
+            chroma_path = os.getenv("CHROMA_DB_PATH") or os.path.join(
+                os.path.dirname(os.path.abspath(__file__)), "chroma_db"
+            )
             self.vector_store_client = chromadb.PersistentClient(
-                path="./chroma_db",
+                path=chroma_path,
                 settings=chromadb.config.Settings(anonymized_telemetry=False)
             )
         else:
