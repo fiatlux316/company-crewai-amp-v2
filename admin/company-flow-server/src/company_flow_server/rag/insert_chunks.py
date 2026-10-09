@@ -1,13 +1,11 @@
 import os
-import sys
-sys.path.append(os.path.dirname(__file__))
 from langchain_community.document_loaders import PyPDFLoader, PyMuPDFLoader, TextLoader
 from langchain_text_splitters import RecursiveCharacterTextSplitter
 
 from dotenv import load_dotenv
 load_dotenv()
 
-from vs_manager import VectorStoreManager
+from company_flow_server.rag.vs_manager import VectorStoreManager
 
 def load_and_chunk_documents(doc_dir="docs", chunk_size=500, chunk_overlap=50):
     if not os.path.exists(doc_dir):

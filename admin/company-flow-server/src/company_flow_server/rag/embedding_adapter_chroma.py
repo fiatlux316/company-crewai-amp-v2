@@ -2,7 +2,7 @@
 Chroma DB에 E5 임베딩 모델을 적용하기 위한 커스텀 어댑터
 """
 import numpy as np
-from embedding_model import E5QEmbeddings
+from company_flow_server.rag.embedding_model import E5QEmbeddings
 
 
 class E5ChromaEmbeddings:

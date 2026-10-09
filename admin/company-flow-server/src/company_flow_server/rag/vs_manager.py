@@ -1,6 +1,6 @@
 import chromadb
-from embedding_adapter_opensearch import E5OpenSearchEmbeddings
-from embedding_adapter_chroma import E5ChromaEmbeddings
+from company_flow_server.rag.embedding_adapter_opensearch import E5OpenSearchEmbeddings
+from company_flow_server.rag.embedding_adapter_chroma import E5ChromaEmbeddings
 import uuid
 
 class VectorStoreManager:

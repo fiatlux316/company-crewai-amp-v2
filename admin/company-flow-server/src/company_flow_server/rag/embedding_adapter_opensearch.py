@@ -1,15 +1,13 @@
 """
 OpenSearch DB에 E5 임베딩 모델을 적용하기 위한 커스텀 어댑터
 """
-import numpy as np
-from embedding_model import E5QEmbeddings
+import os
+from company_flow_server.rag.embedding_model import E5QEmbeddings
 import requests
 import json
 
 from dotenv import load_dotenv
-import os
-import sys
-sys.path.append(os.path.dirname(__file__))
+
 load_dotenv()
 
 open_search_url = {
