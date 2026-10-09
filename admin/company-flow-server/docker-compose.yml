@@ -126,11 +126,11 @@ services:
 
   rag-api:
     build: .
-    command: [ "uvicorn", "company_flow_server.rag.backend:app", "--host", "0.0.0.0", "--port", "8001" ]
-    env_file: [ .env ]
     # command: >
     #   sh -c "cd /app/src/company_flow_server/rag &&
-    #           sh ./create_index.sh && uvicorn backend_fc:app --host 0.0.0.0 --port 8001"
+    #   sh ./create_index.sh && uvicorn backend_fc:app --host 0.0.0.0 --port 8001"
+    command: [ "uvicorn", "company_flow_server.rag.backend:app", "--host", "0.0.0.0", "--port", "8001", "--reload", "--reload-dir", "/app/src" ]
+    env_file: [ .env ]
     environment: *runtime-env
     ports: [ "8001:8001" ]
     volumes:

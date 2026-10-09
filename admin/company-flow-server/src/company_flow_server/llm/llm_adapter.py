@@ -93,8 +93,8 @@ def get_langchain_llm():
         devx_model = os.getenv("DEVX_MODEL", "bedrock/global.anthropic.claude-sonnet-5")
         return ChatOpenAI(
             model=devx_model,
-            base_url=os.getenv("COMPANY_LLM_BASE_URL") or os.getenv("DEVX_API_URL").replace("/chat/completions", ""),
-            api_key=os.getenv("DEVX_API_KEY") or os.getenv("COMPANY_LLM_API_KEY"),
+            base_url=os.getenv("DEVX_API_URL"),
+            api_key=os.getenv("DEVX_API_KEY"),
             temperature=float(os.getenv("DEVX_TEMPERATURE", "0.0")),
             max_tokens=8000
         )

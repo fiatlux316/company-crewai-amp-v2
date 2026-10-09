@@ -5,14 +5,15 @@ from fastapi.responses import StreamingResponse
 from pydantic import BaseModel
 from typing import Dict, List, Optional, Tuple
 
-from function import *
-from company_flow_server.llm.llm_adapter import get_langchain_llm
 from langchain.agents import create_agent
 from langchain_core.messages import AIMessage, HumanMessage
 from langchain_core.prompts import ChatPromptTemplate, PromptTemplate
 
 from dotenv import load_dotenv
 from vs_manager import VectorStoreManager
+from company_flow_server.llm.llm_adapter import get_langchain_llm
+
+from function import *
 
 # 환경 변수 로드(.env 파일에서 API 키 등을 로드)
 load_dotenv()
