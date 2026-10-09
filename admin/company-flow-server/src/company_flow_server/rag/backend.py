@@ -301,6 +301,7 @@ async def chat_stream(messages: Messages):
                 yield chunk.content
 
         response = full_response.strip()
+        print(f"\n>>>>> Final response :\n", response)
 
         # 대화 기록에 현재 대화 추가
         chat_histories[uuid].append(AIMessage(content=response))

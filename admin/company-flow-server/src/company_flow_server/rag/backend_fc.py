@@ -82,6 +82,15 @@ class ConversationManager:
         answer_raw = last_message.content if hasattr(last_message, 'content') else str(last_message)
         
         answer = ""
+        import ast
+        if isinstance(answer_raw, str):
+            answer_raw = answer_raw.strip()
+            if answer_raw.startswith('[') and answer_raw.endswith(']'):
+                try:
+                    answer_raw = ast.literal_eval(answer_raw)
+                except:
+                    pass
+
         if isinstance(answer_raw, list):
             texts = []
             for item in answer_raw:
@@ -157,19 +166,25 @@ system_prompt = base_prompt + '\n\n' + cs_guide
 
 # 프롬프트 템플릿 생성
 prompt = PromptTemplate.from_template(
-    """
-    Please generate a response to the given Question in accordance with the CS_Guide. 
-    If Func_Call_Result exists, prioritize this information for the answer. 
-    If it does not exist, generate the response prioritizing RAG_Context. 
-    Make sure to refer to the Chat_history to summarize and deliver the final response.
-    IMPORTANT: Do not include labels like 'Func_Call_Result :' or 'RAG_Context :' in your output. Return only the final natural response to the user.
+    """System: {system_prompt}
 
-    CS_Guide : {system_prompt}
-    Func_Call_Result : {func_call_result}
-    RAG_Context : {retrieved_context}
-    Question: {question}
-    Chat_history: {chat_history}
-    """
+You are an AI assistant for customer service. Answer the User Question using ONLY the provided context.
+CRITICAL: Do NOT include raw data, JSON, or technical labels like "Func_Call_Result:" or "RAG_Context:" in your output. ONLY provide the final natural conversational response to the user.
+
+<context>
+Function Call Result (if any):
+{func_call_result}
+
+RAG Context (if any):
+{retrieved_context}
+</context>
+
+Chat History:
+{chat_history}
+
+User Question: {question}
+
+Answer:"""
 )
 
 # 사용자별 부분 질문 기록
