@@ -51,6 +51,17 @@ class DynamicLLMAdapter(CompanyBaseLLM):
                 model=gemini_model,
                 api_key=os.getenv("GEMINI_API_KEY", ""),
             )
+        elif llm_type == "ollama":
+            ollama_model = os.getenv("OLLAMA_MODEL") or model or "gemma2"
+            ollama_base_url = os.getenv("OLLAMA_BASE_URL", "http://localhost:11434/v1/chat/completions")
+            print(f"Ollama 호출 : {ollama_model}")
+            self._inner_llm = CompanyLLMWrapper(
+                model=ollama_model,
+                base_url=ollama_base_url,
+                api_key="ollama",
+                timeout_seconds=timeout_seconds,
+                temperature=temperature
+            )
         else:
             raise ValueError(f"지원하지 않는 LLM_TYPE 입니다: {llm_type}")
 
@@ -91,10 +102,13 @@ def get_langchain_llm():
     
     if llm_type == "company-llm-gateway":
         devx_model = os.getenv("DEVX_MODEL", "bedrock/global.anthropic.claude-sonnet-5")
+        print(f"사내 생성형 AI API 호출 : {devx_model}")
+        devx_url = os.getenv("DEVX_API_URL", "")
+        base_url = os.getenv("COMPANY_LLM_BASE_URL") or (devx_url.replace("/chat/completions", "") if devx_url else None)
         return ChatOpenAI(
             model=devx_model,
-            base_url=os.getenv("DEVX_API_URL"),
-            api_key=os.getenv("DEVX_API_KEY"),
+            base_url=base_url,
+            api_key=os.getenv("DEVX_API_KEY") or os.getenv("COMPANY_LLM_API_KEY"),
             temperature=float(os.getenv("DEVX_TEMPERATURE", "0.0")),
             max_tokens=8000
         )
@@ -111,9 +125,20 @@ def get_langchain_llm():
         
     elif llm_type == "gemini":
         gemini_model = os.getenv("GEMINI_MODEL")
+        print(f"Gemini 호출 : {gemini_model}")
         return init_chat_model(
             model=f"google_genai:{gemini_model}",
             api_key=os.getenv('GEMINI_API_KEY'),
+            temperature=0.0
+        )
+    elif llm_type == "ollama":
+        from langchain_ollama import ChatOllama
+        ollama_model = os.getenv("OLLAMA_MODEL", "gemma2")
+        ollama_base_url = os.getenv("OLLAMA_BASE_URL", "http://localhost:11434")
+        print(f"Ollama 호출 : {ollama_model}")
+        return ChatOllama(
+            model=ollama_model,
+            base_url=ollama_base_url,
             temperature=0.0
         )
     else:

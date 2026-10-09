@@ -140,13 +140,17 @@ base_prompt = """당신은 이마트 고객만족센터 7년 차 선임 매니�
 cs_guide = ''
 
 # Guide prompt content is loaded once at startup and reused for every request.
+guide_path = os.path.join(os.path.dirname(__file__), 'docs', 'guide.md')
+if not os.path.exists(guide_path):
+    guide_path = './docs/guide.md'
+
 try:
-    with open('./docs/guide.md', 'r', encoding='utf-8') as f:
+    with open(guide_path, 'r', encoding='utf-8') as f:
         cs_guide = f.read()
         print('guide.md loaded successfully.')
 except FileNotFoundError:
     cs_guide = ''
-    print('Warning: docs/guide.md not found, continuing without guide prompt.')
+    print(f'Warning: {guide_path} not found, continuing without guide prompt.')
 
 system_prompt = base_prompt + '\n\n' + cs_guide
 #print("system_prompt :", system_prompt)
