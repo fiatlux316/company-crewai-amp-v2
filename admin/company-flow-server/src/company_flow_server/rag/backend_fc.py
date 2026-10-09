@@ -1,5 +1,7 @@
 # FC(Function Calling) 기반 챗봇
 import os
+import sys
+sys.path.append(os.path.dirname(__file__))
 from fastapi import FastAPI
 from fastapi.responses import StreamingResponse
 from pydantic import BaseModel

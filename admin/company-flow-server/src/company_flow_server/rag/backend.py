@@ -10,7 +10,7 @@ from langchain_core.messages import AIMessage, HumanMessage
 from langchain_core.prompts import ChatPromptTemplate, PromptTemplate
 
 from dotenv import load_dotenv
-from vs_manager import VectorStoreManager
+from .vs_manager import VectorStoreManager
 from company_flow_server.llm.llm_adapter import get_langchain_llm
 
 #from function import *

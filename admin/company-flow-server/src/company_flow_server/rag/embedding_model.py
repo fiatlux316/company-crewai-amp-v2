@@ -3,6 +3,8 @@ from tokenizers import Tokenizer
 import onnxruntime as ort
 import pathlib
 import os
+import sys
+sys.path.append(os.path.dirname(__file__))
 
 class E5QEmbeddings:
     def __init__(self, **kwargs):

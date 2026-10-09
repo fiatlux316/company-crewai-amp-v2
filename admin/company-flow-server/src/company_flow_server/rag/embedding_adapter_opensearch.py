@@ -8,6 +8,8 @@ import json
 
 from dotenv import load_dotenv
 import os
+import sys
+sys.path.append(os.path.dirname(__file__))
 load_dotenv()
 
 open_search_url = {
