@@ -55,18 +55,28 @@ export default function RAGChatbot() {
         if (done) break;
 
         const chunk = decoder.decode(value, { stream: true });
+        if (!chunk) continue;
+
         setMessages(prev => {
-          const newMessages = [...prev];
-          newMessages[newMessages.length - 1].content += chunk;
-          return newMessages;
+          const lastIdx = prev.length - 1;
+          if (lastIdx < 0) return prev;
+          const updatedLast = {
+            ...prev[lastIdx],
+            content: prev[lastIdx].content + chunk
+          };
+          return [...prev.slice(0, lastIdx), updatedLast];
         });
       }
     } catch (error) {
       console.error('Error fetching chat:', error);
       setMessages(prev => {
-        const newMessages = [...prev];
-        newMessages[newMessages.length - 1].content = "오류가 발생했습니다. 다시 시도해 주세요.";
-        return newMessages;
+        const lastIdx = prev.length - 1;
+        if (lastIdx < 0) return prev;
+        const updatedLast = {
+          ...prev[lastIdx],
+          content: "오류가 발생했습니다. 다시 시도해 주세요."
+        };
+        return [...prev.slice(0, lastIdx), updatedLast];
       });
     } finally {
       setIsLoading(false);
@@ -86,6 +96,9 @@ export default function RAGChatbot() {
       <div className="chat-messages" style={{ flexGrow: 1, overflowY: 'auto', padding: '1.5rem', display: 'flex', flexDirection: 'column', gap: '1.5rem', backgroundColor: '#f9fafb' }}>
         {messages.map((msg, idx) => {
           const isUser = msg.role === 'user';
+          const isLastBotMessage = !isUser && idx === messages.length - 1;
+          const showLoading = isLastBotMessage && isLoading && !msg.content;
+
           return (
             <div key={idx} style={{
               alignSelf: isUser ? 'flex-end' : 'flex-start',
@@ -101,7 +114,13 @@ export default function RAGChatbot() {
               whiteSpace: 'pre-wrap',
               boxShadow: '0 1px 2px 0 rgba(0, 0, 0, 0.05)'
             }}>
-              {msg.content}
+              {showLoading ? (
+                <span style={{ color: '#9ca3af', fontStyle: 'italic' }}>
+                  답변을 생성 중입니다...
+                </span>
+              ) : (
+                msg.content
+              )}
             </div>
           );
         })}

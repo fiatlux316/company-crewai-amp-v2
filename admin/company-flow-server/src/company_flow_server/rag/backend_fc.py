@@ -259,7 +259,7 @@ def chat(messages: Messages) :
 
 
 @app.post("/chat_stream")
-def chat_stream(messages: Messages):
+async def chat_stream(messages: Messages):
 
     query = messages.messages[-1].content
     uuid = messages.uuid
@@ -271,7 +271,7 @@ def chat_stream(messages: Messages):
         "X-Accel-Buffering": "no",
     }
 
-    def generate():
+    async def generate():
 
         final_prompt = get_final_prompt(query, uuid)
         if final_prompt is None:
@@ -280,9 +280,10 @@ def chat_stream(messages: Messages):
     
         # stream 방식 (토큰 단위로 스트리밍)
         full_response = ""
-        for chunk in llm.stream(final_prompt):
-            full_response += chunk.content
-            yield chunk.content
+        async for chunk in llm.astream(final_prompt):
+            if chunk.content:
+                full_response += chunk.content
+                yield chunk.content
 
         response = full_response.strip()
 
