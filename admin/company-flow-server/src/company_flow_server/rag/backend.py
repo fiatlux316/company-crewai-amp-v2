@@ -227,7 +227,7 @@ def get_final_prompt(query: str, uuid: str) -> str:
             context_text = ''
             for chunk in chunks:
                 context_text += f'##참조문서_Chunk:\n{chunk}\n\n'
-            #print("\n>>>>> rag_context:\n", context_text)
+            print("\n>>>>> rag_context:\n", context_text)
             rendered = prompt.format(
                 system_prompt=system_prompt,
                 func_call_result=func_call_result,
