@@ -53,11 +53,17 @@ class DynamicLLMAdapter(CompanyBaseLLM):
             )
         elif llm_type == "ollama":
             ollama_model = os.getenv("OLLAMA_MODEL") or model or "gemma2"
-            ollama_base_url = os.getenv("OLLAMA_BASE_URL", "http://localhost:11434/v1/chat/completions")
-            print(f"Ollama 호출 : {ollama_model}")
+            base = os.getenv("OLLAMA_BASE_URL", "")
+            if not base:
+                base = "http://host.docker.internal:11434" if os.path.exists('/.dockerenv') else "http://localhost:11434"
+            elif os.path.exists('/.dockerenv') and ("localhost" in base or "127.0.0.1" in base):
+                base = base.replace("localhost", "host.docker.internal").replace("127.0.0.1", "host.docker.internal")
+            clean_base = base.replace("/v1/chat/completions", "").replace("/v1", "").rstrip("/")
+            ollama_completions_url = f"{clean_base}/v1/chat/completions"
+            print(f"Ollama 호출 : {ollama_model} ({ollama_completions_url})")
             self._inner_llm = CompanyLLMWrapper(
                 model=ollama_model,
-                base_url=ollama_base_url,
+                base_url=ollama_completions_url,
                 api_key="ollama",
                 timeout_seconds=timeout_seconds,
                 temperature=temperature
@@ -134,8 +140,13 @@ def get_langchain_llm():
     elif llm_type == "ollama":
         from langchain_ollama import ChatOllama
         ollama_model = os.getenv("OLLAMA_MODEL", "gemma2")
-        ollama_base_url = os.getenv("OLLAMA_BASE_URL", "http://localhost:11434")
-        print(f"Ollama 호출 : {ollama_model}")
+        base = os.getenv("OLLAMA_BASE_URL", "")
+        if not base:
+            base = "http://host.docker.internal:11434" if os.path.exists('/.dockerenv') else "http://localhost:11434"
+        elif os.path.exists('/.dockerenv') and ("localhost" in base or "127.0.0.1" in base):
+            base = base.replace("localhost", "host.docker.internal").replace("127.0.0.1", "host.docker.internal")
+        ollama_base_url = base.replace("/v1/chat/completions", "").replace("/v1", "").rstrip("/")
+        print(f"Ollama 호출 : {ollama_model} ({ollama_base_url})")
         return ChatOllama(
             model=ollama_model,
             base_url=ollama_base_url,
