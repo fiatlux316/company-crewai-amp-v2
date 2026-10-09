@@ -8,12 +8,14 @@ from langchain_core.messages import AIMessage, HumanMessage
 from langchain_core.prompts import ChatPromptTemplate, PromptTemplate
 
 from vs_manager import VectorStoreManager
-vs_manager = VectorStoreManager(provider=os.getenv("VS_TYPE", "chroma"))
-
 from company_flow_server.llm.llm_adapter import get_langchain_llm
 
-llm = get_langchain_llm()
+from dotenv import load_dotenv
+# 환경 변수 로드(.env 파일에서 API 키 등을 로드)
+load_dotenv()
 
+vs_manager = VectorStoreManager(provider=os.getenv("VS_TYPE", "chroma"))
+llm = get_langchain_llm()
 
 class Turn(BaseModel):
     role: str
