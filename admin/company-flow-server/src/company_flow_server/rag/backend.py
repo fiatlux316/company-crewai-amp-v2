@@ -227,7 +227,7 @@ def get_final_prompt(query: str, uuid: str) -> str:
             context_text = ''
             for chunk in chunks:
                 context_text += f'##참조문서_Chunk:\n{chunk}\n\n'
-            print("\n>>>>> rag_context:\n", context_text)
+            #print("\n>>>>> rag_context:\n", context_text)
             rendered = prompt.format(
                 system_prompt=system_prompt,
                 func_call_result=func_call_result,
@@ -260,11 +260,11 @@ def chat(messages: Messages) :
     resp = llm.invoke(final_prompt)
     text = resp.content if hasattr(resp, "content") else str(resp)
     response = text.strip()
-    print("\n>>>>> response :\n", response)
+    #print("\n>>>>> response :\n", response)
 
     # 대화 기록에 현재 대화 추가
     chat_histories[uuid].append(AIMessage(content=response))
-    print(f"\n>>>>> Updated chat_history for {uuid}:\n", chat_histories[uuid])
+    #print(f"\n>>>>> Updated chat_history for {uuid}:\n", chat_histories[uuid])
 
     return {"role": "assistant", "content": response}
 
@@ -291,10 +291,10 @@ def chat_stream(messages: Messages) :
             yield chunk.content
 
         response = full_response.strip()
-        print("\n>>>>> response :\n", response)
+        #print("\n>>>>> response :\n", response)
 
         # 대화 기록에 현재 대화 추가
         chat_histories[uuid].append(AIMessage(content=response))
-        print(f"\n>>>>> Updated chat_history for {uuid}:\n", chat_histories[uuid])
+        #print(f"\n>>>>> Updated chat_history for {uuid}:\n", chat_histories[uuid])
 
     return StreamingResponse(generate(), media_type="text/event-stream")    
