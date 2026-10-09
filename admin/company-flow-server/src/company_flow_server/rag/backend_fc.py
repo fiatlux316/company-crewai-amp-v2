@@ -78,7 +78,19 @@ class ConversationManager:
 
         # 응답에서 마지막 메시지 추출
         last_message = response["messages"][-1]
-        answer = last_message.content if hasattr(last_message, 'content') else str(last_message)
+        answer_raw = last_message.content if hasattr(last_message, 'content') else str(last_message)
+        
+        answer = ""
+        if isinstance(answer_raw, list):
+            texts = []
+            for item in answer_raw:
+                if isinstance(item, dict) and 'text' in item:
+                    texts.append(item['text'])
+                elif isinstance(item, str):
+                    texts.append(item)
+            answer = " ".join(texts)
+        else:
+            answer = str(answer_raw)
 
         # 어시스턴트 응답을 히스토리에 추가
         self.chat_history.append({"role": "assistant", "content": answer})
@@ -145,6 +157,7 @@ prompt = PromptTemplate.from_template(
     If Func_Call_Result exists, prioritize this information for the answer. 
     If it does not exist, generate the response prioritizing RAG_Context. 
     Make sure to refer to the Chat_history to summarize and deliver the final response.
+    IMPORTANT: Do not include labels like 'Func_Call_Result :' or 'RAG_Context :' in your output. Return only the final natural response to the user.
 
     CS_Guide : {system_prompt}
     Func_Call_Result : {func_call_result}

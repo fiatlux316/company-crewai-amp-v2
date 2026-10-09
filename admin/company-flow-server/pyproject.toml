@@ -36,7 +36,8 @@ dependencies = [
   "boto3",
   "chromadb",
   "langchain-openai",
-  "langchain-aws"
+  "langchain-aws",
+  "langchain-google-genai"
 ]
 
 [project.optional-dependencies]
