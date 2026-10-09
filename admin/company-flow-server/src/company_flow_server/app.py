@@ -470,10 +470,16 @@ from starlette.requests import ClientDisconnect
 
 @app.post("/api/v1/chat_stream")
 async def chat_stream_proxy(request: Request):
+    headers = {
+        "Content-Type": "text/event-stream; charset=utf-8",
+        "Cache-Control": "no-cache",
+        "Connection": "keep-alive",
+        "X-Accel-Buffering": "no",
+    }
     try:
         body = await request.body()
     except ClientDisconnect:
-        return StreamingResponse(iter([]), media_type="text/event-stream")
+        return StreamingResponse(iter([]), headers=headers)
 
     async def stream_generator():
         try:
@@ -486,5 +492,5 @@ async def chat_stream_proxy(request: Request):
         except Exception as e:
             logger.warning(f"chat_stream_proxy streaming interrupted: {e}")
 
-    return StreamingResponse(stream_generator(), media_type="text/event-stream")
+    return StreamingResponse(stream_generator(), headers=headers)
 app.mount("/", StaticFiles(directory=frontend_dist, html=True), name="spa")

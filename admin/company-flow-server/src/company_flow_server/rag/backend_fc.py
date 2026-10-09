@@ -258,13 +258,18 @@ def chat(messages: Messages) :
     return {"role": "assistant", "content": response}
 
 
-@app.post("/chat_stream", response_model=Turn)
-def chat_stream(messages: Messages) :
+@app.post("/chat_stream")
+def chat_stream(messages: Messages):
 
     query = messages.messages[-1].content
     uuid = messages.uuid
-    #print("query :", query)
-    #print("uuid :", uuid)
+
+    headers = {
+        "Content-Type": "text/event-stream; charset=utf-8",
+        "Cache-Control": "no-cache",
+        "Connection": "keep-alive",
+        "X-Accel-Buffering": "no",
+    }
 
     def generate():
 
@@ -280,10 +285,8 @@ def chat_stream(messages: Messages) :
             yield chunk.content
 
         response = full_response.strip()
-        print("\n>>>>> response :\n", response)
 
         # 대화 기록에 현재 대화 추가
         chat_histories[uuid].append(AIMessage(content=response))
-        print(f"\n>>>>> Updated chat_history for {uuid}:\n", chat_histories[uuid])
 
-    return StreamingResponse(generate(), media_type="text/event-stream")    
+    return StreamingResponse(generate(), headers=headers)    
