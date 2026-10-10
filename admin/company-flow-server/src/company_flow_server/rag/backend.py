@@ -103,7 +103,7 @@ def get_final_prompt(query: str, uuid: str) -> str:
     try:    
         # 질문에 대한 FAQ 검색
         t0 = time.time()
-        chunks = vs_manager.search_chunks(query=query_final, index_name="SM1_chunk", top_k=3)
+        chunks = vs_manager.search_chunks(query=query_final, index_name="SM1_chunk", top_k=2)
         print(f"[{time.time()-t0:.2f}s] search_chunks 완료")
         
         if not chunks:
