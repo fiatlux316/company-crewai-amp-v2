@@ -5,7 +5,6 @@ from fastapi.responses import StreamingResponse
 from pydantic import BaseModel
 from typing import Dict, List, Optional, Tuple
 
-from langchain.agents import create_agent
 from langchain_core.messages import AIMessage, HumanMessage
 from langchain_core.prompts import ChatPromptTemplate, PromptTemplate
 
@@ -60,75 +59,6 @@ app = FastAPI()
 SYSTEM_PROMPT_FOR_AGENT = """당신은 시스템 운영 전문가입니다. 사용자의 질문에 최선을 다해 답변하세요.
 
 """
-
-# Fuction Call 처리를 위한 에이전트 생성
-agent = create_agent(
-    model=llm,
-    #tools=tools,
-    system_prompt=SYSTEM_PROMPT_FOR_AGENT
-)
-
-# 대화 관리 클래스
-class ConversationManager:
-    def __init__(self):
-        self.agent = agent
-        self.chat_history = []
-
-    def process_message(self, message: str):
-        # 사용자 메시지를 히스토리에 추가
-        self.chat_history.append({"role": "user", "content": message})
-
-        # 에이전트 실행
-        response = self.agent.invoke({"messages": self.chat_history})
-
-        # 응답에서 마지막 메시지 추출
-        last_message = response["messages"][-1]
-        answer_raw = last_message.content if hasattr(last_message, 'content') else str(last_message)
-        
-        answer = ""
-        if isinstance(answer_raw, list):
-            texts = []
-            for item in answer_raw:
-                if isinstance(item, dict) and 'text' in item:
-                    texts.append(item['text'])
-                elif isinstance(item, str):
-                    texts.append(item)
-            answer = " ".join(texts)
-        else:
-            answer = str(answer_raw)
-
-        # 어시스턴트 응답을 히스토리에 추가
-        self.chat_history.append({"role": "assistant", "content": answer})
-
-        # 실행 로그 생성
-        log_content = [f"[User Input] :{message}"]
-
-        # tool_calls 정보 추출
-        for msg in response["messages"]:
-            if hasattr(msg, 'tool_calls') and msg.tool_calls:
-                for tool_call in msg.tool_calls:
-                    log_content.append(f"[Function Call] : {tool_call['name']}")
-                    log_content.append(f"[Parameters] : {tool_call['args']}")
-            if hasattr(msg, 'name') and msg.name:  # ToolMessage
-                log_content.append(f"[Output] : \n{msg.content}")
-
-        log_content.append(f"[AI Response] : \n{answer}")
-        execution_log = "\n".join(log_content)
-
-        return answer, execution_log
-
-    def clear_history(self):
-        self.chat_history = []
-        return []
-
-# 대화 관리자 인스턴스 생성
-conversation_manager = ConversationManager()
-
-#  대화 초기화 함수
-def clear_conversation():
-    """대화 이력 초기화"""
-    conversation_manager.clear_history()
-    return [], ""
 
 
 # # AI 상담을 위한 기본 프롬프트 구성
@@ -213,18 +143,13 @@ def get_final_prompt(query: str, uuid: str) -> str:
     print("\n>>>>> query_final :", query_final)
 
     try:    
-        # tool_calls 가 존재하는 경우
-        func_call_result, execution_log = conversation_manager.process_message(query)
-        print("\n>>>>> function_call_log :\n", execution_log)
-        
-        # tool_calls 과 상관없이 질문에 대한 FAQ 검색
+        # 질문에 대한 FAQ 검색
         chunks = vs_manager.search_chunks(
             query=query_final,
             index_name=index,
             top_k=3
         )
         
-        #print("chunks :", chunks)
         if not chunks:
             response = "죄송합니다. 일치하는 FAQ 항목이 없습니다" 
             print(f"response : {response}")
@@ -235,15 +160,20 @@ def get_final_prompt(query: str, uuid: str) -> str:
             for chunk in chunks:
                 context_text += f'##참조문서_Chunk:\n{chunk}\n\n'
             print("\n>>>>> rag_context:\n", context_text)
+            
+            # 히스토리 포맷팅
+            history_str = ""
+            for msg in user_chat_history:
+                role = "User" if isinstance(msg, HumanMessage) else "Assistant"
+                history_str += f"{role}: {msg.content}\n"
+                
             rendered = prompt.format(
                 system_prompt=system_prompt,
-                func_call_result=func_call_result,
                 retrieved_context="[검색된 FAQ Context]\n\n" + context_text,
                 question=query,
-                chat_history=user_chat_history
+                chat_history=history_str
             ) 
             user_chat_history.append(HumanMessage(content=query))
-            #chat_histories[uuid].append(HumanMessage(content=query_final))
             return rendered 
 
     except Exception as e:
