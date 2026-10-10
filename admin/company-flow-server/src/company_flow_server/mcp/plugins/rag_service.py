@@ -26,7 +26,7 @@ TOOL_METADATA = {
 
 def register_tool(mcp_app) -> None:
     @mcp_app.tool(name=TOOL_METADATA["name"])
-    async def rag_search(query: str, session_id: str = "mcp-default-session") -> str:
+    def rag_search(query: str, session_id: str = "mcp-default-session") -> str:
         rag_api = None
         try:
             from .base_api import rag_api as api
@@ -35,4 +35,4 @@ def register_tool(mcp_app) -> None:
             print("Error: Could not import rag_api in rag_service.py", file=sys.stderr)
             return "Error: Could not import rag_api"
 
-        return await rag_api.invoke_rag_chat(query, session_id)
+        return rag_api.invoke_rag_chat(query, session_id)
