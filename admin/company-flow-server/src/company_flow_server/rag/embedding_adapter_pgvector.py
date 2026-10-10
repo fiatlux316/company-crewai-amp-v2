@@ -34,5 +34,5 @@ class E5PGVectorEmbeddings:
         # 전체 테이블 삭제 대신 컬렉션만 안전하게 삭제
         try:
             self.vectorstore.delete_collection()
-        except AttributeError:
-            self.vectorstore.drop_tables()
+        except Exception as e:
+            print(f"컬렉션 삭제 중 오류 발생 (무시됨): {e}")
