@@ -24,14 +24,14 @@ export default function Sidebar({ activeTab, setActiveTab, collapsed, onToggle, 
         <button className={activeTab === 'flow' ? 'active' : ''} onClick={() => setActiveTab('flow')}>
           🔀 <span className="tab-text">Flow Designer</span>
         </button>
+        <button className={activeTab === 'rag' ? 'active' : ''} onClick={() => setActiveTab('rag')}>
+          💬 <span className="tab-text">AI Chatbot</span>
+        </button>
         <button className={activeTab === 'mcp' ? 'active' : ''} onClick={() => setActiveTab('mcp')}>
           🛠 <span className="tab-text">MCP Tools</span>
         </button>
         <button className={activeTab === 'swagger' ? 'active' : ''} onClick={() => setActiveTab('swagger')}>
           📖 <span className="tab-text">Swagger API</span>
-        </button>
-        <button className={activeTab === 'rag' ? 'active' : ''} onClick={() => setActiveTab('rag')}>
-          💬 <span className="tab-text">AI Chatbot</span>
         </button>
       </div>
 
