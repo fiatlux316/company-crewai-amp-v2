@@ -19,6 +19,8 @@ class E5PGVectorEmbeddings:
             connection=self.engine,
             use_jsonb=True
         )
+        # 런타임에 테이블(langchain_pg_collection, langchain_pg_embedding)이 없으면 생성
+        self.vectorstore.create_tables_if_not_exists()
 
     def search(self, query: str, top_k: int) -> list:
         # Langchain PGVector의 similarity_search 이용
@@ -29,4 +31,8 @@ class E5PGVectorEmbeddings:
         self.vectorstore.add_documents(chunks)
 
     def drop_tables(self):
-        self.vectorstore.drop_tables()
+        # 전체 테이블 삭제 대신 컬렉션만 안전하게 삭제
+        try:
+            self.vectorstore.delete_collection()
+        except AttributeError:
+            self.vectorstore.drop_tables()
