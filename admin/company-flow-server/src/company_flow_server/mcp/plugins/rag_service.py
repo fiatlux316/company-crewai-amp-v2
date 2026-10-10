@@ -7,7 +7,7 @@ TOOL_METADATA = {
     'input_schema': {
         'type': 'object',
         'properties': {
-            'query': {
+            'rag_query': {
                 'type': 'string',
                 'description': '챗봇에게 물어볼 질문 내용'
             },
@@ -16,7 +16,7 @@ TOOL_METADATA = {
                 'description': '대화 문맥 유지를 위한 세션 ID (선택 사항)'
             }
         },
-        'required': ['query']
+        'required': ['rag_query']
     },
     'output_schema': {
         'type': 'string',
@@ -26,7 +26,7 @@ TOOL_METADATA = {
 
 def register_tool(mcp_app) -> None:
     @mcp_app.tool(name=TOOL_METADATA["name"])
-    def rag_search(query: str, session_id: str = "mcp-default-session") -> str:
+    def rag_search(rag_query: str, session_id: str = "mcp-default-session") -> str:
         rag_api = None
         try:
             from .base_api import rag_api as api
@@ -35,4 +35,4 @@ def register_tool(mcp_app) -> None:
             print("Error: Could not import rag_api in rag_service.py", file=sys.stderr)
             return "Error: Could not import rag_api"
 
-        return rag_api.invoke_rag_chat(query, session_id)
+        return rag_api.invoke_rag_chat(rag_query, session_id)
