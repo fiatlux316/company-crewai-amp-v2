@@ -1,5 +1,6 @@
 # FC(Function Calling) 기반 챗봇
 import os
+import time
 from fastapi import FastAPI
 from fastapi.responses import StreamingResponse
 from pydantic import BaseModel
@@ -101,11 +102,9 @@ def get_final_prompt(query: str, uuid: str) -> str:
 
     try:    
         # 질문에 대한 FAQ 검색
-        chunks = vs_manager.search_chunks(
-            query=query_final,
-            index_name=index,
-            top_k=3
-        )
+        t0 = time.time()
+        chunks = vs_manager.search_chunks(query=query_final, index_name="SM1_chunk", top_k=3)
+        print(f"[{time.time()-t0:.2f}s] search_chunks 완료")
         
         if not chunks:
             response = "죄송합니다. 일치하는 FAQ 항목이 없습니다" 
@@ -178,18 +177,25 @@ async def chat_stream(messages: Messages):
     }
 
     async def generate():
-
+        start_time = time.time()
         final_prompt = get_final_prompt(query, uuid)
+        print(f"[{time.time()-start_time:.2f}s] get_final_prompt 완료")
         if final_prompt is None:
             yield "죄송합니다. 질문에 대해서 적정한 답변이 준비되지 않았습니다"
             return
     
         # stream 방식 (토큰 단위로 스트리밍)
         full_response = ""
+        first_token = True
+        llm_start = time.time()
         async for chunk in llm.astream(final_prompt):
+            if first_token:
+                print(f"[{time.time()-llm_start:.2f}s] 첫 토큰 응답 (TTFT)")
+                first_token = False
             if chunk.content:
                 full_response += chunk.content
                 yield chunk.content
+        print(f"[{time.time()-llm_start:.2f}s] 전체 스트리밍 완료")
 
         response = full_response.strip()
         print(f"\n>>>>> Final response :\n", response)
