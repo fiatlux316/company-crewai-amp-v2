@@ -155,7 +155,8 @@ def get_langchain_llm():
         return ChatOllama(
             model=ollama_model,
             base_url=ollama_base_url,
-            temperature=0.0
+            temperature=0.0,
+            keep_alive="-1"
         )
     else:
         raise ValueError(f"지원하지 않는 LLM_TYPE 입니다: {llm_type}")

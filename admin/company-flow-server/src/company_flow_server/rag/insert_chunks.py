@@ -76,8 +76,8 @@ if __name__ == "__main__":
         try:
             # 컬렉션(인덱스)이 이미 존재한다면 먼저 삭제 후 다시 처리
             print("기존 컬렉션/인덱스가 존재한다면 삭제를 시도합니다...")
-            vs_manager.delete_index("EM_chunk")
-            vs_manager.ingest_chunks(chunks=chunks, index_name="EM_chunk")
+            vs_manager.delete_index("SM1_chunk")
+            vs_manager.ingest_chunks(chunks=chunks, index_name="SM1_chunk")
         except ValueError as e:
             print(e)
     else:

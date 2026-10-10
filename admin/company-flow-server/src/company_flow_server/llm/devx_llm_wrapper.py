@@ -67,6 +67,10 @@ class CompanyLLMWrapper(CompanyBaseLLM):
             payload["stop"] = kwargs["stop"]
         elif "stop_words" in kwargs:
             payload["stop"] = kwargs["stop_words"]
+            
+        # Ollama 로컬 서버 호출인 경우 콜드 스타트 방지를 위해 keep_alive 파라미터 추가
+        if "11434" in self.base_url or "localhost" in self.base_url:
+            payload["keep_alive"] = "-1"
 
         headers = {"Content-Type": "application/json"}
         if self.api_key:

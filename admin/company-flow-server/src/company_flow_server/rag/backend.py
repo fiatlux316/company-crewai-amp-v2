@@ -12,8 +12,6 @@ from dotenv import load_dotenv
 from company_flow_server.rag.vs_manager import VectorStoreManager
 from company_flow_server.llm.llm_adapter import get_langchain_llm
 
-#from function import *
-
 # 환경 변수 로드(.env 파일에서 API 키 등을 로드)
 load_dotenv()
 
@@ -30,48 +28,7 @@ class Messages(BaseModel):
 
 app = FastAPI()
 
-# 도구 리스트 생성
-# tools = [
-#     get_customer_profile,
-#     search_products,
-#     get_customer_orders,
-#     get_delivery_status,
-#     search_reviews,
-#     get_customer_cart,
-#     get_point_history,
-#     get_current_promotions,
-#     get_popular_products,
-#     search_facility
-# ]
-
-
-# 시스템 프롬프트
-# SYSTEM_PROMPT_FOR_AGENT = """당신은 이마트 고객 상담사 입니다. 사용자의 질문에 최선을 다해 답변하세요.
-
-# 1. 고객 프로필, 주문 내역, 배송 상태, 포인트 이력, 프로모션, 장바구니, 상품 리뷰, 인기상품, 시설물(편의시설) 등에 관한 질문은 반드시 도구를 호출하여 답변합니다.
-# 2. 이전 대화 맥락을 참고하여 일관된 답변을 제공합니다.
-# 3. 만약 이전 대화가 없는 최초의 질문인 경우에는  고객 프로필과 최근 주문내역 기반으로 가볍게 인사를 건넵니다. (예, 안녕하세요. OOO님,  최근 구매하신 OOO 은 맘에 드시는 지요?)
-# 4. ID 형식을 정확히 사용하십시오.
-# 5. 현재 로그인한 사용자의 ID는 C001로 가정합니다.
-# """
-
-# 시스템 프롬프트
-SYSTEM_PROMPT_FOR_AGENT = """당신은 시스템 운영 전문가입니다. 사용자의 질문에 최선을 다해 답변하세요.
-
-"""
-
-
-# # AI 상담을 위한 기본 프롬프트 구성
-# base_prompt = """당신은 이마트 고객만족센터 7년 차 선임 매니저(32세)입니다. \n
-# 현장 경험이 풍부하여 상품권, 결제, 환불 규정에 능통하며, 고객의 문제를 스마트하고 노련하게 해결합니다. \n
-# 사용자의 질문에 최선을 다해 답변하세요.\n
-# 1. 고객 프로필, 주문 내역, 배송 상태, 포인트, 결제 정보 등에 관한 질문은 반드시 도구를 호출하여 답변합니다.\n
-# 2. 해당 도구와 상관없는 질문에 대해서는 RAG_Context 를 기반으로 답변합니다.\n
-# 3. ID 형식을 정확히 사용하십시오.\n
-# 4. 현재 로그인한 사용자의 ID는 C001로 가정합니다. \n\n
-# """
-
-# AI 상담을 위한 기본 프롬프트 구성
+# 기본 프롬프트 구성
 base_prompt = """당신은 업무 전문가입니다. \n
 운영 현장의 경험이 풍부하고,  운영 상의 이슈/문제를 스마트하고 노련하게 해결합니다. \n
 사용자의 질문에 최선을 다해 답변하세요.\n
@@ -124,8 +81,8 @@ chat_histories: Dict[str, List] = {}
 
 def get_final_prompt(query: str, uuid: str) -> str:
 
-    brand_id = 'EM'
-    index = brand_id + '_chunk'
+    store_id = 'SM1'
+    index = store_id + '_chunk'
 
     #print("query :", query)
 
@@ -138,8 +95,8 @@ def get_final_prompt(query: str, uuid: str) -> str:
     user_query_history.append(query)
 
     # 최근 3개 질문을 하나의 스트링으로 저장 
-    query_final = ' '.join(user_query_history[-3:])
-    #query_final = query
+    #query_final = ' '.join(user_query_history[-3:])
+    query_final = query
     print("\n>>>>> query_final :", query_final)
 
     try:    
@@ -161,9 +118,10 @@ def get_final_prompt(query: str, uuid: str) -> str:
                 context_text += f'##참조문서_Chunk:\n{chunk}\n\n'
             print("\n>>>>> rag_context:\n", context_text)
             
-            # 히스토리 포맷팅
+            # 히스토리 포맷팅 (최근 4개 메시지로 제한)
             history_str = ""
-            for msg in user_chat_history:
+            recent_history = user_chat_history[-4:]
+            for msg in recent_history:
                 role = "User" if isinstance(msg, HumanMessage) else "Assistant"
                 history_str += f"{role}: {msg.content}\n"
                 
