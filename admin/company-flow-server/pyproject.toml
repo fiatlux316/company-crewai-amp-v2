@@ -35,6 +35,8 @@ dependencies = [
   "pypdf",
   "boto3",
   "chromadb",
+  "langchain-postgres",
+  "pgvector",
   "langchain-openai",
   "langchain-aws",
   "langchain-google-genai"

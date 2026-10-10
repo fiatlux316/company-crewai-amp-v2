@@ -2,6 +2,7 @@ import os
 import chromadb
 from company_flow_server.rag.embedding_adapter_opensearch import E5OpenSearchEmbeddings
 from company_flow_server.rag.embedding_adapter_chroma import E5ChromaEmbeddings
+from company_flow_server.rag.embedding_adapter_pgvector import E5PGVectorEmbeddings
 import uuid
 
 class VectorStoreManager:
@@ -24,6 +25,19 @@ class VectorStoreManager:
                 path=chroma_path,
                 settings=chromadb.config.Settings(anonymized_telemetry=False)
             )
+        elif self.provider == "pgvector":
+            print("Vector Store Provider로 PGVector가 선택되었습니다.")
+            # fallback to localhost if not set (for local script testing)
+            db_url = os.getenv("DATABASE_URL")
+            if not db_url:
+                db_url = "postgresql+psycopg://crew:change-me@localhost:5434/crew"
+            # 로컬(Mac)에서 셸 스크립트로 실행할 경우, docker 네트워크의 'postgres' 호스트를 찾지 못하므로 localhost로 강제 치환합니다.
+            import os as _os
+            if not _os.path.exists('/.dockerenv') and "postgres:5432" in db_url:
+                db_url = db_url.replace("postgres:5432", "localhost:5434")
+                
+            self.pgvector_client = None
+            self.db_url = db_url
         else:
             raise ValueError(f"지원하지 않는 Vector Store 제공자입니다: {provider}")    
         
@@ -41,6 +55,14 @@ class VectorStoreManager:
                 print(f"ChromaDB '{index_name}' 컬렉션이 삭제되었습니다.")
             except Exception:
                 pass
+        elif self.provider == "pgvector":
+            try:
+                if not self.pgvector_client:
+                    self.pgvector_client = E5PGVectorEmbeddings(self.db_url, index_name)
+                self.pgvector_client.drop_tables()
+                print(f"PGVector '{index_name}' 테이블이 삭제(Drop)되었습니다.")
+            except Exception as e:
+                print(f"Drop error: {e}")
         else:
             raise ValueError(f"지원하지 않는 Vector Store 제공자입니다: {self.provider}")
 
@@ -54,6 +76,8 @@ class VectorStoreManager:
             return self._search_opensearch(query, index_name, top_k)
         elif self.provider == "chroma":
             return self._search_chroma(query, index_name, top_k)
+        elif self.provider == "pgvector":
+            return self._search_pgvector(query, index_name, top_k)
         else:
             raise ValueError(f"지원하지 않는 Vector Store 제공자입니다: {self.provider}")
 
@@ -113,6 +137,8 @@ class VectorStoreManager:
             self._ingest_opensearch(chunks, index_name)
         elif self.provider == "chroma":
             self._ingest_chroma(chunks, index_name)
+        elif self.provider == "pgvector":
+            self._ingest_pgvector(chunks, index_name)
         else:
             raise ValueError(f"지원하지 않는 Vector Store 제공자입니다: {self.provider}")
 
@@ -156,3 +182,19 @@ class VectorStoreManager:
         embeddings = self._embedding_function(documents)
         collection.add(documents=documents, embeddings=embeddings, ids=ids)
         print(f"인덱싱 완료: 총 {len(documents)}개의 Chunk가 ChromaDB에 E5 임베딩과 함께 성공적으로 업로드되었습니다.")
+
+    def _search_pgvector(self, query: str, collection_name: str, top_k: int) -> list:
+        if not self.pgvector_client:
+            self.pgvector_client = E5PGVectorEmbeddings(self.db_url, collection_name)
+        try:
+            return self.pgvector_client.search(query, top_k)
+        except Exception as e:
+            print(f"PGVector 검색 오류: {e}")
+            return []
+
+    def _ingest_pgvector(self, chunks: list, collection_name: str):
+        if not self.pgvector_client:
+            self.pgvector_client = E5PGVectorEmbeddings(self.db_url, collection_name)
+        print(f"PGVector '{collection_name}' 에 {len(chunks)}개의 청크를 인덱싱합니다...")
+        self.pgvector_client.add_chunks(chunks)
+        print(f"인덱싱 완료: 총 {len(chunks)}개의 Chunk가 PGVector에 성공적으로 업로드되었습니다.")
