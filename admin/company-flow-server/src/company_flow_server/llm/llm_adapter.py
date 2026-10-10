@@ -101,10 +101,11 @@ class DynamicLLMAdapter(CompanyBaseLLM):
 
 def get_langchain_llm():
     """LangChain 기반으로 동작하는 컴포넌트(예: RAG 챗봇)를 위한 LLM 팩토리 함수"""
+    
     from langchain.chat_models import init_chat_model
     from langchain_openai import ChatOpenAI
     
-    llm_type = os.getenv("LLM_TYPE", "company-llm-gateway")
+    llm_type = os.getenv("LLM_TYPE2", "company-llm-gateway")
     
     if llm_type == "company-llm-gateway":
         devx_model = os.getenv("DEVX_MODEL", "bedrock/global.anthropic.claude-sonnet-5")
