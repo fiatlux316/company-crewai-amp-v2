@@ -21,8 +21,8 @@ export default function GeneratePersona({ onKickoff }) {
   });
 
   const stepAvailableTools = {
-    extract: ['jira', 'confluence', 'database', 'datadog', 'repositories'],
-    analysis: [],
+    extract: ['jira', 'confluence', 'database', 'datadog', 'bitbucket', 'rag', 'azure_devops'],
+    analysis: ['rag'],
     write: ['jira', 'confluence'],
     report: ['teams', 'outlook']
   };
