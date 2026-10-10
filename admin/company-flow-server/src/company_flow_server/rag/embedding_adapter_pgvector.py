@@ -28,7 +28,14 @@ class E5PGVectorEmbeddings:
         return [doc.page_content for doc in docs]
 
     def add_chunks(self, chunks: list):
-        self.vectorstore.add_documents(chunks)
+        try:
+            self.vectorstore.create_collection()
+        except Exception as e:
+            print(f"create_collection error: {e}")
+        try:
+            self.vectorstore.add_documents(chunks)
+        except Exception as e:
+            print(f"add_documents error: {e}")
 
     def drop_tables(self):
         # 전체 테이블 삭제 대신 컬렉션만 안전하게 삭제
