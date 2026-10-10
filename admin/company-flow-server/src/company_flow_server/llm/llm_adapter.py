@@ -90,6 +90,10 @@ class DynamicLLMAdapter(CompanyBaseLLM):
             raise e
 
     def supports_function_calling(self) -> bool:
+        # Ollama의 대부분 로컬 모델(gemma2 등)은 네이티브 tool_calls API를 지원하지 않음
+        if os.getenv("LLM_TYPE") == "ollama":
+            return False
+            
         if hasattr(self._inner_llm, "supports_function_calling"):
             return self._inner_llm.supports_function_calling()
         return True

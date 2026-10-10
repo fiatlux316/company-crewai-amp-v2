@@ -62,6 +62,11 @@ class CompanyLLMWrapper(CompanyBaseLLM):
             
         if tools:
             payload["tools"] = tools
+            
+        if "stop" in kwargs:
+            payload["stop"] = kwargs["stop"]
+        elif "stop_words" in kwargs:
+            payload["stop"] = kwargs["stop_words"]
 
         headers = {"Content-Type": "application/json"}
         if self.api_key:
