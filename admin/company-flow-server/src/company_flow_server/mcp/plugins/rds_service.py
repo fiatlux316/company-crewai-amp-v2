@@ -3,7 +3,7 @@ import os
 import sys
 
 TOOL_METADATA = {
-    'name': 'rds.execute_query',
+    'name': 'database.execute_query',
     'description': 'Execute read-only SQL query on RDS.',
     'input_schema': {
         'type': 'object',
