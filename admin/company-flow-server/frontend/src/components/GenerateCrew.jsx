@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { api } from '../utils/api';
-import { showAlert } from './Dialog';
+import { showAlert, showConfirm } from './Dialog';
 
 export default function GenerateCrew() {
   const [file, setFile] = useState(null);
@@ -24,9 +24,25 @@ export default function GenerateCrew() {
     setError(null);
 
     try {
-      const data = await api.generateCrew(file);
+      const data = await api.generateCrew(file, false);
       setResult(data);
     } catch (err) {
+      if (err.status === 409 || (err.message && err.message.includes('기존에 동일한 이름의 Crew 가 존재합니다'))) {
+        const confirmed = await showConfirm('기존에 동일한 이름의 Crew 가 존재합니다. 덮어 쓸까요 ?');
+        if (confirmed) {
+          try {
+            setLoading(true);
+            const data = await api.generateCrew(file, true);
+            setResult(data);
+            return;
+          } catch (retryErr) {
+            setError(retryErr.message || '업로드 중 오류가 발생했습니다.');
+            return;
+          }
+        } else {
+          return;
+        }
+      }
       setError(err.message || '업로드 중 오류가 발생했습니다.');
     } finally {
       setLoading(false);

@@ -128,7 +128,21 @@ export default function ExecutionHistory({ initialRunId, onNavigateCrew, userTyp
       const blob = await res.blob();
       const file = new File([blob], cleanName, { type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' });
       
-      const result = await api.generateCrew(file);
+      let result;
+      try {
+        result = await api.generateCrew(file, false);
+      } catch (err) {
+        if (err.status === 409 || (err.message && err.message.includes('기존에 동일한 이름의 Crew 가 존재합니다'))) {
+          const confirmed = await showConfirm('기존에 동일한 이름의 Crew 가 존재합니다. 덮어 쓸까요 ?');
+          if (confirmed) {
+            result = await api.generateCrew(file, true);
+          } else {
+            return;
+          }
+        } else {
+          throw err;
+        }
+      }
       await showAlert(`성공적으로 Crew가 생성되었습니다!\nID: ${result.crew_id}\nVersion: ${result.version}\n이제 Crew Management 탭에서 확인하세요.`);
       if (onNavigateCrew) onNavigateCrew(result.crew_id);
     } catch (err) {

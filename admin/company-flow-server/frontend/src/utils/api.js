@@ -41,9 +41,10 @@ export const api = {
   updateCrewNode: (crew_id, version, node_type, node_id, body) => fetchWithAuth(`/api/v1/crews/${encodeURIComponent(crew_id)}/${version}/nodes/${node_type}/${node_id}`, {
     method: 'PUT', headers: {'Content-Type': 'application/json'}, body: JSON.stringify(body)
   }),
-  generateCrew: (file) => {
+  generateCrew: (file, overwrite = false) => {
     const formData = new FormData();
     formData.append('file', file);
+    formData.append('overwrite', overwrite ? 'true' : 'false');
     const userId = localStorage.getItem('user_id');
     if (userId) {
       formData.append('owner_id', userId);
@@ -51,6 +52,20 @@ export const api = {
     return fetchWithAuth('/api/v1/crews/generate', {
       method: 'POST',
       body: formData
-    }).then(async r => { if(!r.ok) throw new Error(await r.text()); return r.json(); });
+    }).then(async r => {
+      if (!r.ok) {
+        let msg = '';
+        try {
+          const data = await r.json();
+          msg = data.detail || data.message || JSON.stringify(data);
+        } catch (_) {
+          msg = await r.text();
+        }
+        const err = new Error(msg);
+        err.status = r.status;
+        throw err;
+      }
+      return r.json();
+    });
   }
 };

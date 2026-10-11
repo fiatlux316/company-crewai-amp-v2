@@ -351,6 +351,7 @@ def run(inputs: dict[str, Any], runtime: Any) -> dict[str, Any]:
 async def api_generate_crew(
     file: UploadFile = File(...),
     owner_id: Optional[str] = Form(None),
+    overwrite: bool = Form(False),
     p: Principal = Depends(current_principal)
 ):
     # We will use the FlowRegistry root as the base dir
@@ -363,6 +364,14 @@ async def api_generate_crew(
     
     excel_name = Path(file.filename).stem
     
+    # 동일한 이름의 Crew 폴더가 이미 존재하는지 확인
+    crew_target_dir = registry.root / excel_name
+    if crew_target_dir.exists() and not overwrite:
+        raise HTTPException(
+            status_code=409,
+            detail="기존에 동일한 이름의 Crew 가 존재합니다."
+        )
+
     # 로그인 사용자 user_id 우선 결정
     effective_owner = p.subject
     if (not effective_owner or effective_owner == "dev-admin") and owner_id:
