@@ -16,9 +16,26 @@ def markdown_to_excel_tool(md_file_path_or_content: str, excel_file_path: Option
     """
     try:
         # 파일 경로인 경우 파일 읽기, 아니면 텍스트 자체로 간주
-        if len(md_file_path_or_content) < 255 and os.path.exists(md_file_path_or_content):
-            with open(md_file_path_or_content, 'r', encoding='utf-8') as f:
+        resolved_path = None
+        if len(md_file_path_or_content) < 255:
+            candidate_paths = [
+                Path(md_file_path_or_content),
+                Path(os.getcwd()) / md_file_path_or_content,
+                Path("./output") / Path(md_file_path_or_content).name,
+                Path(__file__).parent.parent.parent / "output" / Path(md_file_path_or_content).name,
+                Path("./output") / "{persona_name}.md",
+                Path(__file__).parent.parent.parent / "output" / "{persona_name}.md",
+            ]
+            for cp in candidate_paths:
+                if cp.exists() and cp.is_file():
+                    resolved_path = cp
+                    break
+
+        if resolved_path:
+            with open(resolved_path, 'r', encoding='utf-8') as f:
                 md_text = f.read()
+        elif (md_file_path_or_content.strip().endswith(".md") or md_file_path_or_content.strip().startswith("./") or "/" in md_file_path_or_content) and "\n" not in md_file_path_or_content:
+            return f"오류: 마크다운 파일 '{md_file_path_or_content}'을(를) 찾을 수 없습니다. 경로를 확인하세요."
         else:
             md_text = md_file_path_or_content
 
@@ -129,6 +146,16 @@ def markdown_to_excel_tool(md_file_path_or_content: str, excel_file_path: Option
                 sheet_name = f'Sheet{i+1}'
                 df.to_excel(writer, sheet_name=sheet_name, index=False)
                 
+        # deployed/output 폴더에도 복사 보장 (worker 아티팩트 수집 경로)
+        try:
+            deployed_output = Path(__file__).parent.parent.parent / "output" / Path(excel_file_path).name
+            if deployed_output.resolve() != Path(excel_file_path).resolve():
+                deployed_output.parent.mkdir(parents=True, exist_ok=True)
+                import shutil
+                shutil.copy2(excel_file_path, deployed_output)
+        except Exception:
+            pass
+
         return f"성공: 마크다운 파일을 엑셀 파일로 변환 완료. (저장위치: {excel_file_path})"
         
     except ValueError:

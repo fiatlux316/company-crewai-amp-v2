@@ -3,7 +3,8 @@ import re
 import json
 from pathlib import Path
 import pandas as pd
-from fastapi import APIRouter, UploadFile, File, HTTPException, Depends
+from typing import Optional
+from fastapi import APIRouter, UploadFile, File, Form, HTTPException, Depends
 from pydantic import BaseModel
 from .auth.rbac import Principal, current_principal, require
 
@@ -217,7 +218,11 @@ def run(inputs: dict[str, Any], runtime: Any) -> dict[str, Any]:
                 "agent": t_agent,
             }}
             if "output_file" in t_cfg and t_cfg["output_file"]:
-                task_kwargs["output_file"] = t_cfg["output_file"]
+                out_file = t_cfg["output_file"]
+                for k, v in (inputs or {{}}).items():
+                    v_str = json.dumps(v, ensure_ascii=False) if isinstance(v, (dict, list)) else str(v)
+                    out_file = out_file.replace("{{" + k + "}}", v_str)
+                task_kwargs["output_file"] = out_file
 
             task_obj = Task(**task_kwargs)
             tasks[t_id] = task_obj
@@ -245,7 +250,7 @@ def run(inputs: dict[str, Any], runtime: Any) -> dict[str, Any]:
         
     return {{
         "outputs": parsed_result,
-        "metadata": {{"crew": "ops.{excel_name}", "version": "1.0.0"}},
+        "metadata": {{"crew": "{excel_name}", "version": "1.0.0"}},
     }}
 """
     # Fix the regex bug in the generated entrypoint as well
@@ -254,11 +259,15 @@ def run(inputs: dict[str, Any], runtime: Any) -> dict[str, Any]:
     with open(src_dir / "entrypoint.py", "w", encoding="utf-8") as f:
         f.write(entrypoint_code)
         
-    return f"ops.{crew_dir_name}", version
+    return f"{crew_dir_name}", version
 
 
 @router.post("/api/v1/crews/generate")
-async def api_generate_crew(file: UploadFile = File(...), p: Principal = Depends(current_principal)):
+async def api_generate_crew(
+    file: UploadFile = File(...),
+    owner_id: Optional[str] = Form(None),
+    p: Principal = Depends(current_principal)
+):
     # We will use the FlowRegistry root as the base dir
     # To avoid circular imports, we just know the registry path or import it
     from .app import registry
@@ -269,9 +278,16 @@ async def api_generate_crew(file: UploadFile = File(...), p: Principal = Depends
     
     excel_name = Path(file.filename).stem
     
+    # 로그인 사용자 user_id 우선 결정
+    effective_owner = p.subject
+    if (not effective_owner or effective_owner == "dev-admin") and owner_id:
+        effective_owner = owner_id
+    elif not effective_owner:
+        effective_owner = owner_id or "dev-admin"
+
     try:
-        crew_id, version = generate_crew_from_excel(excel_bytes, excel_name, registry.root, p.subject)
-        return {"status": "success", "crew_id": crew_id, "version": version}
+        crew_id, version = generate_crew_from_excel(excel_bytes, excel_name, registry.root, effective_owner)
+        return {"status": "success", "crew_id": crew_id, "version": version, "owner": effective_owner}
     except Exception as e:
         import traceback
         traceback.print_exc()

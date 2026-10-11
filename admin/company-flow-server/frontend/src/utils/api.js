@@ -44,6 +44,10 @@ export const api = {
   generateCrew: (file) => {
     const formData = new FormData();
     formData.append('file', file);
+    const userId = localStorage.getItem('user_id');
+    if (userId) {
+      formData.append('owner_id', userId);
+    }
     return fetchWithAuth('/api/v1/crews/generate', {
       method: 'POST',
       body: formData

@@ -73,7 +73,11 @@ def run(inputs: dict[str, Any], runtime: Any) -> dict[str, Any]:
                 "agent": t_agent,
             }
             if "output_file" in t_cfg and t_cfg["output_file"]:
-                task_kwargs["output_file"] = t_cfg["output_file"]
+                out_file = t_cfg["output_file"]
+                for k, v in (inputs or {}).items():
+                    v_str = json.dumps(v, ensure_ascii=False) if isinstance(v, (dict, list)) else str(v)
+                    out_file = out_file.replace("{" + k + "}", v_str)
+                task_kwargs["output_file"] = out_file
 
             task_obj = Task(**task_kwargs)
             tasks[t_id] = task_obj

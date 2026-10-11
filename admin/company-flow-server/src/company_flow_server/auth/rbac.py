@@ -40,6 +40,15 @@ def decode_token(token:str)->Principal:
  return Principal(str(claims.get("sub","unknown")),tuple(roles),tuple(scopes),claims.get("environment"))
 
 def current_principal(credentials:HTTPAuthorizationCredentials|None=Depends(security))->Principal:
+ if credentials and credentials.credentials:
+  try:
+   p = decode_token(credentials.credentials)
+   if os.getenv("AUTH_DISABLED","false").lower()=="true":
+    roles = tuple(set(p.roles) | {"platform_admin"})
+    return Principal(p.subject, roles, p.scopes, p.environment)
+   return p
+  except Exception:
+   pass
  if os.getenv("AUTH_DISABLED","false").lower()=="true":
   return Principal("dev-admin",("platform_admin",),())
  if not credentials:raise HTTPException(401,"bearer token required")
