@@ -109,7 +109,16 @@ def generate_crew_from_excel(excel_bytes: bytes, excel_name: str, registry_root:
             "context": context_list
         }
         if task_output_file:
-            task_entry["output_file"] = task_output_file
+            cleaned_out = task_output_file
+            if cleaned_out.startswith("./output/"):
+                pass
+            elif cleaned_out.startswith("output/"):
+                cleaned_out = f"./{cleaned_out}"
+            elif cleaned_out.startswith("./"):
+                cleaned_out = f"./output/{cleaned_out[2:]}"
+            else:
+                cleaned_out = f"./output/{cleaned_out}"
+            task_entry["output_file"] = cleaned_out
 
         tasks[task_name] = task_entry
         
