@@ -1,0 +1,5 @@
+{
+  "issue_key": "[jira.get_issue - issue_key]",
+  "project_key": "[bitbucket.list_repositories - project_key]",
+  "rag_query": "[rag.search - 챗봇에게 물어볼 질문 내용]"
+}

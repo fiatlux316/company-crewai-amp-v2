@@ -1,0 +1,34 @@
+{
+  "schema_version": 1,
+  "crew_id": "TESTER",
+  "version": "1.0.0",
+  "name": "TESTER",
+  "description": "Generated crew from TESTER.xlsx",
+  "owner": "053455",
+  "entrypoint": "TESTER.entrypoint:run",
+  "input_schema": {
+    "type": "object",
+    "properties": {
+      "issue_key": {
+        "type": "string"
+      },
+      "project_key": {
+        "type": "string"
+      },
+      "rag_query": {
+        "type": "string"
+      }
+    }
+  },
+  "output_schema": {
+    "type": "object",
+    "properties": {}
+  },
+  "tags": [
+    "generated"
+  ],
+  "runtime": {
+    "crewai": ">=1.15.17,<1.16"
+  },
+  "process_definition": "src/TESTER/process.jsonc"
+}

@@ -18,11 +18,19 @@ def generate_crew_from_excel(excel_bytes: bytes, excel_name: str, registry_root:
     df = pd.read_excel(io.BytesIO(excel_bytes))
     df = df.fillna("")
     
+    try:
+        from .mcp.registry import get_mcp_catalog
+        mcp_catalog = {tool.get("name"): tool for tool in get_mcp_catalog()}
+    except Exception:
+        mcp_catalog = {}
+
+    mcp_dummy_inputs = {}
+    mcp_param_props = {}
     agents = {}
     tasks = {}
     process_tasks = []
     input_placeholders = set()
-    
+
     for idx, row in df.iterrows():
         task_name = str(row.get("task_name", "")).strip()
         task_context = str(row.get("task_context", "")).strip()
@@ -38,15 +46,42 @@ def generate_crew_from_excel(excel_bytes: bytes, excel_name: str, registry_root:
         if not agent_llm_ref:
             agent_llm_ref = "company/devx-llm"
         mcp = str(row.get("mcp", "")).strip()
+        custom_tool = str(row.get("custom_tool", "")).strip()
         
         if not task_name or not agent_id:
             continue
+
+        tool_refs = [t.strip() for t in mcp.split(",") if t.strip()] if mcp else []
+        if custom_tool:
+            for ct in custom_tool.split(","):
+                ct = ct.strip()
+                if ct and ct not in tool_refs:
+                    tool_refs.append(ct)
+
+        # MCP 필수 파라미터 자동 추출 및 task description 보완
+        needed_in_desc = []
+        for t_ref in tool_refs:
+            mcp_meta = mcp_catalog.get(t_ref)
+            if mcp_meta:
+                input_schema = mcp_meta.get("input_schema", {})
+                required_fields = input_schema.get("required", [])
+                props = input_schema.get("properties", {})
+                for field_name in required_fields:
+                    input_placeholders.add(field_name)
+                    prop_info = props.get(field_name, {})
+                    desc = prop_info.get("description", field_name)
+                    if field_name not in mcp_dummy_inputs:
+                        mcp_dummy_inputs[field_name] = f"[{t_ref} - {desc}]"
+                        mcp_param_props[field_name] = {"type": prop_info.get("type", "string")}
+                    if f"{{{field_name}}}" not in task_desc:
+                        needed_in_desc.append(f"{field_name}: {{{field_name}}}")
+
+        if needed_in_desc:
+            task_desc += "\n\n[도구 필수 파라미터]\n" + "\n".join(f"- {item}" for item in needed_in_desc)
             
         if task_desc:
             found = re.findall(r"\{([a-zA-Z_][a-zA-Z0-9_]*)\}", task_desc)
             input_placeholders.update(found)
-
-        tool_refs = [t.strip() for t in mcp.split(",") if t.strip()] if mcp else []
         
         if agent_id not in agents:
             agents[agent_id] = {
@@ -88,8 +123,12 @@ def generate_crew_from_excel(excel_bytes: bytes, excel_name: str, registry_root:
     inputs_data = {}
     input_properties = {}
     for key in sorted(input_placeholders):
-        inputs_data[key] = "값을 설정하세요"
-        input_properties[key] = {"type": "string"}
+        if key in mcp_dummy_inputs:
+            inputs_data[key] = mcp_dummy_inputs[key]
+            input_properties[key] = mcp_param_props.get(key, {"type": "string"})
+        else:
+            inputs_data[key] = "값을 설정하세요"
+            input_properties[key] = {"type": "string"}
 
     crew_dir_name = excel_name
     version = "1.0.0"
@@ -116,6 +155,26 @@ def generate_crew_from_excel(excel_bytes: bytes, excel_name: str, registry_root:
         
     with open(src_dir / "__init__.py", "w", encoding="utf-8") as f:
         f.write("")
+
+    custom_tools_code = '''from __future__ import annotations
+
+from typing import Any
+from crewai.tools import tool
+
+
+@tool("custom_tool_dummy")
+def custom_tool_dummy(query: str = "") -> str:
+    """
+    사용자 정의 커스텀 도구 템플릿입니다.
+    이 파일에 새로운 @tool 함수를 추가하거나 로직을 수정하면 별도의 서버 재시작 없이 즉시 반영됩니다.
+
+    Args:
+        query: 도구 실행에 필요한 입력 인자
+    """
+    return f"[Custom Tool Dummy Result] Query received: {query}"
+'''
+    with open(src_dir / "custom_tools.py", "w", encoding="utf-8") as f:
+        f.write(custom_tools_code)
         
     manifest = {
       "schema_version": 1,
@@ -166,7 +225,7 @@ HERE = Path(__file__).parent
 
 def _load_jsonc(path: Path) -> dict[str, Any]:
     text = path.read_text(encoding="utf-8")
-    text = re.sub(r"/\*.*?\*/", "", text, flags=re.S)
+    text = re.sub(r"/\\*.*?\\*/", "", text, flags=re.S)
     text = re.sub(r"(^|\\s)//.*$", r"\\1", text, flags=re.M)
     return json.loads(text)
 
@@ -180,9 +239,26 @@ def run(inputs: dict[str, Any], runtime: Any) -> dict[str, Any]:
     for ag_cfg in agents_cfg.values():
         all_tool_refs.update(ag_cfg.get("tool_refs", []))
     
-    with runtime.mcp_tools(list(all_tool_refs)) as tool_provider:
-        tools_list = tool_provider.tools(list(all_tool_refs))
+    # 1. Custom tools 동적 로드 (custom_tools.py 또는 custom_tool.py)
+    custom_tool_map = {{}}
+    for mod_name in (".custom_tools", ".custom_tool"):
+        try:
+            import importlib
+            mod = importlib.import_module(mod_name, package=__package__)
+            for attr_name in dir(mod):
+                attr = getattr(mod, attr_name)
+                if hasattr(attr, "name") and hasattr(attr, "run"):
+                    custom_tool_map[attr.name] = attr
+        except (ImportError, ValueError):
+            pass
+
+    # 2. MCP 툴 목록 (custom_tools에 등록된 툴은 MCP에서 제외)
+    mcp_tool_refs = [t for t in all_tool_refs if t not in custom_tool_map]
+
+    with runtime.mcp_tools(mcp_tool_refs) as tool_provider:
+        tools_list = tool_provider.tools(mcp_tool_refs)
         tool_map = {{t.name: t for t in tools_list}}
+        tool_map.update(custom_tool_map)
         
         # Build agents
         agents = {{}}
