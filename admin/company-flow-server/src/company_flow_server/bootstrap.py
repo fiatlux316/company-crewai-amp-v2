@@ -67,6 +67,9 @@ def build_tool_registry(settings: Settings) -> ToolRegistry:
                 except Exception:
                     pass
         for tool_name, fn in mock_mcp.captured.items():
+            if not getattr(fn, "__doc__", None):
+                fn.__doc__ = f"사내 도구 {tool_name}을(를) 실행합니다."
+
             def make_factory(f, n):
                 return lambda **kwargs: tool(n)(f)
             try:

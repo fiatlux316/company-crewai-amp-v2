@@ -27,6 +27,13 @@ TOOL_METADATA = {
 def register_tool(mcp_app) -> None:
     @mcp_app.tool(name=TOOL_METADATA["name"])
     def rag_search(rag_query: str, session_id: str = "mcp-default-session") -> str:
+        """
+        사내 지식베이스(Knowledge Base)를 검색하여 질문에 대한 종합적인 답변을 제공합니다.
+
+        Args:
+            rag_query: 챗봇에게 물어볼 질문 내용
+            session_id: 대화 문맥 유지를 위한 세션 ID (선택 사항)
+        """
         rag_api = None
         try:
             from .base_api import rag_api as api

@@ -93,7 +93,7 @@ def generate_crew_from_excel(excel_bytes: bytes, excel_name: str, registry_root:
 
     crew_dir_name = excel_name
     version = "1.0.0"
-    base_dir = registry_root / f"ops.{crew_dir_name}" / version
+    base_dir = registry_root / f"{crew_dir_name}" / version
     src_dir = base_dir / "src" / crew_dir_name
     
     src_dir.mkdir(parents=True, exist_ok=True)
@@ -119,7 +119,7 @@ def generate_crew_from_excel(excel_bytes: bytes, excel_name: str, registry_root:
         
     manifest = {
       "schema_version": 1,
-      "crew_id": f"ops.{crew_dir_name}",
+      "crew_id": f"{crew_dir_name}",
       "version": version,
       "name": crew_dir_name,
       "description": f"Generated crew from {excel_name}.xlsx",
