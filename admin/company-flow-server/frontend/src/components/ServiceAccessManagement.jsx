@@ -48,6 +48,7 @@ export default function ServiceAccessManagement() {
     setEditForm({
       name: service.name,
       description: service.description || '',
+      url: service.url || '',
       order_num: service.order_num || 0
     });
   };
@@ -78,7 +79,7 @@ export default function ServiceAccessManagement() {
         <div>
           <h2 style={{ margin: 0 }}>서비스 및 팀 접근 권한 관리</h2>
           <p className="hint" style={{ margin: '4px 0 0 0', color: '#64748b' }}>
-            포탈에 등록된 서비스들의 이름을 수정하고, 각 팀별 접근 권한을 관리합니다.
+            포탈에 등록된 서비스들의 이름 및 링크 URL을 수정하고, 각 팀별 접근 권한을 관리합니다.
           </p>
         </div>
         <button className="btn secondary" onClick={loadData}>↻ 새로고침</button>
@@ -90,11 +91,12 @@ export default function ServiceAccessManagement() {
         <table style={{ width: '100%', borderCollapse: 'collapse', textAlign: 'left', fontSize: '14px' }}>
           <thead>
             <tr style={{ borderBottom: '2px solid #e2e8f0', background: '#f8fafc' }}>
-              <th style={{ padding: '10px 12px' }}>서비스 코드</th>
-              <th style={{ padding: '10px 12px' }}>서비스 표시명</th>
+              <th style={{ padding: '10px 12px', width: '130px' }}>서비스 코드</th>
+              <th style={{ padding: '10px 12px', width: '140px' }}>서비스 표시명</th>
+              <th style={{ padding: '10px 12px', width: '220px' }}>링크 URL</th>
               <th style={{ padding: '10px 12px' }}>설명</th>
-              <th style={{ padding: '10px 12px', width: '80px' }}>순서</th>
-              <th style={{ padding: '10px 12px', width: '120px' }}>관리</th>
+              <th style={{ padding: '10px 12px', width: '70px' }}>순서</th>
+              <th style={{ padding: '10px 12px', width: '110px' }}>관리</th>
             </tr>
           </thead>
           <tbody>
@@ -117,6 +119,25 @@ export default function ServiceAccessManagement() {
                       <span style={{ fontWeight: '600' }}>{s.name}</span>
                     )}
                   </td>
+                  <td style={{ padding: '10px 12px' }}>
+                    {isEditing ? (
+                      <input
+                        type="text"
+                        placeholder="https://..."
+                        value={editForm.url}
+                        onChange={e => setEditForm({ ...editForm, url: e.target.value })}
+                        style={{ padding: '6px 8px', borderRadius: '4px', border: '1px solid #cbd5e1', width: '100%', fontSize: '12px' }}
+                      />
+                    ) : (
+                      s.url ? (
+                        <a href={s.url} target="_blank" rel="noopener noreferrer" style={{ color: '#2563eb', textDecoration: 'none', wordBreak: 'break-all', fontSize: '12px' }}>
+                          🔗 {s.url}
+                        </a>
+                      ) : (
+                        <span style={{ color: '#94a3b8', fontSize: '12px' }}>-</span>
+                      )
+                    )}
+                  </td>
                   <td style={{ padding: '10px 12px', color: '#64748b' }}>
                     {isEditing ? (
                       <input
@@ -135,7 +156,7 @@ export default function ServiceAccessManagement() {
                         type="number"
                         value={editForm.order_num}
                         onChange={e => setEditForm({ ...editForm, order_num: parseInt(e.target.value) || 0 })}
-                        style={{ padding: '6px 8px', borderRadius: '4px', border: '1px solid #cbd5e1', width: '60px' }}
+                        style={{ padding: '6px 8px', borderRadius: '4px', border: '1px solid #cbd5e1', width: '50px' }}
                       />
                     ) : (
                       s.order_num

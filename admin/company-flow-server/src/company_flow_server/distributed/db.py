@@ -24,6 +24,7 @@ class PortalService(Base):
     service_code: Mapped[str] = mapped_column(String(50), unique=True, index=True)
     name: Mapped[str] = mapped_column(String(100))
     description: Mapped[str | None] = mapped_column(String(255), nullable=True)
+    url: Mapped[str | None] = mapped_column(String(512), nullable=True)
     order_num: Mapped[int] = mapped_column(Integer, default=0)
     is_active: Mapped[bool] = mapped_column(Boolean, default=True)
     created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=lambda: datetime.now(timezone.utc))
@@ -93,13 +94,13 @@ DEFAULT_TEAMS = [
 ]
 
 DEFAULT_SERVICES = [
-    {"service_code": "agent-platform", "name": "Agent Ops", "description": "Crew AI 및 Multi-Agent 운영 관리 플랫폼", "order_num": 1},
-    {"service_code": "squad1", "name": "squad1", "description": "스쿼드 1 AI 서비스", "order_num": 2},
-    {"service_code": "squad2", "name": "squad2", "description": "스쿼드 2 AI 서비스", "order_num": 3},
-    {"service_code": "squad3", "name": "squad3", "description": "스쿼드 3 AI 서비스", "order_num": 4},
-    {"service_code": "squad4", "name": "squad4", "description": "스쿼드 4 AI 서비스", "order_num": 5},
-    {"service_code": "squad5", "name": "squad5", "description": "스쿼드 5 AI 서비스", "order_num": 6},
-    {"service_code": "squad6", "name": "squad6", "description": "스쿼드 6 AI 서비스", "order_num": 7},
+    {"service_code": "agent-platform", "name": "Agent Ops", "description": "Crew AI 및 Multi-Agent 운영 관리 플랫폼", "order_num": 1, "url": None},
+    {"service_code": "squad1", "name": "squad1", "description": "스쿼드 1 AI 서비스", "order_num": 2, "url": "https://squad1.company.internal"},
+    {"service_code": "squad2", "name": "squad2", "description": "스쿼드 2 AI 서비스", "order_num": 3, "url": "https://squad2.company.internal"},
+    {"service_code": "squad3", "name": "squad3", "description": "스쿼드 3 AI 서비스", "order_num": 4, "url": "https://squad3.company.internal"},
+    {"service_code": "squad4", "name": "squad4", "description": "스쿼드 4 AI 서비스", "order_num": 5, "url": "https://squad4.company.internal"},
+    {"service_code": "squad5", "name": "squad5", "description": "스쿼드 5 AI 서비스", "order_num": 6, "url": "https://squad5.company.internal"},
+    {"service_code": "squad6", "name": "squad6", "description": "스쿼드 6 AI 서비스", "order_num": 7, "url": "https://squad6.company.internal"},
 ]
 
 def init_db():
@@ -110,6 +111,7 @@ def init_db():
             if "postgresql" in engine.url.drivername:
                 conn.execute(text("ALTER TABLE run_history ADD COLUMN IF NOT EXISTS metadata_json JSONB DEFAULT '{}';"))
                 conn.execute(text("ALTER TABLE users ADD COLUMN IF NOT EXISTS team_id VARCHAR(36);"))
+                conn.execute(text("ALTER TABLE portal_services ADD COLUMN IF NOT EXISTS url VARCHAR(512);"))
             elif "sqlite" in engine.url.drivername:
                 try:
                     conn.execute(text("ALTER TABLE run_history ADD COLUMN metadata_json JSON;"))
@@ -117,6 +119,10 @@ def init_db():
                     pass
                 try:
                     conn.execute(text("ALTER TABLE users ADD COLUMN team_id VARCHAR(36);"))
+                except Exception:
+                    pass
+                try:
+                    conn.execute(text("ALTER TABLE portal_services ADD COLUMN url VARCHAR(512);"))
                 except Exception:
                     pass
             conn.commit()
@@ -147,12 +153,16 @@ def init_db():
                         service_code=code,
                         name=svc_info["name"],
                         description=svc_info["description"],
+                        url=svc_info.get("url"),
                         order_num=svc_info["order_num"],
                         is_active=True
                     )
                     db.add(new_svc)
-                elif code == "agent-platform" and existing_services[code].name == "Agent Platform":
-                    existing_services[code].name = "Agent Ops"
+                else:
+                    if code == "agent-platform" and existing_services[code].name == "Agent Platform":
+                        existing_services[code].name = "Agent Ops"
+                    if not existing_services[code].url and svc_info.get("url"):
+                        existing_services[code].url = svc_info.get("url")
             db.commit()
 
             # 3. Agent Platform 기본 매핑: 모든 팀에 Agent Platform 기본 접근 권한 부여

@@ -32,7 +32,39 @@ export default function SquadServiceFrame({ service, userTeamName }) {
                 <span style={{ marginLeft: '12px', color: '#10b981' }}>● 서비스 정상 가동 중</span>
               </div>
             </div>
+
+            {service.url && (
+              <a
+                href={service.url}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="btn primary"
+                style={{
+                  display: 'inline-flex',
+                  alignItems: 'center',
+                  gap: '6px',
+                  textDecoration: 'none',
+                  padding: '10px 18px',
+                  fontSize: '14px',
+                  fontWeight: '600'
+                }}
+              >
+                ↗ 서비스 바로가기
+              </a>
+            )}
           </div>
+
+          {service.url && (
+            <div style={{ marginTop: '16px', padding: '10px 14px', background: '#f8fafc', borderRadius: '8px', border: '1px solid #e2e8f0', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+              <div style={{ fontSize: '13px', color: '#64748b' }}>
+                <span>연결된 서비스 URL: </span>
+                <a href={service.url} target="_blank" rel="noopener noreferrer" style={{ color: '#2563eb', fontWeight: '600', marginLeft: '6px' }}>
+                  {service.url}
+                </a>
+              </div>
+              <span style={{ fontSize: '11px', color: '#94a3b8' }}>* 새 창 또는 프레임에서 접근 가능</span>
+            </div>
+          )}
         </div>
 
         {/* 서비스 초기 대시보드 카드들 */}
@@ -54,11 +86,19 @@ export default function SquadServiceFrame({ service, userTeamName }) {
               이 서비스에서 지원하는 전용 작업 및 프롬프트 플로우를 실행할 수 있습니다.
             </p>
             <div style={{ display: 'flex', flexDirection: 'column', gap: '8px', marginTop: '16px' }}>
+              {service.url ? (
+                <a
+                  href={service.url}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="btn secondary"
+                  style={{ justifyContent: 'center', width: '100%', textDecoration: 'none' }}
+                >
+                  🚀 {service.name} 웹 콘솔 열기
+                </a>
+              ) : null}
               <button className="btn secondary" style={{ justifyContent: 'center', width: '100%' }}>
                 🔍 작업 데이터 조회
-              </button>
-              <button className="btn secondary" style={{ justifyContent: 'center', width: '100%' }}>
-                📝 신규 작업 요청
               </button>
             </div>
           </div>
@@ -66,10 +106,11 @@ export default function SquadServiceFrame({ service, userTeamName }) {
           <div className="panel" style={{ background: '#ffffff', borderRadius: '10px', padding: '20px', border: '1px solid #e2e8f0' }}>
             <h3 style={{ marginTop: 0, fontSize: '16px', color: '#1e293b' }}>🔗 모듈 확장 및 연동</h3>
             <p style={{ fontSize: '14px', color: '#64748b', lineHeight: 1.5 }}>
-              추후 서비스 URL, 내부 대시보드 SPA 또는 iframe 프레임을 본 영역에 유연하게 마운트할 수 있습니다.
+              Service Access 관리자 화면에서 서비스 링크 URL을 변경할 수 있습니다.
             </p>
             <div style={{ marginTop: '16px', fontSize: '12px', color: '#94a3b8' }}>
-              엔드포인트: <code>/services/{service.service_code}</code>
+              <div>코드: <code>{service.service_code}</code></div>
+              <div style={{ marginTop: '4px' }}>URL: <code>{service.url || '(미설정)'}</code></div>
             </div>
           </div>
         </div>

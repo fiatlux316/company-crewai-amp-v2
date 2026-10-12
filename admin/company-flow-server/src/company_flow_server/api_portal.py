@@ -18,6 +18,7 @@ def get_db():
 class ServiceUpdateRequest(BaseModel):
     name: str
     description: Optional[str] = None
+    url: Optional[str] = None
     order_num: Optional[int] = 0
     is_active: Optional[bool] = True
 
@@ -25,6 +26,7 @@ class ServiceCreateRequest(BaseModel):
     service_code: str
     name: str
     description: Optional[str] = None
+    url: Optional[str] = None
     order_num: Optional[int] = 0
 
 class ServiceTeamAccessRequest(BaseModel):
@@ -49,6 +51,7 @@ def get_my_services(
                 "service_code": s.service_code,
                 "name": s.name,
                 "description": s.description,
+                "url": s.url,
                 "order_num": s.order_num
             }
             for s in all_active_services
@@ -72,6 +75,7 @@ def get_my_services(
             "service_code": s.service_code,
             "name": s.name,
             "description": s.description,
+            "url": s.url,
             "order_num": s.order_num
         }
         for s in all_active_services
@@ -103,6 +107,7 @@ def list_services_for_admin(
             "service_code": s.service_code,
             "name": s.name,
             "description": s.description,
+            "url": s.url,
             "order_num": s.order_num,
             "is_active": s.is_active,
             "allowed_team_ids": access_map.get(s.id, [])
@@ -126,13 +131,14 @@ def create_service(
         service_code=req.service_code,
         name=req.name,
         description=req.description,
+        url=req.url,
         order_num=req.order_num,
         is_active=True
     )
     db.add(new_svc)
     db.commit()
     db.refresh(new_svc)
-    return {"message": "Service created", "service": {"id": new_svc.id, "service_code": new_svc.service_code, "name": new_svc.name}}
+    return {"message": "Service created", "service": {"id": new_svc.id, "service_code": new_svc.service_code, "name": new_svc.name, "url": new_svc.url}}
 
 @router.put("/services/{service_id}")
 def update_service(
@@ -151,6 +157,8 @@ def update_service(
     svc.name = req.name
     if req.description is not None:
         svc.description = req.description
+    if req.url is not None:
+        svc.url = req.url
     if req.order_num is not None:
         svc.order_num = req.order_num
     if req.is_active is not None:
