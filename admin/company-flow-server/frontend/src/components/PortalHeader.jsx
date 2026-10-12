@@ -61,13 +61,13 @@ export default function PortalHeader({
           WebkitBackgroundClip: 'text',
           WebkitTextFillColor: 'transparent'
         }}>
-          <span>🌐 AI Native Works</span>
+          <span>AI Native Works</span>
         </div>
 
         <div style={{ width: '1px', height: '20px', background: '#334155' }}></div>
 
         {/* 중앙: 접근 가능한 서비스 상단 탭들 */}
-        <nav style={{ display: 'flex', gap: '4px', overflowX: 'auto', alignItems: 'center' }}>
+        <nav style={{ display: 'flex', gap: '6px', overflowX: 'auto', alignItems: 'center' }}>
           {services.map(svc => {
             const isActive = svc.service_code === currentServiceCode;
             return (
@@ -76,11 +76,11 @@ export default function PortalHeader({
                 onClick={() => onSelectService(svc.service_code)}
                 style={{
                   background: isActive ? '#1e293b' : 'transparent',
-                  color: isActive ? '#38bdf8' : '#94a3b8',
-                  border: isActive ? '1px solid #38bdf840' : '1px solid transparent',
-                  padding: '6px 14px',
+                  color: isActive ? '#38bdf8' : '#cbd5e1',
+                  border: isActive ? '1px solid #38bdf850' : '1px solid transparent',
+                  padding: '7px 16px',
                   borderRadius: '6px',
-                  fontSize: '13px',
+                  fontSize: '15px',
                   fontWeight: isActive ? '700' : '500',
                   cursor: 'pointer',
                   display: 'flex',
