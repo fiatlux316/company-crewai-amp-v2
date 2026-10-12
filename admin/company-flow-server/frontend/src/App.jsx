@@ -26,16 +26,21 @@ function App() {
 
   // Portal Multi-Service State
   const [accessibleServices, setAccessibleServices] = useState([]);
-  const [currentServiceCode, setCurrentServiceCode] = useState('agent-platform');
+  const [currentServiceCode, setCurrentServiceCode] = useState('agentops');
+
+  const isAgentOps = (code) => code === 'agentops' || code === 'agent-platform';
 
   const loadUserServices = () => {
     api.fetchMyServices()
       .then(services => {
         setAccessibleServices(services || []);
         if (services && services.length > 0) {
-          // 현재 선택된 서비스가 접근 가능 목록에 없다면 첫 번째 서비스로 전환
-          const exists = services.some(s => s.service_code === currentServiceCode);
-          if (!exists) {
+          // AgentOps 우선 선택, 없으면 첫 번째 서비스 선택
+          const agentOpsSvc = services.find(s => isAgentOps(s.service_code));
+          const currentExists = services.some(s => s.service_code === currentServiceCode);
+          if (agentOpsSvc) {
+            setCurrentServiceCode(agentOpsSvc.service_code);
+          } else if (!currentExists) {
             setCurrentServiceCode(services[0].service_code);
           }
         }
@@ -112,8 +117,8 @@ function App() {
 
       {/* Tier 2: 하단 서비스 뷰 프레임 */}
       <div className="portal-body">
-        {currentServiceCode === 'agent-platform' ? (
-          /* 기존 Agent Platform 메인 환경 (사이드바 + 메인 작업공간) */
+        {isAgentOps(currentServiceCode) ? (
+          /* 기존 AgentOps 메인 환경 (사이드바 + 메인 작업공간) */
           <div className="app-layout">
             <Sidebar 
               activeTab={activeTab} 
