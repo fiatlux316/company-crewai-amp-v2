@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { api } from '../utils/api';
 import { showAlert } from './Dialog';
 
@@ -8,6 +8,19 @@ export default function Auth({ onLogin }) {
   const [password, setPassword] = useState('');
   const [name, setName] = useState('');
   const [userType, setUserType] = useState('3');
+  const [teamId, setTeamId] = useState('');
+  const [teams, setTeams] = useState([]);
+
+  useEffect(() => {
+    api.fetchTeams()
+      .then(data => {
+        setTeams(data || []);
+        if (data && data.length > 0) {
+          setTeamId(data[0].id);
+        }
+      })
+      .catch(err => console.error("Failed to load teams:", err));
+  }, []);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -18,9 +31,17 @@ export default function Auth({ onLogin }) {
         localStorage.setItem('user_id', res.user_id);
         localStorage.setItem('user_type', res.user_type);
         localStorage.setItem('user_name', res.name);
+        if (res.team_id) localStorage.setItem('team_id', res.team_id);
+        else localStorage.removeItem('team_id');
+        if (res.team_name) localStorage.setItem('team_name', res.team_name);
+        else localStorage.removeItem('team_name');
         onLogin();
       } else {
-        await api.signup({ user_id: userId, name, password, user_type: userType });
+        if (!teamId) {
+          await showAlert('소속 팀을 선택해주세요.');
+          return;
+        }
+        await api.signup({ user_id: userId, name, password, user_type: userType, team_id: teamId });
         await showAlert('가입 신청이 완료되었습니다. 관리자 승인 후 로그인 가능합니다.');
         setIsLogin(true);
       }
@@ -52,15 +73,26 @@ export default function Auth({ onLogin }) {
         </div>
 
         {!isLogin && (
-          <div>
-            <label>사용자 유형</label>
-            <select value={userType} onChange={e => setUserType(e.target.value)}>
-              <option value="1">Strategist</option>
-              <option value="2">Orchestrator</option>
-              <option value="3">Doer</option>
-              <option value="4">Etc</option>
-            </select>
-          </div>
+          <>
+            <div>
+              <label>소속 팀</label>
+              <select value={teamId} onChange={e => setTeamId(e.target.value)} required>
+                {teams.map(t => (
+                  <option key={t.id} value={t.id}>{t.name}</option>
+                ))}
+              </select>
+            </div>
+
+            <div>
+              <label>사용자 유형</label>
+              <select value={userType} onChange={e => setUserType(e.target.value)}>
+                <option value="1">Strategist</option>
+                <option value="2">Orchestrator</option>
+                <option value="3">Doer</option>
+                <option value="4">Etc</option>
+              </select>
+            </div>
+          </>
         )}
 
         <button type="submit" className="btn primary" style={{ marginTop: '10px', justifyContent: 'center' }}>

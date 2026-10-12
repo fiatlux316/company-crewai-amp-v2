@@ -7,6 +7,8 @@ const TAB_TITLES = {
   history: '📋 Execution History',
   flow: '🔀 Node Flow Designer',
   mcp: '🛠 MCP Tools Catalog',
+  service_access: '🔐 Service & Team Access',
+  users: '👥 User Management',
   swagger: '📖 Swagger API Specification'
 };
 
@@ -35,9 +37,6 @@ export default function Header({ activeTab, setActiveTab, onLogout }) {
         <div className="workspace-tag">
           🚀 Company Private AMP
         </div>
-        <button onClick={onLogout} className="btn secondary" style={{ marginLeft: '15px' }}>
-          로그아웃
-        </button>
       </div>
     </header>
   );

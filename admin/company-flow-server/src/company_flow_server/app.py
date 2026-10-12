@@ -291,9 +291,11 @@ def download_run_artifact(run_id: str, filename: str, p: Principal = Depends(req
 from .mcp.registry import get_mcp_catalog, invoke_mcp_tool
 from .api_crew_generate import router as generate_router
 from .api_auth import router as auth_router
+from .api_portal import router as portal_router
 
 app.include_router(generate_router)
 app.include_router(auth_router)
+app.include_router(portal_router)
 
 class McpTestRequest(BaseModel):
     tool_name: str

@@ -13,6 +13,7 @@ function fetchWithAuth(url, options = {}) {
 }
 
 export const api = {
+  fetchTeams: () => fetchWithAuth('/api/v1/auth/teams').then(r => r.json()),
   login: (user_id, password) => fetchWithAuth('/api/v1/auth/login', {
     method: 'POST', headers: {'Content-Type': 'application/json'}, body: JSON.stringify({ user_id, password })
   }).then(async r => { if (!r.ok) throw new Error(await r.text()); return r.json(); }),
@@ -21,6 +22,19 @@ export const api = {
   }).then(async r => { if (!r.ok) throw new Error(await r.text()); return r.json(); }),
   fetchUsers: () => fetchWithAuth('/api/v1/auth/users').then(r => r.json()),
   approveUser: (user_id) => fetchWithAuth(`/api/v1/auth/users/${user_id}/approve`, { method: 'PUT' }).then(r => r.json()),
+
+  // Portal & Service Access APIs
+  fetchMyServices: () => fetchWithAuth('/api/v1/portal/my-services').then(r => r.json()),
+  fetchAdminServices: () => fetchWithAuth('/api/v1/portal/services').then(r => r.json()),
+  createService: (payload) => fetchWithAuth('/api/v1/portal/services', {
+    method: 'POST', headers: {'Content-Type': 'application/json'}, body: JSON.stringify(payload)
+  }).then(r => r.json()),
+  updateService: (service_id, payload) => fetchWithAuth(`/api/v1/portal/services/${service_id}`, {
+    method: 'PUT', headers: {'Content-Type': 'application/json'}, body: JSON.stringify(payload)
+  }).then(r => r.json()),
+  updateServiceTeamAccess: (service_id, team_ids) => fetchWithAuth(`/api/v1/portal/services/${service_id}/teams`, {
+    method: 'PUT', headers: {'Content-Type': 'application/json'}, body: JSON.stringify({ team_ids })
+  }).then(r => r.json()),
 
   fetchCrews: () => fetchWithAuth('/api/v1/crews').then(r => r.json()),
   fetchGraph: (crew_id, version) => fetchWithAuth(`/api/v1/crews/${encodeURIComponent(crew_id)}/${version}/graph?t=${Date.now()}`, { headers: { 'Cache-Control': 'no-cache' } }).then(r => r.json()),

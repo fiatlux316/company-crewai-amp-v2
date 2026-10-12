@@ -48,6 +48,7 @@ export default function UserManagement() {
             <tr style={{ borderBottom: '2px solid #e2e8f0' }}>
               <th style={{ padding: '12px 8px' }}>사번</th>
               <th style={{ padding: '12px 8px' }}>이름</th>
+              <th style={{ padding: '12px 8px' }}>소속 팀</th>
               <th style={{ padding: '12px 8px' }}>유형</th>
               <th style={{ padding: '12px 8px' }}>가입일</th>
               <th style={{ padding: '12px 8px' }}>상태</th>
@@ -59,6 +60,7 @@ export default function UserManagement() {
               <tr key={u.user_id} style={{ borderBottom: '1px solid #e2e8f0' }}>
                 <td style={{ padding: '12px 8px' }}>{u.user_id}</td>
                 <td style={{ padding: '12px 8px' }}>{u.name}</td>
+                <td style={{ padding: '12px 8px' }}>{u.team_name || '-'}</td>
                 <td style={{ padding: '12px 8px' }}>{getTypeLabel(u.user_type)}</td>
                 <td style={{ padding: '12px 8px' }}>{new Date(u.created_at).toLocaleString()}</td>
                 <td style={{ padding: '12px 8px' }}>{u.status === '1' ? '승인됨' : '미승인'}</td>
