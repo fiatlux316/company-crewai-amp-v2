@@ -43,30 +43,30 @@ export default function UserManagement() {
     <section className="view active" style={{ padding: '24px' }}>
       <h2>User Management</h2>
       <div className="panel">
-        <table style={{ width: '100%', borderCollapse: 'collapse', textAlign: 'left' }}>
+        <table style={{ width: '100%', borderCollapse: 'collapse', textAlign: 'left', fontSize: '90%' }}>
           <thead>
             <tr style={{ borderBottom: '2px solid #e2e8f0' }}>
-              <th style={{ padding: '12px 8px' }}>사번</th>
-              <th style={{ padding: '12px 8px' }}>이름</th>
-              <th style={{ padding: '12px 8px' }}>소속 팀</th>
-              <th style={{ padding: '12px 8px' }}>유형</th>
-              <th style={{ padding: '12px 8px' }}>가입일</th>
-              <th style={{ padding: '12px 8px' }}>상태</th>
-              <th style={{ padding: '12px 8px' }}>액션</th>
+              <th style={{ padding: '10px 8px' }}>사번</th>
+              <th style={{ padding: '10px 8px' }}>이름</th>
+              <th style={{ padding: '10px 8px' }}>소속 팀</th>
+              <th style={{ padding: '10px 8px' }}>유형</th>
+              <th style={{ padding: '10px 8px' }}>가입일</th>
+              <th style={{ padding: '10px 8px' }}>상태</th>
+              <th style={{ padding: '10px 8px' }}>액션</th>
             </tr>
           </thead>
           <tbody>
             {users.map(u => (
               <tr key={u.user_id} style={{ borderBottom: '1px solid #e2e8f0' }}>
-                <td style={{ padding: '12px 8px' }}>{u.user_id}</td>
-                <td style={{ padding: '12px 8px' }}>{u.name}</td>
-                <td style={{ padding: '12px 8px' }}>{u.team_name || '-'}</td>
-                <td style={{ padding: '12px 8px' }}>{getTypeLabel(u.user_type)}</td>
-                <td style={{ padding: '12px 8px' }}>{new Date(u.created_at).toLocaleString()}</td>
-                <td style={{ padding: '12px 8px' }}>{u.status === '1' ? '승인됨' : '미승인'}</td>
-                <td style={{ padding: '12px 8px' }}>
+                <td style={{ padding: '10px 8px' }}>{u.user_id}</td>
+                <td style={{ padding: '10px 8px' }}>{u.name}</td>
+                <td style={{ padding: '10px 8px' }}>{u.team_name || '-'}</td>
+                <td style={{ padding: '10px 8px' }}>{getTypeLabel(u.user_type)}</td>
+                <td style={{ padding: '10px 8px' }}>{new Date(u.created_at).toLocaleString()}</td>
+                <td style={{ padding: '10px 8px' }}>{u.status === '1' ? '승인됨' : '미승인'}</td>
+                <td style={{ padding: '10px 8px' }}>
                   {u.status === '0' && (
-                    <button className="btn primary" onClick={() => handleApprove(u.user_id)}>승인</button>
+                    <button className="btn primary" style={{ fontSize: '90%', padding: '4px 10px' }} onClick={() => handleApprove(u.user_id)}>승인</button>
                   )}
                 </td>
               </tr>
