@@ -51,56 +51,266 @@ export default function Auth({ onLogin }) {
   };
 
   return (
-    <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '100vh', width: '100%', background: '#f8fafc' }}>
-      <form onSubmit={handleSubmit} className="panel" style={{ width: '400px', display: 'flex', flexDirection: 'column', gap: '15px' }}>
-        <h2 style={{ textAlign: 'center', marginBottom: '10px' }}>{isLogin ? '로그인' : '회원가입'}</h2>
-        
-        <div>
-          <label>사번 (6자리 숫자)</label>
-          <input type="text" value={userId} onChange={e => setUserId(e.target.value)} required pattern="\d{6}" maxLength="6" />
-        </div>
+    <div style={{
+      position: 'relative',
+      display: 'flex',
+      justifyContent: 'center',
+      alignItems: 'center',
+      minHeight: '100vh',
+      width: '100%',
+      backgroundImage: `linear-gradient(rgba(10, 15, 29, 0.65), rgba(10, 15, 29, 0.78)), url('/images/login-bg.png')`,
+      backgroundSize: 'cover',
+      backgroundPosition: 'center',
+      backgroundRepeat: 'no-repeat',
+      fontFamily: 'Inter, system-ui, -apple-system, sans-serif'
+    }}>
+      {/* Background ambient glow effect */}
+      <div style={{
+        position: 'absolute',
+        width: '500px',
+        height: '500px',
+        borderRadius: '50%',
+        background: 'radial-gradient(circle, rgba(56, 189, 248, 0.15) 0%, rgba(99, 102, 241, 0.05) 50%, transparent 70%)',
+        filter: 'blur(40px)',
+        pointerEvents: 'none'
+      }} />
 
-        {!isLogin && (
-          <div>
-            <label>이름</label>
-            <input type="text" value={name} onChange={e => setName(e.target.value)} required />
+      <form onSubmit={handleSubmit} style={{
+        position: 'relative',
+        width: '400px',
+        background: 'rgba(15, 23, 42, 0.78)',
+        backdropFilter: 'blur(16px)',
+        WebkitBackdropFilter: 'blur(16px)',
+        border: '1px solid rgba(255, 255, 255, 0.12)',
+        borderRadius: '16px',
+        padding: '32px 36px',
+        boxShadow: '0 20px 45px rgba(0, 0, 0, 0.5), inset 0 1px 0 rgba(255, 255, 255, 0.1)',
+        display: 'flex',
+        flexDirection: 'column',
+        alignItems: 'center',
+        zIndex: 10
+      }}>
+        {/* Portal Branding */}
+        <div style={{ textAlign: 'center', marginBottom: '22px', width: '100%' }}>
+          <div style={{
+            display: 'inline-flex',
+            alignItems: 'center',
+            gap: '8px',
+            marginBottom: '6px'
+          }}>
+            <span style={{
+              fontSize: '22px',
+              fontWeight: '800',
+              letterSpacing: '-0.5px',
+              background: 'linear-gradient(135deg, #38bdf8 0%, #818cf8 100%)',
+              WebkitBackgroundClip: 'text',
+              WebkitTextFillColor: 'transparent'
+            }}>
+              AI Native Works
+            </span>
           </div>
-        )}
-
-        <div>
-          <label>비밀번호</label>
-          <input type="password" value={password} onChange={e => setPassword(e.target.value)} required />
+          <p style={{
+            fontSize: '12px',
+            color: '#94a3b8',
+            margin: '2px 0 0',
+            letterSpacing: '0.2px'
+          }}>
+            Next-Gen Intelligent Multi-Agent Workplace
+          </p>
         </div>
 
-        {!isLogin && (
-          <>
+        <div style={{
+          width: '100%',
+          display: 'flex',
+          justifyContent: 'center',
+          borderBottom: '1px solid rgba(255, 255, 255, 0.08)',
+          paddingBottom: '12px',
+          marginBottom: '18px'
+        }}>
+          <span style={{ fontSize: '15px', fontWeight: '700', color: '#f1f5f9' }}>
+            {isLogin ? '로그인' : '회원가입'}
+          </span>
+        </div>
+
+        {/* 70% 크기로 줄인 입력 컨트롤 영역 */}
+        <div style={{
+          width: '70%',
+          display: 'flex',
+          flexDirection: 'column',
+          gap: '11px'
+        }}>
+          <div>
+            <label style={{ display: 'block', fontSize: '11px', fontWeight: '600', color: '#cbd5e1', marginBottom: '4px' }}>
+              사번 (6자리)
+            </label>
+            <input
+              type="text"
+              value={userId}
+              onChange={e => setUserId(e.target.value)}
+              required
+              pattern="\d{6}"
+              maxLength="6"
+              placeholder="사번 입력"
+              style={{
+                width: '100%',
+                padding: '7px 10px',
+                fontSize: '12px',
+                background: 'rgba(30, 41, 59, 0.7)',
+                color: '#f8fafc',
+                border: '1px solid rgba(148, 163, 184, 0.25)',
+                borderRadius: '6px',
+                outline: 'none',
+                boxSizing: 'border-box',
+                margin: 0
+              }}
+            />
+          </div>
+
+          {!isLogin && (
             <div>
-              <label>소속 팀</label>
-              <select value={teamId} onChange={e => setTeamId(e.target.value)} required>
-                {teams.map(t => (
-                  <option key={t.id} value={t.id}>{t.name}</option>
-                ))}
-              </select>
+              <label style={{ display: 'block', fontSize: '11px', fontWeight: '600', color: '#cbd5e1', marginBottom: '4px' }}>
+                이름
+              </label>
+              <input
+                type="text"
+                value={name}
+                onChange={e => setName(e.target.value)}
+                required
+                placeholder="이름 입력"
+                style={{
+                  width: '100%',
+                  padding: '7px 10px',
+                  fontSize: '12px',
+                  background: 'rgba(30, 41, 59, 0.7)',
+                  color: '#f8fafc',
+                  border: '1px solid rgba(148, 163, 184, 0.25)',
+                  borderRadius: '6px',
+                  outline: 'none',
+                  boxSizing: 'border-box',
+                  margin: 0
+                }}
+              />
             </div>
+          )}
 
-            <div>
-              <label>사용자 유형</label>
-              <select value={userType} onChange={e => setUserType(e.target.value)}>
-                <option value="1">Strategist</option>
-                <option value="2">Orchestrator</option>
-                <option value="3">Doer</option>
-                <option value="4">Etc</option>
-              </select>
-            </div>
-          </>
-        )}
+          <div>
+            <label style={{ display: 'block', fontSize: '11px', fontWeight: '600', color: '#cbd5e1', marginBottom: '4px' }}>
+              비밀번호
+            </label>
+            <input
+              type="password"
+              value={password}
+              onChange={e => setPassword(e.target.value)}
+              required
+              placeholder="비밀번호 입력"
+              style={{
+                width: '100%',
+                padding: '7px 10px',
+                fontSize: '12px',
+                background: 'rgba(30, 41, 59, 0.7)',
+                color: '#f8fafc',
+                border: '1px solid rgba(148, 163, 184, 0.25)',
+                borderRadius: '6px',
+                outline: 'none',
+                boxSizing: 'border-box',
+                margin: 0
+              }}
+            />
+          </div>
 
-        <button type="submit" className="btn primary" style={{ marginTop: '10px', justifyContent: 'center' }}>
-          {isLogin ? '로그인' : '가입하기'}
-        </button>
+          {!isLogin && (
+            <>
+              <div>
+                <label style={{ display: 'block', fontSize: '11px', fontWeight: '600', color: '#cbd5e1', marginBottom: '4px' }}>
+                  소속 팀
+                </label>
+                <select
+                  value={teamId}
+                  onChange={e => setTeamId(e.target.value)}
+                  required
+                  style={{
+                    width: '100%',
+                    padding: '7px 10px',
+                    fontSize: '12px',
+                    background: 'rgba(30, 41, 59, 0.9)',
+                    color: '#f8fafc',
+                    border: '1px solid rgba(148, 163, 184, 0.25)',
+                    borderRadius: '6px',
+                    outline: 'none',
+                    boxSizing: 'border-box',
+                    margin: 0
+                  }}
+                >
+                  {teams.map(t => (
+                    <option key={t.id} value={t.id} style={{ background: '#1e293b', color: '#fff' }}>{t.name}</option>
+                  ))}
+                </select>
+              </div>
 
-        <div style={{ textAlign: 'center', marginTop: '10px' }}>
-          <a href="#" onClick={(e) => { e.preventDefault(); setIsLogin(!isLogin); }} style={{ color: '#2563eb', textDecoration: 'none', fontSize: '14px' }}>
+              <div>
+                <label style={{ display: 'block', fontSize: '11px', fontWeight: '600', color: '#cbd5e1', marginBottom: '4px' }}>
+                  사용자 유형
+                </label>
+                <select
+                  value={userType}
+                  onChange={e => setUserType(e.target.value)}
+                  style={{
+                    width: '100%',
+                    padding: '7px 10px',
+                    fontSize: '12px',
+                    background: 'rgba(30, 41, 59, 0.9)',
+                    color: '#f8fafc',
+                    border: '1px solid rgba(148, 163, 184, 0.25)',
+                    borderRadius: '6px',
+                    outline: 'none',
+                    boxSizing: 'border-box',
+                    margin: 0
+                  }}
+                >
+                  <option value="1" style={{ background: '#1e293b', color: '#fff' }}>Strategist</option>
+                  <option value="2" style={{ background: '#1e293b', color: '#fff' }}>Orchestrator</option>
+                  <option value="3" style={{ background: '#1e293b', color: '#fff' }}>Doer</option>
+                  <option value="4" style={{ background: '#1e293b', color: '#fff' }}>Etc</option>
+                </select>
+              </div>
+            </>
+          )}
+
+          <button
+            type="submit"
+            className="btn primary"
+            style={{
+              width: '100%',
+              padding: '8px 12px',
+              fontSize: '12.5px',
+              fontWeight: '700',
+              marginTop: '6px',
+              justifyContent: 'center',
+              borderRadius: '6px',
+              letterSpacing: '0.3px',
+              background: 'linear-gradient(135deg, #3b82f6 0%, #6366f1 100%)',
+              border: 'none',
+              boxShadow: '0 4px 14px rgba(59, 130, 246, 0.35)',
+              cursor: 'pointer'
+            }}
+          >
+            {isLogin ? '로그인' : '가입하기'}
+          </button>
+        </div>
+
+        <div style={{ textAlign: 'center', marginTop: '18px' }}>
+          <a
+            href="#"
+            onClick={(e) => { e.preventDefault(); setIsLogin(!isLogin); }}
+            style={{
+              color: '#38bdf8',
+              textDecoration: 'none',
+              fontSize: '12px',
+              transition: 'color 0.15s ease'
+            }}
+            onMouseOver={e => e.currentTarget.style.color = '#7dd3fc'}
+            onMouseOut={e => e.currentTarget.style.color = '#38bdf8'}
+          >
             {isLogin ? '계정이 없으신가요? 회원가입' : '이미 계정이 있으신가요? 로그인'}
           </a>
         </div>
