@@ -64,13 +64,13 @@ def list_teams(db: Session = Depends(get_db)):
 @router.post("/signup")
 def signup(req: SignUpRequest, db: Session = Depends(get_db)):
     if db.query(User).filter(User.user_id == req.user_id).first():
-        raise HTTPException(status_code=400, detail="User ID already exists")
+        raise HTTPException(status_code=400, detail="이미 등록된 사번입니다.")
     
     # 팀 유효성 확인
     if req.team_id:
         team = db.query(Team).filter(Team.id == req.team_id).first()
         if not team:
-            raise HTTPException(status_code=400, detail="Invalid team_id")
+            raise HTTPException(status_code=400, detail="유효하지 않은 팀입니다.")
     
     user = User(
         user_id=req.user_id,
@@ -82,16 +82,16 @@ def signup(req: SignUpRequest, db: Session = Depends(get_db)):
     )
     db.add(user)
     db.commit()
-    return {"message": "Signup successful, waiting for approval"}
+    return {"message": "가입 신청이 완료되었습니다. 관리자 승인을 기다려주세요."}
 
 @router.post("/login")
 def login(req: LoginRequest, db: Session = Depends(get_db)):
     user = db.query(User).filter(User.user_id == req.user_id).first()
     if not user or user.password != hash_password(req.password):
-        raise HTTPException(status_code=401, detail="Invalid user ID or password")
+        raise HTTPException(status_code=401, detail="사번 또는 비밀번호가 일치하지 않습니다.")
     
     if user.status != "1":
-        raise HTTPException(status_code=403, detail="Account not approved yet")
+        raise HTTPException(status_code=403, detail="아직 관리자 승인이 완료되지 않은 계정입니다.")
     
     team_name = None
     if user.team_id:

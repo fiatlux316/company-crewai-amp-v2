@@ -16,7 +16,19 @@ export const api = {
   fetchTeams: () => fetchWithAuth('/api/v1/auth/teams').then(r => r.json()),
   login: (user_id, password) => fetchWithAuth('/api/v1/auth/login', {
     method: 'POST', headers: {'Content-Type': 'application/json'}, body: JSON.stringify({ user_id, password })
-  }).then(async r => { if (!r.ok) throw new Error(await r.text()); return r.json(); }),
+  }).then(async r => {
+    if (!r.ok) {
+      let msg = '';
+      try {
+        const errObj = await r.json();
+        msg = errObj.detail || errObj.message || JSON.stringify(errObj);
+      } catch (_) {
+        msg = await r.text();
+      }
+      throw new Error(msg);
+    }
+    return r.json();
+  }),
   signup: (payload) => fetchWithAuth('/api/v1/auth/signup', {
     method: 'POST', headers: {'Content-Type': 'application/json'}, body: JSON.stringify(payload)
   }).then(async r => { if (!r.ok) throw new Error(await r.text()); return r.json(); }),
