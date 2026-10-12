@@ -12,11 +12,11 @@ const TAB_TITLES = {
   swagger: '📖 Swagger API Specification'
 };
 
-export default function Header({ activeTab, setActiveTab, onLogout }) {
+export default function Header({ activeTab, setActiveTab }) {
   return (
     <header className="top-header">
       <div className="header-left">
-        <span className="current-view-title">{TAB_TITLES[activeTab] || 'Agent Platform'}</span>
+        <span className="current-view-title">{TAB_TITLES[activeTab] || 'Agent Ops'}</span>
         <span className="environment-badge">v1.0 Enterprise</span>
       </div>
       <div className="header-right">
@@ -32,10 +32,6 @@ export default function Header({ activeTab, setActiveTab, onLogout }) {
           <button className={`header-link ${activeTab === 'mcp' ? 'active' : ''}`} onClick={() => setActiveTab('mcp')}>
             🛠 MCP Catalog
           </button>
-        </div>
-        <div className="header-divider"></div>
-        <div className="workspace-tag">
-          🚀 Company Private AMP
         </div>
       </div>
     </header>

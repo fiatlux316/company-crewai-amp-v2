@@ -6,7 +6,7 @@ export default function Sidebar({ activeTab, setActiveTab, collapsed, onToggle, 
     <aside className={`sidebar ${collapsed ? 'collapsed' : ''}`} id="appSidebar">
       <div className="sidebar-header">
         <button className="toggle-btn" onClick={onToggle}>☰</button>
-        <div className="brand">Agent Platform</div>
+        <div className="brand">Agent Ops</div>
       </div>
       <div className="tabs">
         <button className={activeTab === 'persona' ? 'active' : ''} onClick={() => setActiveTab('persona')}>

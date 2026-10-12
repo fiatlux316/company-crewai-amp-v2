@@ -93,7 +93,7 @@ DEFAULT_TEAMS = [
 ]
 
 DEFAULT_SERVICES = [
-    {"service_code": "agent-platform", "name": "Agent Platform", "description": "Crew AI 및 Multi-Agent 운영 관리 플랫폼", "order_num": 1},
+    {"service_code": "agent-platform", "name": "Agent Ops", "description": "Crew AI 및 Multi-Agent 운영 관리 플랫폼", "order_num": 1},
     {"service_code": "squad1", "name": "squad1", "description": "스쿼드 1 AI 서비스", "order_num": 2},
     {"service_code": "squad2", "name": "squad2", "description": "스쿼드 2 AI 서비스", "order_num": 3},
     {"service_code": "squad3", "name": "squad3", "description": "스쿼드 3 AI 서비스", "order_num": 4},
@@ -151,6 +151,8 @@ def init_db():
                         is_active=True
                     )
                     db.add(new_svc)
+                elif code == "agent-platform" and existing_services[code].name == "Agent Platform":
+                    existing_services[code].name = "Agent Ops"
             db.commit()
 
             # 3. Agent Platform 기본 매핑: 모든 팀에 Agent Platform 기본 접근 권한 부여

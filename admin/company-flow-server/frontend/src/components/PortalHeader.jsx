@@ -61,7 +61,7 @@ export default function PortalHeader({
           WebkitBackgroundClip: 'text',
           WebkitTextFillColor: 'transparent'
         }}>
-          <span>🌐 AI Ops Portal</span>
+          <span>🌐 AI Native Works</span>
         </div>
 
         <div style={{ width: '1px', height: '20px', background: '#334155' }}></div>
