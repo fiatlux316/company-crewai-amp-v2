@@ -172,17 +172,13 @@ def init_db():
                         existing_services[code].url = svc_info.get("url")
             db.commit()
 
-            # 3. AgentOps 기본 매핑: 모든 팀에 AgentOps 기본 접근 권한 부여
-            agentops_svc = db.query(PortalService).filter(PortalService.service_code == "agentops").first()
-            if agentops_svc:
-                for team in all_teams:
-                    exists = db.query(ServiceTeamAccess).filter(
-                        ServiceTeamAccess.service_id == agentops_svc.id,
-                        ServiceTeamAccess.team_id == team.id
-                    ).first()
-                    if not exists:
-                        db.add(ServiceTeamAccess(service_id=agentops_svc.id, team_id=team.id))
-                db.commit()
+            # 3. 초기 시딩 시에만(권한 데이터가 전혀 없을 때) 이마트CX팀에 AgentOps 기본 권한 1회 부여
+            if db.query(ServiceTeamAccess).count() == 0:
+                cx_team = db.query(Team).filter(Team.name == "이마트CX팀").first()
+                agentops_svc = db.query(PortalService).filter(PortalService.service_code == "agentops").first()
+                if cx_team and agentops_svc:
+                    db.add(ServiceTeamAccess(service_id=agentops_svc.id, team_id=cx_team.id))
+                    db.commit()
     except Exception as e:
         print(f"Error during seeding: {e}")
 

@@ -43,31 +43,13 @@ def get_my_services(
     """
     all_active_services = db.query(PortalService).filter(PortalService.is_active == True).order_by(PortalService.order_num.asc()).all()
     
-    # 관리자는 전체 접근 가능
-    if "platform_admin" in p.roles:
-        return [
-            {
-                "id": s.id,
-                "service_code": s.service_code,
-                "name": s.name,
-                "description": s.description,
-                "url": s.url,
-                "order_num": s.order_num
-            }
-            for s in all_active_services
-        ]
-    
-    # 일반 사용자는 본인 team_id 에 매핑된 서비스만 조회
+    # 일반 사용자/관리자 모두 본인 team_id 에 매핑된 서비스만 조회
     user = db.query(User).filter(User.user_id == p.subject).first()
     if not user or not user.team_id:
-        # 팀이 없는 경우 기본적으로 AgentOps는 접근 허용
-        accessible_codes = {"agentops"}
-    else:
-        access_rows = db.query(ServiceTeamAccess).filter(ServiceTeamAccess.team_id == user.team_id).all()
-        accessible_service_ids = {a.service_id for a in access_rows}
-        accessible_codes = {s.service_code for s in all_active_services if s.id in accessible_service_ids}
-        # 최소한 AgentOps는 포함하도록 보장
-        accessible_codes.add("agentops")
+        return []
+
+    access_rows = db.query(ServiceTeamAccess).filter(ServiceTeamAccess.team_id == user.team_id).all()
+    accessible_service_ids = {a.service_id for a in access_rows}
 
     result = [
         {
@@ -79,7 +61,7 @@ def get_my_services(
             "order_num": s.order_num
         }
         for s in all_active_services
-        if s.service_code in accessible_codes
+        if s.id in accessible_service_ids
     ]
     return result
 

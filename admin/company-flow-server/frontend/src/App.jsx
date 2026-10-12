@@ -26,27 +26,34 @@ function App() {
 
   // Portal Multi-Service State
   const [accessibleServices, setAccessibleServices] = useState([]);
-  const [currentServiceCode, setCurrentServiceCode] = useState('agentops');
+  const [currentServiceCode, setCurrentServiceCode] = useState(null);
+  const [servicesLoaded, setServicesLoaded] = useState(false);
 
   const isAgentOps = (code) => code === 'agentops';
 
   const loadUserServices = () => {
     api.fetchMyServices()
       .then(services => {
-        setAccessibleServices(services || []);
-        if (services && services.length > 0) {
-          // AgentOps 우선 선택, 없으면 첫 번째 서비스 선택
-          const agentOpsSvc = services.find(s => isAgentOps(s.service_code));
-          const currentExists = services.some(s => s.service_code === currentServiceCode);
-          if (agentOpsSvc) {
-            setCurrentServiceCode(agentOpsSvc.service_code);
-          } else if (!currentExists) {
-            setCurrentServiceCode(services[0].service_code);
-          }
+        const list = Array.isArray(services) ? services : [];
+        setAccessibleServices(list);
+        setServicesLoaded(true);
+        if (list.length > 0) {
+          setCurrentServiceCode(prev => {
+            if (prev && list.some(s => s.service_code === prev)) {
+              return prev;
+            }
+            const agentOpsSvc = list.find(s => isAgentOps(s.service_code));
+            return agentOpsSvc ? agentOpsSvc.service_code : list[0].service_code;
+          });
+        } else {
+          setCurrentServiceCode(null);
         }
       })
       .catch(err => {
         console.error("Failed to load user services:", err);
+        setAccessibleServices([]);
+        setServicesLoaded(true);
+        setCurrentServiceCode(null);
       });
   };
 
@@ -117,7 +124,30 @@ function App() {
 
       {/* Tier 2: 하단 서비스 뷰 프레임 */}
       <div className="portal-body">
-        {isAgentOps(currentServiceCode) ? (
+        {accessibleServices.length === 0 ? (
+          <div style={{
+            flex: 1,
+            width: '100%',
+            height: '100%',
+            display: 'flex',
+            flexDirection: 'column',
+            alignItems: 'center',
+            justifyContent: 'center',
+            background: '#090d16',
+            color: '#94a3b8',
+            textAlign: 'center',
+            padding: '40px'
+          }}>
+            <div style={{ fontSize: '56px', marginBottom: '16px' }}>🔒</div>
+            <h3 style={{ fontSize: '20px', fontWeight: '700', color: '#f1f5f9', marginBottom: '10px' }}>
+              접근 가능한 서비스가 없습니다
+            </h3>
+            <p style={{ fontSize: '14px', maxWidth: '440px', lineHeight: '1.6', color: '#94a3b8', margin: 0 }}>
+              소속 팀(<strong>{teamName || '미지정'}</strong>)에 할당된 포탈 서비스 권한이 없습니다.<br />
+              관리자(이마트CX팀)에게 서비스 접근 권한을 요청해주세요.
+            </p>
+          </div>
+        ) : isAgentOps(currentServiceCode) ? (
           /* 기존 AgentOps 메인 환경 (사이드바 + 메인 작업공간) */
           <div className="app-layout">
             <Sidebar 
