@@ -7,6 +7,7 @@ export default function RAGChatbot() {
   const [sessionId, setSessionId] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const messagesEndRef = useRef(null);
+  const chatMessagesContainerRef = useRef(null);
 
   useEffect(() => {
     let uuid = localStorage.getItem('chat_uuid');
@@ -18,7 +19,9 @@ export default function RAGChatbot() {
   }, []);
 
   useEffect(() => {
-    messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
+    if (messages.length > 0 && chatMessagesContainerRef.current) {
+      chatMessagesContainerRef.current.scrollTop = chatMessagesContainerRef.current.scrollHeight;
+    }
   }, [messages]);
 
   const handleSubmit = async (e) => {
@@ -84,8 +87,8 @@ export default function RAGChatbot() {
   };
 
   return (
-    <div className="panel" style={{ display: 'flex', flexDirection: 'column', height: 'calc(100vh - 80px)', overflow: 'hidden', padding: 0, backgroundColor: '#ffffff' }}>
-      <div className="panel-header" style={{ flexShrink: 0, padding: '1.5rem', borderBottom: '1px solid #e5e7eb', backgroundColor: '#ffffff' }}>
+    <div className="panel" style={{ display: 'flex', flexDirection: 'column', height: 'calc(100vh - 140px)', margin: '14px', overflow: 'hidden', padding: 0, backgroundColor: '#ffffff' }}>
+      <div className="panel-header" style={{ flexShrink: 0, padding: '1.25rem 1.5rem', borderBottom: '1px solid #e5e7eb', backgroundColor: '#ffffff' }}>
         <h2 style={{ margin: 0, fontSize: '1.25rem', color: '#111827' }}>AI Chatbot</h2>
         <p style={{ margin: '0.5rem 0 0', color: '#6b7280', fontSize: '0.9rem', lineHeight: '1.4' }}>
           RAG 기반 AI 챗봇입니다.<br />
@@ -93,7 +96,7 @@ export default function RAGChatbot() {
         </p>
       </div>
 
-      <div className="chat-messages" style={{ flexGrow: 1, overflowY: 'auto', padding: '1.5rem', display: 'flex', flexDirection: 'column', gap: '1.5rem', backgroundColor: '#f9fafb' }}>
+      <div ref={chatMessagesContainerRef} className="chat-messages" style={{ flexGrow: 1, overflowY: 'auto', padding: '1.5rem', display: 'flex', flexDirection: 'column', gap: '1.5rem', backgroundColor: '#f9fafb' }}>
         {messages.map((msg, idx) => {
           const isUser = msg.role === 'user';
           const isLastBotMessage = !isUser && idx === messages.length - 1;

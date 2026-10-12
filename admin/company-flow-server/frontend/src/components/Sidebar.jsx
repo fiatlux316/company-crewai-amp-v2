@@ -1,7 +1,9 @@
 
 import React from 'react';
 
-export default function Sidebar({ activeTab, setActiveTab, collapsed, onToggle, userType }) {
+export default function Sidebar({ activeTab, setActiveTab, collapsed, onToggle, userType, teamName }) {
+  const isCXStrategist = userType === '1' && teamName === '이마트CX팀';
+
   return (
     <aside className={`sidebar ${collapsed ? 'collapsed' : ''}`} id="appSidebar">
       <div className="sidebar-header">
@@ -35,7 +37,7 @@ export default function Sidebar({ activeTab, setActiveTab, collapsed, onToggle, 
         </button>
       </div>
 
-      {userType === '1' && (
+      {isCXStrategist && (
         <div className="tabs" style={{ marginTop: 'auto', borderTop: '1px solid #1f2937' }}>
           <button className={activeTab === 'service_access' ? 'active' : ''} onClick={() => setActiveTab('service_access')}>
             🔐 <span className="tab-text">Service Access</span>

@@ -126,6 +126,7 @@ function App() {
               collapsed={sidebarCollapsed} 
               onToggle={() => setSidebarCollapsed(!sidebarCollapsed)} 
               userType={userType}
+              teamName={teamName}
             />
             <div className="main-wrapper">
               <Header activeTab={activeTab} setActiveTab={setActiveTab} onLogout={handleLogout} />

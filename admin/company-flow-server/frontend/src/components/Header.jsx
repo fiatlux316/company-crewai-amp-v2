@@ -6,6 +6,7 @@ const TAB_TITLES = {
   crew: '⚙️ Crew Management',
   history: '📋 Execution History',
   flow: '🔀 Node Flow Designer',
+  rag: '💬 AI Chatbot',
   mcp: '🛠 MCP Tools Catalog',
   service_access: '🔐 Service & Team Access',
   users: '👥 User Management',
