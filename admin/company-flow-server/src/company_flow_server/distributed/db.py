@@ -94,7 +94,7 @@ DEFAULT_TEAMS = [
 ]
 
 DEFAULT_SERVICES = [
-    {"service_code": "agent-platform", "name": "Agent Ops", "description": "Crew AI 및 Multi-Agent 운영 관리 플랫폼", "order_num": 1, "url": None},
+    {"service_code": "agentops", "name": "AgentOps", "description": "Crew AI 및 Multi-Agent 운영 관리 플랫폼", "order_num": 1, "url": None},
     {"service_code": "squad1", "name": "squad1", "description": "스쿼드 1 AI 서비스", "order_num": 2, "url": "https://squad1.company.internal"},
     {"service_code": "squad2", "name": "squad2", "description": "스쿼드 2 AI 서비스", "order_num": 3, "url": "https://squad2.company.internal"},
     {"service_code": "squad3", "name": "squad3", "description": "스쿼드 3 AI 서비스", "order_num": 4, "url": "https://squad3.company.internal"},
@@ -132,6 +132,13 @@ def init_db():
     # 시딩(Seeding): 기본 팀 및 기본 서비스 등록 및 기본 접근 권한 매핑
     try:
         with SessionLocal() as db:
+            # 0. 레거시 agent-platform 삭제 (존재할 경우)
+            old_platform = db.query(PortalService).filter(PortalService.service_code == "agent-platform").first()
+            if old_platform:
+                db.query(ServiceTeamAccess).filter(ServiceTeamAccess.service_id == old_platform.id).delete()
+                db.delete(old_platform)
+                db.commit()
+
             # 1. Teams 시딩
             existing_teams = {t.name: t for t in db.query(Team).all()}
             for team_name in DEFAULT_TEAMS:
@@ -159,22 +166,22 @@ def init_db():
                     )
                     db.add(new_svc)
                 else:
-                    if code == "agent-platform" and existing_services[code].name == "Agent Platform":
-                        existing_services[code].name = "Agent Ops"
+                    if code == "agentops" and existing_services[code].name != "AgentOps":
+                        existing_services[code].name = "AgentOps"
                     if not existing_services[code].url and svc_info.get("url"):
                         existing_services[code].url = svc_info.get("url")
             db.commit()
 
-            # 3. Agent Platform 기본 매핑: 모든 팀에 Agent Platform 기본 접근 권한 부여
-            agent_platform_svc = db.query(PortalService).filter(PortalService.service_code == "agent-platform").first()
-            if agent_platform_svc:
+            # 3. AgentOps 기본 매핑: 모든 팀에 AgentOps 기본 접근 권한 부여
+            agentops_svc = db.query(PortalService).filter(PortalService.service_code == "agentops").first()
+            if agentops_svc:
                 for team in all_teams:
                     exists = db.query(ServiceTeamAccess).filter(
-                        ServiceTeamAccess.service_id == agent_platform_svc.id,
+                        ServiceTeamAccess.service_id == agentops_svc.id,
                         ServiceTeamAccess.team_id == team.id
                     ).first()
                     if not exists:
-                        db.add(ServiceTeamAccess(service_id=agent_platform_svc.id, team_id=team.id))
+                        db.add(ServiceTeamAccess(service_id=agentops_svc.id, team_id=team.id))
                 db.commit()
     except Exception as e:
         print(f"Error during seeding: {e}")

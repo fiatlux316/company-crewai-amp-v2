@@ -28,7 +28,7 @@ function App() {
   const [accessibleServices, setAccessibleServices] = useState([]);
   const [currentServiceCode, setCurrentServiceCode] = useState('agentops');
 
-  const isAgentOps = (code) => code === 'agentops' || code === 'agent-platform';
+  const isAgentOps = (code) => code === 'agentops';
 
   const loadUserServices = () => {
     api.fetchMyServices()

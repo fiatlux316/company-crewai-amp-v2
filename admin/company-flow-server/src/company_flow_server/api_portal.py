@@ -61,13 +61,13 @@ def get_my_services(
     user = db.query(User).filter(User.user_id == p.subject).first()
     if not user or not user.team_id:
         # 팀이 없는 경우 기본적으로 AgentOps는 접근 허용
-        accessible_codes = {"agentops", "agent-platform"}
+        accessible_codes = {"agentops"}
     else:
         access_rows = db.query(ServiceTeamAccess).filter(ServiceTeamAccess.team_id == user.team_id).all()
         accessible_service_ids = {a.service_id for a in access_rows}
         accessible_codes = {s.service_code for s in all_active_services if s.id in accessible_service_ids}
         # 최소한 AgentOps는 포함하도록 보장
-        accessible_codes.update({"agentops", "agent-platform"})
+        accessible_codes.add("agentops")
 
     result = [
         {

@@ -102,7 +102,7 @@ export default function PortalHeader({
                   }
                 }}
               >
-                <span>{(svc.service_code === 'agentops' || svc.service_code === 'agent-platform') ? '🤖' : '🚀'}</span>
+                <span>{svc.service_code === 'agentops' ? '🤖' : '🚀'}</span>
                 <span>{svc.name}</span>
               </button>
             );
